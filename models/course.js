@@ -1,24 +1,22 @@
 const mongoose = require("mongoose");
 
-const subjectScheme = new mongoose.Schema(
+const courseScheme = new mongoose.Schema(
     {
         name: {
             type: String,
-            require: [true, "Please provide subject name"],
+            require: [true, "Please provide course name"],
             trim: true,
         },
-        topics: [
+        centers: [
             {
-                name: {
-                    type: String,
-                    required: true,
-                    trim: true,
-                },
-                status: {
-                    type: String,
-                    required: true,
-                    trim: true,
-                }
+                type: mongoose.Schema.Types.ObjectId,
+                ref: 'center'
+            }
+        ],
+        subjects: [
+            {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: 'subject'
             }
         ],
         description: {
@@ -26,10 +24,10 @@ const subjectScheme = new mongoose.Schema(
             require: [true, "Please provide description name"],
             trim: true,
         },
-        subject_id: {
+        course_id: {
             type: String,
             unique: true,
-            required: [true, "Please provide a subject id"],
+            required: [true, "Please provide a course id"],
         },
         master_id: {
             type: String,
@@ -43,4 +41,4 @@ const subjectScheme = new mongoose.Schema(
     },
     { timestamps: true }
 );
-module.exports = mongoose.model("subject", subjectScheme);
+module.exports = mongoose.model("course", courseScheme);

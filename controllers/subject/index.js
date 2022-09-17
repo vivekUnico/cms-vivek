@@ -53,6 +53,8 @@ exports.UpdateSubject = asyncHandler(async (req, res) => {
         let schemaData = { name, topics, description, subject_id, master_id, academic_year };
 
         const data = await Subject.findOneAndUpdate({ _id: id }, schemaData, { returnOriginal: false });
+        if (!data) throw new ErrorResponse(`Subject id not found`, 400);
+
         return res.status(201).json({ success: true, data });
 
     } catch (error) {
@@ -68,6 +70,8 @@ exports.DeleteSubject = asyncHandler(async (req, res) => {
         if (!id) throw new ErrorResponse(`Please provide a subject id `, 400);
 
         const data = await Subject.findOneAndDelete({ _id: id });
+        if(!data) throw new ErrorResponse(`Subject id not found`, 400);
+
         return res.status(201).json({ success: true, data: "Subject Deleted Successful" });
     } catch (error) {
         throw new ErrorResponse(`Server error :${error}`, 400);
