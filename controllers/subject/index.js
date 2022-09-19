@@ -5,6 +5,8 @@ const { validationCheck, findUniqueData } = require('../../middleware/validation
 
 //models
 const Subject = require("../../models/subject");
+const Course = require("../../models/course");
+
 
 //Get All Subject
 exports.GetAllSubject = asyncHandler(async (req, res) => {
@@ -95,9 +97,15 @@ exports.DeleteSubject = asyncHandler(async (req, res) => {
         const { id } = req.params;
         if (!id) throw new ErrorResponse(`Please provide a subject id `, 400);
 
-        const data = await Subject.findOneAndDelete({ _id: id });
-        if (!data) throw new ErrorResponse(`Subject id not found`, 400);
+        //remove subject from course
+        let oldSubject = await Subject.findOne({ _id: id });
+        if (!oldSubject) throw new ErrorResponse(`Subject id not found`, 400);
 
+        await oldSubject?.courses?.map(async (courseId) => {
+            await Course.findByIdAndUpdate(courseId, { $pull: { subjects: oldSubject._id } });
+        });
+
+        await oldSubject.remove();
         return res.status(201).json({ success: true, data: "Subject Deleted Successful" });
     } catch (error) {
         throw new ErrorResponse(`Server error :${error}`, 400);
