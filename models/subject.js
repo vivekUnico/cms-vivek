@@ -7,6 +7,12 @@ const subjectScheme = new mongoose.Schema(
             require: [true, "Please provide subject name"],
             trim: true,
         },
+        courses: [
+            {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: 'course'
+            }
+        ],
         topics: [
             {
                 name: {

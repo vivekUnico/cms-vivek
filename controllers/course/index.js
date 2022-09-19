@@ -5,7 +5,7 @@ const { validationCheck, findUniqueData } = require('../../middleware/validation
 
 //models
 const Course = require("../../models/course");
-const Center = require("../../models/center");
+const Subject = require("../../models/subject");
 
 //Get All Course
 exports.GetAllCourse = asyncHandler(async (req, res) => {
@@ -18,6 +18,25 @@ exports.GetAllCourse = asyncHandler(async (req, res) => {
         throw new ErrorResponse(`Server error :${error}`, 400);
     }
 });
+
+
+//Get Single Course
+exports.GetSingleCourse = asyncHandler(async (req, res) => {
+    let { populate } = req.query;
+
+    try {
+        const { id } = req.params;
+        if (!id) throw new ErrorResponse(`Please provide a Course id `, 400);
+
+        const data = await Course.findOne({ _id: id }).populate(populate?.split(",").map((item) => ({ path: item })));;
+        if (!data) throw new ErrorResponse(`Course id not found`, 400);
+
+        return res.status(201).json({ success: true, data });
+    } catch (error) {
+        throw new ErrorResponse(`Server error :${error}`, 400);
+    }
+});
+
 
 //Create Single Course
 exports.CreateCourse = asyncHandler(async (req, res) => {
@@ -35,8 +54,11 @@ exports.CreateCourse = asyncHandler(async (req, res) => {
         if (checkCourseID) throw new ErrorResponse(`Course id already exist`, 400);
 
         const data = await Course.create(schemaData);
-        return res.status(201).json({ success: true, data });
+        await subjects.map(async (sub) => {
+            await Subject.findByIdAndUpdate(sub, { $push: { "courses": data._id } });
+        });
 
+        return res.status(201).json({ success: true, data });
     } catch (error) {
         throw new ErrorResponse(`Server error :${error}`, 400);
     }
@@ -53,6 +75,15 @@ exports.UpdateCourse = asyncHandler(async (req, res) => {
         else if (subjects?.length == 0) throw new ErrorResponse(`Please provide subjects`, 400);
 
         let schemaData = { name, centers, subjects, description, course_id, master_id, academic_year };
+
+        // let oldCourse = Course.findOne({ _id: id });
+        // let removeCourseFromSubject = [];
+        // subjects.map((sub)=>{
+        //     if(old.subjects.find((item)=> item != sub)){
+
+        //     }
+        // })
+
 
         const data = await Course.findOneAndUpdate({ _id: id }, schemaData, { returnOriginal: false });
         if (!data) throw new ErrorResponse(`Course id not found`, 400);
@@ -71,7 +102,7 @@ exports.DeleteCourse = asyncHandler(async (req, res) => {
         if (!id) throw new ErrorResponse(`Please provide a Course id `, 400);
 
         const data = await Course.findOneAndDelete({ _id: id });
-        if(!data) throw new ErrorResponse(`Course id not found`, 400);
+        if (!data) throw new ErrorResponse(`Course id not found`, 400);
 
         return res.status(201).json({ success: true, data: "Course Deleted Successful" });
     } catch (error) {
