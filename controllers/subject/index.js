@@ -10,10 +10,29 @@ const Course = require("../../models/course");
 
 //Get All Subject
 exports.GetAllSubject = asyncHandler(async (req, res) => {
-    let { populate } = req.query;
-
+    let { populate, courses, name, dateFrom, dateTo } = req.query;
     try {
-        const data = await Subject.find({}).populate(populate?.split(",").map((item) => ({ path: item })));
+        let filter = {};
+        if (courses) {
+            let courseFilter = String(courses).split(",");
+            filter["courses"] = courseFilter.length > 1 ? courseFilter : courses;
+        } if (name) {
+            filter['name'] = { '$regex': name, '$options': 'i' };
+        } if (dateFrom && dateTo) {
+            dateFrom = new Date(dateFrom)
+            dateFrom = dateFrom.toISOString()
+
+            dateTo = new Date(dateTo)
+            dateTo.setDate(dateTo.getDate() + 1);
+            dateTo = dateTo.toISOString()
+
+            filter['createdAt'] = {
+                $gte: dateFrom,
+                $lte: dateTo
+            };
+        }
+
+        const data = await Subject.find({ ...filter }).populate(populate?.split(",").map((item) => ({ path: item })));
         return res.status(201).json({ success: true, data });
     } catch (error) {
         throw new ErrorResponse(`Server error :${error}`, 400);
