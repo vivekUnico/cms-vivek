@@ -6,13 +6,20 @@ const { validationCheck, findUniqueData } = require('../../middleware/validation
 //models
 const Course = require("../../models/course");
 const Subject = require("../../models/subject");
+const Batch = require("../../models/batch");
+
 
 //Get All Course
 exports.GetAllCourse = asyncHandler(async (req, res) => {
     try {
         let { populate } = req.query;
-
         const data = await Course.find({}).populate(populate?.split(",").map((item) => ({ path: item })));
+
+        for (let index = 0; index < data.length; index++) {
+            let item = data[index]._doc;
+            item["batch_details"] = await Batch.find({ "courses": item._id });
+        }
+
         return res.status(201).json({ success: true, data });
     } catch (error) {
         throw new ErrorResponse(`Server error :${error}`, 400);

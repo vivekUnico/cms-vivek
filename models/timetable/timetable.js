@@ -18,12 +18,12 @@ const timetableScheme = new mongoose.Schema(
         },
         end_date: Date,
 
-        date_details: [
-            {
-                type: mongoose.Schema.Types.ObjectId,
-                ref: 'datedetails'
-            }
-        ],
+        // date_details: [
+        //     {
+        //         type: mongoose.Schema.Types.ObjectId,
+        //         ref: 'datedetails'
+        //     }
+        // ],
     },
     { timestamps: true }
 );

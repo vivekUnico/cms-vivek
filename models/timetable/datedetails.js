@@ -2,6 +2,11 @@ const mongoose = require("mongoose");
 
 const datedetailsScheme = new mongoose.Schema(
     {
+        timetable: {
+            required: [true, "Please provide timetable"],
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'timetable'
+        },
         date: {
             type: Date,
             required: [true, "Please provide Date"]
@@ -19,15 +24,20 @@ const datedetailsScheme = new mongoose.Schema(
 
         time_details: [
             {
-                start_time: Date,
-                end_time: Date,
+                start_time: {
+                    type: Date,
+                    required: [true, "Please provide start time"],
+                },
+                end_time: {
+                    type: Date,
+                    required: [true, "Please provide end time"],
+                },
                 subject: {
                     required: [true, "Please provide subject"],
                     type: mongoose.Schema.Types.ObjectId,
                     ref: 'subject'
                 },
-                topics: [
-                ],
+                topics: [],
                 teacher: {
                     required: [true, "Please provide teacher"],
                     type: mongoose.Schema.Types.ObjectId,
