@@ -39,14 +39,14 @@ exports.GetSingleCourse = asyncHandler(async (req, res) => {
 //Create Single Course
 exports.CreateCourse = asyncHandler(async (req, res) => {
     try {
-        const { name, centers, subjects, description, course_id, master_id, academic_year } = req.body;
-        let validation = await validationCheck({ name, centers, subjects, description, course_id });
+        const { name,price, centers, subjects, description, course_id, master_id, academic_year } = req.body;
+        let validation = await validationCheck({ name,price, centers, subjects, description, course_id });
         if (!validation.status) {
             throw new ErrorResponse(`Please provide a ${validation?.errorAt}`, 400);
         } else if (centers?.length == 0) throw new ErrorResponse(`Please provide centers`, 400);
         else if (subjects?.length == 0) throw new ErrorResponse(`Please provide subjects`, 400);
 
-        let schemaData = { name, centers, subjects, description, course_id, master_id, academic_year };
+        let schemaData = { name,price, centers, subjects, description, course_id, master_id, academic_year };
 
         let checkCourseID = await findUniqueData(Course, { course_id });
         if (checkCourseID) throw new ErrorResponse(`Course id already exist`, 400);
@@ -68,10 +68,10 @@ exports.UpdateCourse = asyncHandler(async (req, res) => {
         const { id } = req.params;
         if (!id) throw new ErrorResponse(`Please provide a Course id `, 400);
 
-        const { name, centers, subjects, description, course_id, master_id, academic_year } = req.body;
+        const { name, price, centers, subjects, description, course_id, master_id, academic_year } = req.body;
         if (centers?.length == 0) throw new ErrorResponse(`Please provide centers`, 400);
         else if (subjects?.length == 0) throw new ErrorResponse(`Please provide subjects`, 400);
-        let schemaData = { name, centers, subjects, description, course_id, master_id, academic_year };
+        let schemaData = { name,price, centers, subjects, description, course_id, master_id, academic_year };
 
         //remove course from subject
         let oldCourse = await Course.findOne({ _id: id });

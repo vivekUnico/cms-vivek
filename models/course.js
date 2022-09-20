@@ -7,6 +7,11 @@ const courseScheme = new mongoose.Schema(
             require: [true, "Please provide course name"],
             trim: true,
         },
+        price: {
+            type: String,
+            require: [true, "Please provide course price"],
+            trim: true,
+        },
         centers: [
             {
                 type: mongoose.Schema.Types.ObjectId,
