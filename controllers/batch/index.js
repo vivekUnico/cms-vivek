@@ -9,10 +9,47 @@ const Center = require("../../models/center");
 
 //Get All Batch
 exports.GetAllBatch = asyncHandler(async (req, res) => {
-    try {
-        let { populate } = req.query;
+    let { populate, center, courses, name, dateFrom, dateTo, startDate, endDate } = req.query;
 
-        const data = await Batch.find({}).populate(populate?.split(",").map((item) => ({ path: item })));
+    try {
+        let filter = {};
+        if (center) {
+            filter["center"] = String(center);
+        } if (courses) {
+            let courseFilter = String(courses).split(",");
+            filter["courses"] = courseFilter.length > 1 ? courseFilter : courses;
+        } if (name) {
+            filter['name'] = { '$regex': name, '$options': 'i' };
+        } if (dateFrom && dateTo) {
+            dateFrom = new Date(dateFrom)
+            dateFrom = dateFrom.toISOString()
+
+            dateTo = new Date(dateTo)
+            dateTo.setDate(dateTo.getDate() + 1);
+            dateTo = dateTo.toISOString()
+
+            filter['createdAt'] = {
+                $gte: dateFrom,
+                $lte: dateTo
+            };
+        } if (startDate) {
+            startDate = new Date(startDate)
+            startDate = startDate.toISOString()
+
+            filter['batch_date.start_date'] = {
+                $gte: startDate
+            }
+        } if (endDate) {
+            endDate = new Date(endDate)
+            endDate.setDate(endDate.getDate() + 1);
+            endDate = endDate.toISOString()
+
+            filter['batch_date.end_date'] = {
+                $lte: endDate
+            };
+        }
+
+        const data = await Batch.find({...filter}).populate(populate?.split(",").map((item) => ({ path: item })));
         return res.status(201).json({ success: true, data });
     } catch (error) {
         throw new ErrorResponse(`Server error :${error}`, 400);

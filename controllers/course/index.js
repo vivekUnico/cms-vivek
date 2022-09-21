@@ -11,9 +11,31 @@ const Batch = require("../../models/batch");
 
 //Get All Course
 exports.GetAllCourse = asyncHandler(async (req, res) => {
+    let { populate, centers, name, dateFrom, dateTo } = req.query;
+    
     try {
-        let { populate } = req.query;
-        const data = await Course.find({}).populate(populate?.split(",").map((item) => ({ path: item })));
+        let filter = {};
+        if (centers) {
+            let centersFilter = String(centers).split(",");
+            filter["centers"] = centersFilter.length > 1 ? centersFilter : centers;
+        } if (name) {
+            filter['name'] = { '$regex': name, '$options': 'i' };
+        } if (dateFrom && dateTo) {
+            dateFrom = new Date(dateFrom)
+            dateFrom = dateFrom.toISOString()
+
+            dateTo = new Date(dateTo)
+            dateTo.setDate(dateTo.getDate() + 1);
+            dateTo = dateTo.toISOString()
+
+            filter['createdAt'] = {
+                $gte: dateFrom,
+                $lte: dateTo
+            };
+        }
+
+
+        const data = await Course.find({ ...filter }).populate(populate?.split(",").map((item) => ({ path: item })));
 
         for (let index = 0; index < data.length; index++) {
             let item = data[index]._doc;
