@@ -9,9 +9,11 @@ const DateDetails = require("../../models/timetable/datedetails");
 //Get All DateDetails
 exports.GetAllDateDetails = asyncHandler(async (req, res) => {
     let { populate } = req.query;
-
     try {
-        const data = await DateDetails.find({}).populate(populate?.split(",").map((item) => ({ path: item })));
+        const { timetable } = req.params;
+        if (!timetable) throw new ErrorResponse(`Please provide a timetable _id `, 400);
+
+        const data = await DateDetails.find({ timetable }).populate(populate?.split(",").map((item) => ({ path: item })));
         return res.status(201).json({ success: true, data });
     } catch (error) {
         throw new ErrorResponse(`Server error :${error}`, 400);
@@ -40,15 +42,18 @@ exports.CreateDateDetails = asyncHandler(async (req, res) => {
         const { dates } = req.body;
         if (!dates || dates.length == 0) throw new ErrorResponse(`Please provide dates`, 400);
 
-        // await dates.map(async (item,index) => {
+        await dates.map(async (item,index) => {
+            const { timetable, date, date_type, lecture_type, time_details } = item;
 
-        //     const { timetable, date, date_type, lecture_type, time_details } = item;
-        //     let validation = await validationCheck({ timetable, date, date_type, lecture_type, time_details });
+            let validation = await validationCheck({ timetable, date, date_type, lecture_type, time_details });
+            if (!validation.status) return res.status(400).json({ success: false, message: `Please provide a ${validation?.errorAt} at ${index}` });
+            if (!time_details || time_details.length == 0) return res.status(400).json({ success: false, message: `Please provide time_details at ${index}` });
 
-        //     if (!validation.status) throw new ErrorResponse(`Please provide a ${validation?.errorAt} at ${index}`, 400);
-        //     if (!time_details || time_details.length == 0) throw new ErrorResponse(`Please provide time_details at ${index}`, 400);
-
-        // });
+            let matchDate = await DateDetails.findOne({ timetable, date: {
+                $eq: date
+            }});
+            if(matchDate) return res.status(400).json({ success: false, message: `${date} already exists` });
+        });
 
         const data = await DateDetails.create([...dates]);
         return res.status(201).json({ success: true, data });

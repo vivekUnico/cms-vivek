@@ -16,7 +16,10 @@ const timetableScheme = new mongoose.Schema(
             type: Date,
             required: [true, "Please provide start date"],
         },
-        end_date: Date,
+        end_date: {
+            type: Date,
+            required: [true, "Please provide end date"],
+        },
 
         // date_details: [
         //     {

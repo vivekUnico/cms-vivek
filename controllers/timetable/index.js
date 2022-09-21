@@ -6,21 +6,30 @@ const { validationCheck, findUniqueData } = require('../../middleware/validation
 //models
 const Timetable = require("../../models/timetable/timetable");
 const DateDetails = require("../../models/timetable/datedetails");
+const moment = require('moment');
 
 
 //Create Single Timetable
 exports.CreateTimetable = asyncHandler(async (req, res) => {
     try {
-        const { center, batch, start_date, end_date } = req.body;
-        let validation = await validationCheck({ center, batch, start_date });
+        let { center, batch, start_date, end_date } = req.body;
+        let validation = await validationCheck({ center, batch, start_date, end_date });
         if (!validation.status) {
             throw new ErrorResponse(`Please provide a ${validation?.errorAt}`, 400);
         }
-
         let schemaData = { center, batch, start_date, end_date };
 
+        let validateData = await findUniqueData(Timetable, { center, batch });
+        if(validateData){
+            if(moment(start_date) > moment(validateData.start_date) && moment(start_date) > moment(validateData.end_date)){
+                return res.status(200).json({ success: true, data: validateData, continue: true });         
+            }else{
+                throw new ErrorResponse(`date has already been used, choose a different date`, 400); 
+            }
+        }
+
         const data = await Timetable.create(schemaData);
-        return res.status(201).json({ success: true, data });
+        return res.status(201).json({ success: true, data: data });
     } catch (error) {
         throw new ErrorResponse(`Server error :${error}`, 400);
     }
@@ -47,12 +56,13 @@ exports.GetAllTimetable = asyncHandler(async (req, res) => {
 //Get Single Timetable
 exports.GetSingleTimetable = asyncHandler(async (req, res) => {
     let { populate } = req.query;
-    
+
     try {
         const { id } = req.params;
         if (!id) throw new ErrorResponse(`Please provide a timetable _id `, 400);
 
         let data = await Timetable.findById(id);
+        if (!data) throw new ErrorResponse(`timetable id not found`, 400);
         data._doc["date_details"] = await DateDetails.find({ timetable: id }).populate(populate?.split(",").map((item) => ({ path: item })));;
 
         return res.status(201).json({ success: true, data });

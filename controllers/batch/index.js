@@ -56,6 +56,21 @@ exports.GetAllBatch = asyncHandler(async (req, res) => {
     }
 });
 
+//Get Single Batch
+exports.GetSingleBatch = asyncHandler(async (req, res) => {
+    try {
+        const { id } = req.params;
+        if (!id) throw new ErrorResponse(`Please provide a Batch id `, 400);
+
+        const data = await Batch.findById(id);
+        if (!data) throw new ErrorResponse(`Batch id not found`, 400);
+
+        return res.status(201).json({ success: true, data });
+    } catch (error) {
+        throw new ErrorResponse(`Server error :${error}`, 400);
+    }
+});
+
 //Create Single Batch
 exports.CreateBatch = asyncHandler(async (req, res) => {
     try {
