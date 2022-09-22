@@ -44,6 +44,36 @@ const datedetailsScheme = new mongoose.Schema(
                     ref: 'staff'
                 }
             }
+        ],
+
+        actuals_details: [
+            {
+                timedetailId: {
+                    type: String,
+                    required: [true, "Please provide timedetailId"],
+                },
+                start_time: {
+                    type: Date,
+                    required: [true, "Please provide start time"],
+                },
+                end_time: {
+                    type: Date,
+                    required: [true, "Please provide end time"],
+                },
+                subject: {
+                    required: [true, "Please provide subject"],
+                    type: mongoose.Schema.Types.ObjectId,
+                    ref: 'subject'
+                },
+                topics: [],
+                completed_topics: [],
+                partially_completed_topics: [],
+                teacher: {
+                    required: [true, "Please provide teacher"],
+                    type: mongoose.Schema.Types.ObjectId,
+                    ref: 'staff'
+                }
+            }
         ]
     },
     { timestamps: true }
