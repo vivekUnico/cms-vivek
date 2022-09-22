@@ -14,7 +14,7 @@ exports.GetAllDateDetails = asyncHandler(async (req, res) => {
         if (!timetable) throw new ErrorResponse(`Please provide a timetable _id `, 400);
 
         const data = await DateDetails.find({ timetable }).populate(populate?.split(",").map((item) => ({ path: item })));
-        return res.status(201).json({ success: true, data });
+        return res.status(200).json({ success: true, data });
     } catch (error) {
         throw new ErrorResponse(`Server error :${error}`, 400);
     }
@@ -30,7 +30,7 @@ exports.GetSingleDateDetails = asyncHandler(async (req, res) => {
         if (!id) throw new ErrorResponse(`Please provide a date _id `, 400);
 
         const data = await DateDetails.findById(id).populate(populate?.split(",").map((item) => ({ path: item })));
-        return res.status(201).json({ success: true, data });
+        return res.status(200).json({ success: true, data });
     } catch (error) {
         throw new ErrorResponse(`Server error :${error}`, 400);
     }
@@ -82,7 +82,7 @@ exports.UpdateDateDetails = asyncHandler(async (req, res) => {
 
         const schemaData = { date, date_type, lecture_type, time_details };
         const data = await DateDetails.findOneAndUpdate({ _id: id }, schemaData, { returnOriginal: false });
-        return res.status(201).json({ success: true, data });
+        return res.status(200).json({ success: true, data });
     } catch (error) {
         throw new ErrorResponse(`Server error :${error}`, 400);
     }
@@ -98,7 +98,7 @@ exports.DeleteSingleDateDetails = asyncHandler(async (req, res) => {
         const data = await DateDetails.findByIdAndDelete(id);
         if (!data) throw new ErrorResponse(`date id not found`, 400);
 
-        return res.status(201).json({ success: true, data: "Date Deleted Successful" });
+        return res.status(200).json({ success: true, data: "Date Deleted Successful" });
     } catch (error) {
         throw new ErrorResponse(`Server error :${error}`, 400);
     }

@@ -13,8 +13,8 @@ const staff = require("./staff/staff");
 
 
 router.use('/center',center);
-router.use('/batch',batch);
 
+router.use('/batch',batch);
 router.use('/subject',subject);
 router.use('/course',course);
 

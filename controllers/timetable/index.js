@@ -29,7 +29,7 @@ exports.CreateTimetable = asyncHandler(async (req, res) => {
         }
 
         const data = await Timetable.create(schemaData);
-        return res.status(201).json({ success: true, data: data });
+        return res.status(210).json({ success: true, data: data });
     } catch (error) {
         throw new ErrorResponse(`Server error :${error}`, 400);
     }
@@ -46,7 +46,7 @@ exports.GetAllTimetable = asyncHandler(async (req, res) => {
             item["date_details"] = await DateDetails.find({ timetable: item._id }).populate(populate?.split(",").map((item) => ({ path: item })));;
         }
 
-        return res.status(201).json({ success: true, data });
+        return res.status(200).json({ success: true, data });
     } catch (error) {
         throw new ErrorResponse(`Server error :${error}`, 400);
     }
@@ -65,7 +65,7 @@ exports.GetSingleTimetable = asyncHandler(async (req, res) => {
         if (!data) throw new ErrorResponse(`timetable id not found`, 400);
         data._doc["date_details"] = await DateDetails.find({ timetable: id }).populate(populate?.split(",").map((item) => ({ path: item })));;
 
-        return res.status(201).json({ success: true, data });
+        return res.status(200).json({ success: true, data });
     } catch (error) {
         throw new ErrorResponse(`Server error :${error}`, 400);
     }
@@ -83,7 +83,7 @@ exports.UpdateTimetable = asyncHandler(async (req, res) => {
         let schemaData = { center, batch, start_date, end_date };
 
         const data = await Timetable.findOneAndUpdate({ _id: id }, schemaData, { returnOriginal: false });
-        return res.status(201).json({ success: true, data });
+        return res.status(200).json({ success: true, data });
     } catch (error) {
         throw new ErrorResponse(`Server error :${error}`, 400);
     }
@@ -100,7 +100,7 @@ exports.DeleteSingleTimetable = asyncHandler(async (req, res) => {
         const data = await Timetable.findByIdAndDelete(id);
         if (!data) throw new ErrorResponse(`timetable id not found`, 400);
 
-        return res.status(201).json({ success: true, data: "timetable Deleted Successful" });
+        return res.status(200).json({ success: true, data: "timetable Deleted Successful" });
     } catch (error) {
         throw new ErrorResponse(`Server error :${error}`, 400);
     }

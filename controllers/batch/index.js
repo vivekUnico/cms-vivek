@@ -50,7 +50,7 @@ exports.GetAllBatch = asyncHandler(async (req, res) => {
         }
 
         const data = await Batch.find({...filter}).populate(populate?.split(",").map((item) => ({ path: item })));
-        return res.status(201).json({ success: true, data });
+        return res.status(200).json({ success: true, data });
     } catch (error) {
         throw new ErrorResponse(`Server error :${error}`, 400);
     }
@@ -65,7 +65,7 @@ exports.GetSingleBatch = asyncHandler(async (req, res) => {
         const data = await Batch.findById(id);
         if (!data) throw new ErrorResponse(`Batch id not found`, 400);
 
-        return res.status(201).json({ success: true, data });
+        return res.status(200).json({ success: true, data });
     } catch (error) {
         throw new ErrorResponse(`Server error :${error}`, 400);
     }
@@ -108,7 +108,7 @@ exports.UpdateBatch = asyncHandler(async (req, res) => {
         const data = await Batch.findOneAndUpdate({ _id: id }, schemaData, { returnOriginal: false });
         if (!data) throw new ErrorResponse(`Batch id not found`, 400);
 
-        return res.status(201).json({ success: true, data });
+        return res.status(200).json({ success: true, data });
     } catch (error) {
         throw new ErrorResponse(`Server error :${error}`, 400);
     }
@@ -123,7 +123,7 @@ exports.DeleteBatch = asyncHandler(async (req, res) => {
         const data = await Batch.findOneAndDelete({ _id: id });
         if (!data) throw new ErrorResponse(`Batch id not found`, 400);
 
-        return res.status(201).json({ success: true, data: "Batch Deleted Successful" });
+        return res.status(200).json({ success: true, data: "Batch Deleted Successful" });
     } catch (error) {
         throw new ErrorResponse(`Server error :${error}`, 400);
     }

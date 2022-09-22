@@ -33,7 +33,7 @@ exports.GetAllSubject = asyncHandler(async (req, res) => {
         }
 
         const data = await Subject.find({ ...filter }).populate(populate?.split(",").map((item) => ({ path: item })));
-        return res.status(201).json({ success: true, data });
+        return res.status(200).json({ success: true, data });
     } catch (error) {
         throw new ErrorResponse(`Server error :${error}`, 400);
     }
@@ -50,7 +50,7 @@ exports.GetSingleSubject = asyncHandler(async (req, res) => {
         const data = await Subject.findOne({ _id: id }).populate(populate?.split(",").map((item) => ({ path: item })));;
         if (!data) throw new ErrorResponse(`Subject id not found`, 400);
 
-        return res.status(201).json({ success: true, data });
+        return res.status(200).json({ success: true, data });
     } catch (error) {
         throw new ErrorResponse(`Server error :${error}`, 400);
     }
@@ -102,7 +102,7 @@ exports.UpdateSubject = asyncHandler(async (req, res) => {
         const data = await Subject.findOneAndUpdate({ _id: id }, schemaData, { returnOriginal: false });
         if (!data) throw new ErrorResponse(`Subject id not found`, 400);
 
-        return res.status(201).json({ success: true, data });
+        return res.status(200).json({ success: true, data });
 
     } catch (error) {
         throw new ErrorResponse(`Server error :${error}`, 400);
@@ -125,7 +125,7 @@ exports.DeleteSubject = asyncHandler(async (req, res) => {
         });
 
         await oldSubject.remove();
-        return res.status(201).json({ success: true, data: "Subject Deleted Successful" });
+        return res.status(200).json({ success: true, data: "Subject Deleted Successful" });
     } catch (error) {
         throw new ErrorResponse(`Server error :${error}`, 400);
     }

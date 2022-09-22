@@ -42,7 +42,7 @@ exports.GetAllCourse = asyncHandler(async (req, res) => {
             item["batch_details"] = await Batch.find({ "courses": item._id });
         }
 
-        return res.status(201).json({ success: true, data });
+        return res.status(200).json({ success: true, data });
     } catch (error) {
         throw new ErrorResponse(`Server error :${error}`, 400);
     }
@@ -59,7 +59,7 @@ exports.GetSingleCourse = asyncHandler(async (req, res) => {
         const data = await Course.findOne({ _id: id }).populate(populate?.split(",").map((item) => ({ path: item })));;
         if (!data) throw new ErrorResponse(`Course id not found`, 400);
 
-        return res.status(201).json({ success: true, data });
+        return res.status(200).json({ success: true, data });
     } catch (error) {
         throw new ErrorResponse(`Server error :${error}`, 400);
     }
@@ -117,7 +117,7 @@ exports.UpdateCourse = asyncHandler(async (req, res) => {
         const data = await Course.findOneAndUpdate({ _id: id }, schemaData, { returnOriginal: false });
         if (!data) throw new ErrorResponse(`Course id not found`, 400);
 
-        return res.status(201).json({ success: true, data });
+        return res.status(200).json({ success: true, data });
     } catch (error) {
         throw new ErrorResponse(`Server error :${error}`, 400);
     }
@@ -138,7 +138,7 @@ exports.DeleteCourse = asyncHandler(async (req, res) => {
         });
 
         await oldCourse.remove();
-        return res.status(201).json({ success: true, data: "Course Deleted Successful" });
+        return res.status(200).json({ success: true, data: "Course Deleted Successful" });
     } catch (error) {
         throw new ErrorResponse(`Server error :${error}`, 400);
     }

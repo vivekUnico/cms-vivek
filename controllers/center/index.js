@@ -9,7 +9,7 @@ const Center = require("../../models/center");
 exports.GetAllCenter = asyncHandler(async (req, res) => {
     try {
         const data = await Center.find({});
-        return res.status(201).json({ success: true, data });
+        return res.status(200).json({ success: true, data });
     } catch (error) {
         throw new ErrorResponse(`Server error :${error}`, 400);
     }
