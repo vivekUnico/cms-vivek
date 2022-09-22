@@ -21,13 +21,13 @@ exports.GetAllStaff = asyncHandler(async (req, res) => {
 //Create Single Staff
 exports.CreateStaff = asyncHandler(async (req, res) => {
     try {
-        const { initial, first_name, last_name, email, dob, center, staffCode, salary_type, loginId, role, department, position, grade, shift, qualification, manager, joining_date, job_type, gender, account_status } = req.body;
+        const { initial, first_name, last_name, email, mobile, dob, center, staffCode, salary_type, loginId, role, department, position, grade, shift, qualification, manager, joining_date, job_type, gender, account_status } = req.body;
 
-        let validation = await validationCheck({ initial, first_name, last_name, email, dob, center, staffCode, salary_type, loginId, role, department, position, grade, shift, qualification, manager, joining_date, job_type, gender, account_status });
+        let validation = await validationCheck({ initial, first_name, last_name, email, mobile, dob, center, staffCode, salary_type, loginId, role, department, position, grade, shift, qualification, manager, joining_date, job_type, gender, account_status });
         if (!validation.status) {
             throw new ErrorResponse(`Please provide a ${validation?.errorAt}`, 400);
         }
-        let schemaData = { initial, first_name, last_name, email, dob, center, staffCode, salary_type, loginId, role, department, position, grade, shift, qualification, manager, joining_date, job_type, gender, account_status };
+        let schemaData = { initial, first_name, last_name, email, mobile, dob, center, staffCode, salary_type, loginId, role, department, position, grade, shift, qualification, manager, joining_date, job_type, gender, account_status };
 
         let checkEmail = await findUniqueData(Staff,{ email });
         if (checkEmail) throw new ErrorResponse(`email already exist`, 400);
@@ -87,11 +87,24 @@ exports.UpdateStaff = asyncHandler(async (req, res) => {
         const { id } = req.params;
         if (!id) throw new ErrorResponse(`Please provide a Staff _id `, 400);
 
-        const { initial, first_name, last_name, email, dob, center, staffCode, salary_type, loginId, role, department, position, grade, shift, qualification, manager, joining_date, job_type, gender, account_status } = req.body;
-        let schemaData = { initial, first_name, last_name, email, dob, center, staffCode, salary_type, loginId, role, department, position, grade, shift, qualification, manager, joining_date, job_type, gender, account_status };
+        const { initial, first_name, last_name, email, mobile, dob, center, staffCode, salary_type, loginId, role, department, position, grade, shift, qualification, manager, joining_date, job_type, gender, account_status } = req.body;
+        let schemaData = { initial, first_name, last_name, email, mobile, dob, center, staffCode, salary_type, loginId, role, department, position, grade, shift, qualification, manager, joining_date, job_type, gender, account_status };
 
-        const data = await Course.findOneAndUpdate({ _id: id }, schemaData, { returnOriginal: false });
-        if (!data) throw new ErrorResponse(`Course id not found`, 400);
+        let oldStaff = await findUniqueData(Staff,{ _id: id });
+
+        if(oldStaff.email != email){
+            let checkEmail = await findUniqueData(Staff,{ email });
+            if (checkEmail) throw new ErrorResponse(`email already exist`, 400);    
+        }else if(oldStaff.staffCode != staffCode){
+            let checkStaffCode = await findUniqueData(Staff,{ staffCode });
+            if (checkStaffCode) throw new ErrorResponse(`staffCode already exist`, 400);
+        }else if(oldStaff.oldStaff != checkLoginId){
+            let checkLoginId = await findUniqueData(Staff,{ loginId });
+            if (checkLoginId) throw new ErrorResponse(`loginId already exist`, 400);    
+        }
+
+        const data = await Staff.findOneAndUpdate({ _id: id }, schemaData, { returnOriginal: false });
+        if (!data) throw new ErrorResponse(`Staff id not found`, 400);
 
         return res.status(200).json({ success: true, data });
     } catch (error) {

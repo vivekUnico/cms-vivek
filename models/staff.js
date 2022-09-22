@@ -25,6 +25,11 @@ const staffScheme = new mongoose.Schema({
             unique: true,
             required: [true, "Please provide a email address"],
         },
+        mobile: {
+            type: String,
+            required: [true, "Please provide mobile"],
+            trim: true,
+        },
         dob: {
             type: Date,
             required: [true, "Please provide dob"],
