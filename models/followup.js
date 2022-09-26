@@ -8,10 +8,14 @@ const followupScheme = new mongoose.Schema(
             enum: ["lead","enquiry"],
             required: [true, "Please provide followup_type"],
         },
+        // connection_id: {
+        //     type: String,
+        //     trim: true,
+        //     required: [true, "Please provide connection_id"],
+        // },
         connection_id: {
-            type: String,
-            trim: true,
-            required: [true, "Please provide connection_id"],
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "lead-and-enquiry"
         },
         followup_by:  {
             required: [true, "Please provide followup_by"],

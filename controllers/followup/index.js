@@ -5,7 +5,7 @@ const { validationCheck } = require('../../middleware/validationCheck');
 
 //models
 const Followup = require("../../models/followup");
-const Lead = require("../../models/lead/lead");
+const LeadAndEnquiry = require("../../models/leadAndEnquiry");
 
 //Get All Followup
 exports.GetAllFollowup = asyncHandler(async (req, res) => {
@@ -16,7 +16,7 @@ exports.GetAllFollowup = asyncHandler(async (req, res) => {
             filter["followup_by"] = String(followup_by);
         }
 
-        const data = await Followup.find({...filter}).populate(populate?.split(",").map((item) => ({ path: item })));
+        let data = await Followup.find({...filter}).populate(populate?.split(",").map((item) => ({ path: item })));
         return res.status(200).json({ success: true, data });
     } catch (error) {
         throw new ErrorResponse(`Server error :${error}`, 400);
@@ -48,10 +48,8 @@ exports.CreateFollowup = asyncHandler(async (req, res) => {
         } else if (!followup_list || followup_list?.length == 0) {
             throw new ErrorResponse(`Please provide followup_list`, 400);
         };
-        if (followup_type == "lead") {
-            let lead = await Lead.findById(connection_id);
-            if (!lead) throw new ErrorResponse(`lead connection_id not found`, 400);
-        }
+        let check = await LeadAndEnquiry.findOne({ _id: connection_id })
+        if(!check) throw new ErrorResponse(`connection_id not found`, 400);
 
         for (let i = 0; i < followup_list.length; i++) {
             const item = followup_list[i];
