@@ -26,7 +26,6 @@ router.use('/timetable', timetable);
 router.use('/lead-and-enquiry',leadAndEnquiry);
 router.use('/followup',followup);
 
-router.use('/lead', lead);
 router.use('/followup', followup);
 
 router.use('/staff', staff);
