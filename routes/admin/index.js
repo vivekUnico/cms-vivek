@@ -14,17 +14,21 @@ const staff = require("./staff/staff");
 const lead = require("./lead/lead");
 const followup = require("./followup");
 
-router.use('/center',center);
+const studymaterial = require("./studymaterial");
 
-router.use('/batch',batch);
-router.use('/subject',subject);
-router.use('/course',course);
+router.use('/center', center);
 
-router.use('/timetable',timetable);
+router.use('/batch', batch);
+router.use('/subject', subject);
+router.use('/course', course);
 
-router.use('/lead',lead);
-router.use('/followup',followup);
+router.use('/timetable', timetable);
 
-router.use('/staff',staff);
+router.use('/lead', lead);
+router.use('/followup', followup);
+
+router.use('/staff', staff);
+
+router.use('/studymaterial', studymaterial);
 
 module.exports = router;

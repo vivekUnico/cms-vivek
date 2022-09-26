@@ -5,6 +5,9 @@ const cors = require("cors");
 const connectDB = require("./config/db");
 const errorHandler = require("./middleware/errorHandler");
 
+// Models
+const StudyMaterial = require("./models/studymaterial");
+
 // --------------------------------- load env vars ---------------------------------
 if (process.env.NODE_ENV !== "production") {
   const dotenv = require("dotenv");
@@ -37,6 +40,13 @@ app.use(errorHandler);
 const PORT = process.env.PORT || 5000;
 const server = app.listen(PORT, async () => {
   await connectDB();
+  const rootStudyMateialFolderExists = await StudyMaterial.find({});
+  if (rootStudyMateialFolderExists.length == 0) {
+    await StudyMaterial.create({
+      title: "root_StudyMaterial",
+      type: "root"
+    })
+  }
   console.log(
     chalk.yellowBright.bold(
       `Server is running on PORT: ${PORT} url on mode ${process.env.NODE_ENV}`
