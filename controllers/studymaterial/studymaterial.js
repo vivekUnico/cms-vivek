@@ -9,13 +9,13 @@ const StudyMaterial = require("../../models/studymaterial");
 exports.createStudyMaterial = asyncHandler(async (req, res) => {
     const { title, type, description, parent, attachement, courses, centers, isFree, showOnDashboard } = req.body;
     const validation = validationCheck({
-        title, type, description, parent, attachement, centers
+        title, type, description, parent,
     });
     if (!validation.status) {
         throw new ErrorResponse(`Please provide a ${validation?.errorAt}`, 400);
     }
     try {
-        const dataCreated = await StudyMaterial.create({ title, type, description, courses, parent, attachement, centers });
+        const dataCreated = await StudyMaterial.create({ title, type, description, courses, parent, attachement, centers, isFree, showOnDashboard });
         return res.status(201).json({ success: true, data: dataCreated });
     } catch (error) {
         throw new ErrorResponse(`Server error :${error}`, 400);
@@ -29,9 +29,9 @@ exports.getStudyMaterial = asyncHandler(async (req, res) => {
     //     id
     // });
 
-    if (!validation.status) {
-        throw new ErrorResponse(`Please provide a ${validation?.errorAt}`, 400);
-    }
+    // if (!validation.status) {
+    //     throw new ErrorResponse(`Please provide a ${validation?.errorAt}`, 400);
+    // }
     try {
         const folderDetails = await StudyMaterial.find({});
         return res.status(201).json({ success: true, data: folderDetails });

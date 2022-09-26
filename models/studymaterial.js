@@ -20,7 +20,7 @@ const studyMaterialScheme = new mongoose.Schema(
         },
         type: {
             type: String,
-            enum: ["root", "pdf", "excel", "powerpoint", "word"],
+            enum: ["root", "pdf", "excel", "powerpoint", "word","folder"],
             require: [true, "Please provide folder/file type"],
             trim: true,
         },
