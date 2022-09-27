@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 
-let mainSchema = {
+
+const student = new mongoose.Schema({
     name: {
         type: String,
         trim: true,
@@ -62,25 +63,8 @@ let mainSchema = {
     city: {
         type: String,
         trim: true
-    }
-}
-
-const leadAndEnquiry = new mongoose.Schema({
-    ...mainSchema,
-    currentStatus: {
-        type: String,
-        enum: ["lead", "enquiry","student"]
     },
-    isLead: {
-        type: Boolean,
-        default: false
-    },
-    isEnquiry: {
-        type: Boolean,
-        default: false
-    },
-    enquiry_data: {
-        ...mainSchema,
+    payment_related: {
         gross_amount: {
             type: Number,
         },
@@ -111,4 +95,4 @@ const leadAndEnquiry = new mongoose.Schema({
 },
     { timestamps: true }
 );
-module.exports = mongoose.model("lead-and-enquiry", leadAndEnquiry);
+module.exports = mongoose.model("student", student);
