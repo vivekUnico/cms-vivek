@@ -17,6 +17,8 @@ const followup = require("./followup");
 
 const studymaterial = require("./studymaterial");
 
+const librarybook = require("./librarybook");
+
 router.use('/center', center);
 
 router.use('/batch', batch);
@@ -24,12 +26,14 @@ router.use('/subject', subject);
 router.use('/course', course);
 
 router.use('/timetable', timetable);
-router.use('/lead-and-enquiry',leadAndEnquiry);
-router.use('/followup',followup);
+router.use('/lead-and-enquiry', leadAndEnquiry);
+router.use('/followup', followup);
 
 router.use('/staff', staff);
 router.use('/student', student);
 
 router.use('/studymaterial', studymaterial);
+
+router.use('/library', librarybook);
 
 module.exports = router;
