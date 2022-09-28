@@ -7,16 +7,16 @@ const { validationCheck, findUniqueData } = require('../../middleware/validation
 const LibraryBook = require("../../models/librarybook");
 
 exports.createLibraryBook = asyncHandler(async (req, res) => {
-    const { name, bookid, courses, totalBooks, totalReq, totalIssued, totalReturned, addedby } = req.body;
+    const { name, bookid, courses, totalBooks, addedby } = req.body;
     const validation = validationCheck({
-        name, bookid, courses, totalBooks, totalReq, totalIssued, totalReturned, addedby
+        name, bookid, courses, totalBooks, addedby
     });
     if (!validation.status) {
         throw new ErrorResponse(`Please provide a ${validation?.errorAt}`, 400);
     }
     try {
         const dataCreated = await LibraryBook.create({
-            name, bookid, courses, totalBooks, totalReq, totalIssued, totalReturned, addedby
+            name, bookid, courses, totalBooks, addedby
         });
         return res.status(201).json({ success: true, data: dataCreated });
     } catch (error) {
@@ -25,9 +25,9 @@ exports.createLibraryBook = asyncHandler(async (req, res) => {
 });
 
 exports.getLibraryBook = asyncHandler(async (req, res) => {
-    const { page, limit } = req.query;
+    const { page, limit, populate } = req.query;
     try {
-        const libData = await LibraryBook.find({}).limit(Number(limit)).skip(Number(page) * Number(limit)).sort({ createdAt: -1 });;
+        const libData = await LibraryBook.find({}).select(populate?.split(",")).limit(Number(limit)).skip(Number(page) * Number(limit)).sort({ createdAt: -1 });;
         return res.status(201).json({ success: true, data: libData });
     } catch (error) {
         throw new ErrorResponse(`Server error :${error}`, 400);

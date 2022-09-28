@@ -19,6 +19,9 @@ const studymaterial = require("./studymaterial");
 
 const librarybook = require("./librarybook");
 
+const QuestionRouter = require("./qp");
+const NotesRouter = require("./notes");
+
 router.use('/center', center);
 
 router.use('/batch', batch);
@@ -35,5 +38,8 @@ router.use('/student', student);
 router.use('/studymaterial', studymaterial);
 
 router.use('/library', librarybook);
+
+router.use('/question', QuestionRouter);
+router.use('/notes', NotesRouter);
 
 module.exports = router;
