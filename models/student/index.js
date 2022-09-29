@@ -90,7 +90,30 @@ const student = new mongoose.Schema({
                     type: Number,
                 }
             }
-        ]
+        ],
+
+        fees: {
+            date: Date,
+            category: String,
+            committed: Number,
+            remaining: Number,
+            paid_amount: Number,
+            tax: {
+                type: {
+                    type: String,
+                    enum: ["GST", "IGST", "SGST"]
+                },
+                txt_percent: Number,
+                total_txt_amount: Number
+            },
+            payment_mode: String,
+            remark: String,
+            recepit: String,
+            emi: {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: 'emi'
+            }
+        }
     }
 },
     { timestamps: true }

@@ -12,6 +12,9 @@ const timetable = require("./timetable/timetable");
 const staff = require("./staff/staff");
 const student = require("./student");
 
+const emi = require("./emi");
+
+
 const leadAndEnquiry = require("./leadAndEnquiry/leadAndEnquiry");
 const followup = require("./followup");
 
@@ -34,6 +37,8 @@ router.use('/followup', followup);
 
 router.use('/staff', staff);
 router.use('/student', student);
+
+router.use('/emi', emi);
 
 router.use('/studymaterial', studymaterial);
 
