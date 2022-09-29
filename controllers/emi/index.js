@@ -77,6 +77,61 @@ exports.UpdateEmi = asyncHandler(async (req, res) => {
     }
 });
 
+//add emi in emi_list
+exports.AppendEMI = asyncHandler(async (req, res) => {
+    try {
+        const { id } = req.params;
+        if (!id) throw new ErrorResponse(`Please provide a Emi id `, 400);
+
+        let { amount, date, payment_mode, paid } = req.body;
+        let schemaData = { amount, date, payment_mode, paid };
+
+        const data = await Emi.findOneAndUpdate({ "_id": id }, { $push: { "emi_list": schemaData } }, { returnOriginal: false });
+        if (!data) throw new ErrorResponse(`Emi id not found`, 400);
+
+        return res.status(201).json({ success: true, data });
+    } catch (error) {
+        throw new ErrorResponse(`Server error :${error}`, 400);
+    }
+});
+
+//update emi in emi_list
+exports.Update_emi_list = asyncHandler(async (req, res) => {
+    try {
+        const { id } = req.params;
+        if (!id) throw new ErrorResponse(`Please provide a emi_list id `, 400);
+
+        let { amount, date, payment_mode, paid } = req.body;
+        let schemaData = { amount, date, payment_mode, paid };
+        
+        let updateData = {};
+        Object.entries(schemaData).map((item) => {
+            updateData[`emi_list.$.${item[0]}`] = item[1];
+        });
+
+        const data = await Emi.findOneAndUpdate({ "emi_list._id": id }, { $set: { ...updateData } }, { returnOriginal: false });
+        if (!data) throw new ErrorResponse(`emi_list id not found`, 400);
+
+        return res.status(201).json({ success: true, data,updateData });
+    } catch (error) {
+        throw new ErrorResponse(`Server error :${error}`, 400);
+    }
+});
+
+//remove emi in emi_list
+exports.RemoveEMI = asyncHandler(async (req, res) => {
+    try {
+        const { id } = req.params;
+        if (!id) throw new ErrorResponse(`Please provide a emi_list id `, 400);
+
+        const data = await Emi.findOneAndUpdate({ "emi_list._id": id }, { $pull: { "emi_list": { "_id": id } } }, { new: true });
+        if (!data) throw new ErrorResponse(`emi_list id not found`, 400);
+
+        return res.status(201).json({ success: true, data });
+    } catch (error) {
+        throw new ErrorResponse(`Server error :${error}`, 400);
+    }
+});
 
 
 
