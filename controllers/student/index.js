@@ -28,7 +28,7 @@ exports.GetAllStudent = asyncHandler(async (req, res) => {
 exports.CreateStudent = asyncHandler(async (req, res) => {
     try {
         const { name, gender, mobile, email, date, assign_to, comment, alternate_number, status, source, courses, center, medium, city } = req.body;
-        let { gross_amount, committed_amount, bifuraction } = req.body;
+        let { gross_amount, committed_amount, bifuraction, fees } = req.body;
 
         let validation = await validationCheck({ name, email, date, assign_to, status, source, center });
         if (!validation.status) {
@@ -38,10 +38,17 @@ exports.CreateStudent = asyncHandler(async (req, res) => {
         let checkEmail = await findUniqueData(Student, { email });
         if (checkEmail) throw new ErrorResponse(`email already exist`, 400);
 
+        if (fees) {
+            let { date, category, committed, remaining, tax, payment_mode, remark, recepit, emi } = fees;
+            validation = await validationCheck({ date, category, committed, remaining, payment_mode, recepit });
+            if (!validation.status) throw new ErrorResponse(`Please provide a ${validation?.errorAt} in fees`, 400);
+        };
+
         //main and final body
         let schemaData = {
             name, gender, mobile, email, date, assign_to, comment, alternate_number, status, source, courses, center, medium, city, payment_related: {
-                gross_amount, committed_amount, bifuraction
+                gross_amount, committed_amount, bifuraction,
+                fees
             }
         };
 
@@ -93,22 +100,42 @@ exports.MoveEnquiryToStudent = asyncHandler(async (req, res) => {
         const { id } = req.params;
         if (!id) throw new ErrorResponse(`Please provide a Enquiry id `, 400);
 
+        const { fees } = req.body;
+
         let oldEnquiry = await findUniqueData(LeadAndEnquiry, { _id: id });
         if (!oldEnquiry) throw new ErrorResponse(`Enquiry not found`, 400);
         if (oldEnquiry.currentStatus != "enquiry") throw new ErrorResponse(`You cannot register student with this enquiry.`, 400);
 
-        let newData = { ...oldEnquiry._doc, ...oldEnquiry._doc.enquiry_data};
+        let newData = { ...oldEnquiry._doc, ...oldEnquiry._doc.enquiry_data };
         newData["payment_related"] = {
             ...oldEnquiry._doc.enquiry_data
         };
+
+        if (fees) {
+            let { date, category, committed, remaining, tax, payment_mode, remark, recepit, emi } = fees;
+            validation = await validationCheck({ date, category, committed, remaining, payment_mode, recepit });
+            if (!validation.status) throw new ErrorResponse(`Please provide a ${validation?.errorAt} in fees`, 400);
+
+            newData["payment_related"] = {
+                ...newData["payment_related"],
+                fees: {
+                    ...newData["payment_related"].fees,
+                    date, category, committed, remaining, tax, payment_mode, remark, recepit
+                }
+            };
+            if(emi){
+                newData["payment_related"].fees["emi"] = emi;
+            }
+        };
+
 
         let checkEmail = await findUniqueData(Student, { email: newData.email });
         if (checkEmail) throw new ErrorResponse(`email already exist`, 400);
 
         const data = await Student.create(newData);
-        
+
         oldEnquiry.currentStatus = "student";
-        await  oldEnquiry.save();
+        await oldEnquiry.save();
 
         return res.status(201).json({ success: true, data });
     } catch (error) {

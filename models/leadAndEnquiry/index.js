@@ -106,7 +106,13 @@ const leadAndEnquiry = new mongoose.Schema({
                     type: Number,
                 }
             }
-        ]
+        ],
+        fees: {
+            emi: {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: 'emi'
+            }
+        }
     }
 },
     { timestamps: true }
