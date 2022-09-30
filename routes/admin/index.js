@@ -25,6 +25,9 @@ const librarybook = require("./librarybook");
 const QuestionRouter = require("./qp");
 const NotesRouter = require("./notes");
 
+const MentorshipRouter = require("./mentorship");
+const SeminarRouter = require("./seminar");
+
 router.use('/center', center);
 
 router.use('/batch', batch);
@@ -46,5 +49,8 @@ router.use('/library', librarybook);
 
 router.use('/question', QuestionRouter);
 router.use('/notes', NotesRouter);
+
+router.use('/mentorship', MentorshipRouter);
+router.use('/seminar', SeminarRouter);
 
 module.exports = router;
