@@ -31,6 +31,7 @@ const emiScheme = new mongoose.Schema(
                 },
                 date: {
                     type: Date,
+                    default: new Date(),
                     required: [true, "Please provide a emi_list date"],
                 },
                 paid: {

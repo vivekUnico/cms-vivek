@@ -5,6 +5,8 @@ const { validationCheck, findUniqueData } = require('../../middleware/validation
 
 //models
 const Student = require("../../models/student");
+const StudentScreening = require("../../models/student/studentScreening");
+
 const LeadAndEnquiry = require("../../models/leadAndEnquiry");
 
 //Get All Student
@@ -53,6 +55,7 @@ exports.CreateStudent = asyncHandler(async (req, res) => {
         };
 
         const data = await Student.create(schemaData);
+        await StudentScreening.create({ student: data._id, courses });
         return res.status(201).json({ success: true, data });
     } catch (error) {
         throw new ErrorResponse(`Server error :${error}`, 400);
@@ -123,7 +126,7 @@ exports.MoveEnquiryToStudent = asyncHandler(async (req, res) => {
                     date, category, committed, remaining, tax, payment_mode, remark, recepit
                 }
             };
-            if(emi){
+            if (emi) {
                 newData["payment_related"].fees["emi"] = emi;
             }
         };
@@ -138,6 +141,57 @@ exports.MoveEnquiryToStudent = asyncHandler(async (req, res) => {
         await oldEnquiry.save();
 
         return res.status(201).json({ success: true, data });
+    } catch (error) {
+        throw new ErrorResponse(`Server error :${error}`, 400);
+    }
+});
+
+//student fees status
+exports.StudentFees = asyncHandler(async (req, res) => {
+    try {
+        let { populate } = req.query;
+
+        let data = await Student.find({ "payment_related.fees.emi": { $exists: true } }).populate(populate?.split(",").map((item) => ({ path: item })));;
+        return res.status(200).json({ success: true, data });
+    } catch (error) {
+        throw new ErrorResponse(`Server error :${error}`, 400);
+    }
+});
+
+//student fees analytics
+exports.StudentFeesAnalytics = asyncHandler(async (req, res) => {
+    try {
+
+        let data = await Student.find({ "payment_related.fees.emi": { $exists: true } }).populate("payment_related.fees.emi");
+
+        let totalFees = 0;
+        let pendingFees = 0;
+        let RangeDateFees = 0;
+
+        var today = new Date();
+        var priorDate = new Date(new Date().setDate(today.getDate() - 30));
+
+        for (let i = 0; i < data.length; i++) {
+            const item = data[i];
+
+            item.payment_related?.fees?.emi?.emi_list?.map((emi) => {
+                totalFees += emi.amount;
+                if (!emi.paid) {
+                    pendingFees += emi.amount;
+                }
+                if(new Date(emi.date) <= today && new Date(emi.date) >= priorDate){
+                    RangeDateFees += emi.amount;
+                }
+            });
+        }
+
+        return res.status(200).json({
+            success: true, data: {
+                totalFees,
+                pendingFees,
+                RangeDateFees
+            }
+        });
     } catch (error) {
         throw new ErrorResponse(`Server error :${error}`, 400);
     }

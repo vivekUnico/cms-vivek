@@ -11,6 +11,7 @@ const course = require("./course");
 const timetable = require("./timetable/timetable");
 const staff = require("./staff/staff");
 const student = require("./student");
+const studentScreening = require("./student/studentScreening");
 
 const emi = require("./emi");
 
@@ -40,6 +41,8 @@ router.use('/followup', followup);
 
 router.use('/staff', staff);
 router.use('/student', student);
+router.use('/student-screening', studentScreening);
+
 
 router.use('/emi', emi);
 
