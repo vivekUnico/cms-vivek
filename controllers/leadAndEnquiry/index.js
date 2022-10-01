@@ -70,7 +70,7 @@ exports.CreateLeadAndEnquiry = asyncHandler(async (req, res) => {
             validation = await validationCheck({ ...enquirySchema, ...enquirySchema.enquiry_data });
             if (!validation.status) {
                 throw new ErrorResponse(`Please provide a ${validation?.errorAt}`, 400);
-            } else if (!bifuraction || bifuraction.length == 0) throw new ErrorResponse(`Please provide a bifuraction`, 400);
+            };
 
             schemaData = { ...schemaData, ...enquirySchema };
         }
