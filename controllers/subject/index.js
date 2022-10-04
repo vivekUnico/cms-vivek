@@ -32,7 +32,7 @@ exports.GetAllSubject = asyncHandler(async (req, res) => {
             };
         }
 
-        const data = await Subject.find({ ...filter }).populate(populate?.split(",").map((item) => ({ path: item })) + "course");
+        const data = await Subject.find({ ...filter }).populate(populate?.split(",").map((item) => ({ path: item })));
         return res.status(200).json({ success: true, data });
     } catch (error) {
         throw new ErrorResponse(`Server error :${error}`, 400);
