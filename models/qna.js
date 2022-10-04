@@ -26,6 +26,11 @@ const questionAnswerScheme = new mongoose.Schema(
         mcq: [{
             type: String
         }],
+        marks:{
+            type: Number, // Text , MCQ
+            require: [false, "Please provide marks"],
+            trim: true,
+        },
         questionimage: {
             height: Number,
             width: Number,

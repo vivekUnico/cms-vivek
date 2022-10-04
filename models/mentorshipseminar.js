@@ -14,6 +14,7 @@ const mentorSeminarScheme = new mongoose.Schema(
         },
         meet_type: {
             type: String,
+            // enum: ["1-1", "mentorship",],
             require: [true, "Please provide meet_type"],
             trim: true,
         },
