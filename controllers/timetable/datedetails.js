@@ -5,6 +5,7 @@ const { validationCheck, findUniqueData } = require('../../middleware/validation
 
 //models
 const DateDetails = require("../../models/timetable/datedetails");
+const moment = require('moment');
 
 //Get All DateDetails
 exports.GetAllDateDetails = asyncHandler(async (req, res) => {
@@ -37,28 +38,47 @@ exports.GetSingleDateDetails = asyncHandler(async (req, res) => {
 });
 
 //Create Single DateDetails
-exports.CreateDateDetails = asyncHandler(async (req, res) => {
+exports.CreateDateDetails = asyncHandler(async (req, res, next) => {
     try {
-        const { dates } = req.body;
+        const { dates, create } = req.body;
         if (!dates || dates.length == 0) throw new ErrorResponse(`Please provide dates`, 400);
 
-        await dates.map(async (item, index) => {
+        if (create) {
+            const data = await DateDetails.create([...dates]);
+            return res.status(201).json({ success: true, data });
+        }
+
+        for (let index = 0; index < dates.length; index++) {
+            const item = dates[index];
             const { timetable, date, date_type, lecture_type, time_details } = item;
 
-            let validation = await validationCheck({ timetable, date, date_type, lecture_type, time_details });
-            if (!validation.status) return res.status(400).json({ success: false, message: `Please provide a ${validation?.errorAt} at ${index}` });
-            if (!time_details || time_details.length == 0) return res.status(400).json({ success: false, message: `Please provide time_details at ${index}` });
+            let validation = await validationCheck({ timetable, date, date_type, lecture_type });
+            if (!validation.status) throw new ErrorResponse(`Please provide a ${validation?.errorAt} at ${index}`);
 
-            let matchDate = await DateDetails.findOne({
-                timetable, date: {
-                    $eq: date
+            // let matchDate = await DateDetails.findOne({
+            //     timetable, date: {
+            //         $eq: date
+            //     }
+            // });
+            // if (matchDate) throw new ErrorResponse(`${date} already exists`);
+
+
+            if (date_type == "lecture") {
+                if (!time_details || time_details.length == 0) throw new ErrorResponse(`Please provide time_details at ${index}`);
+
+                for (let i = 0; i < time_details.length; i++) {
+                    const time_item = time_details[i];
+                    const { start_time, end_time, subject, topics, teacher } = time_item;
+
+                    validation = await validationCheck({ start_time, end_time, subject, topics, teacher });
+                    if (!validation.status) throw new ErrorResponse(`Please provide a ${validation?.errorAt} in time_details at ${i} date ${moment(date).format("DD MMM YYYY")}`);
                 }
-            });
-            if (matchDate) return res.status(400).json({ success: false, message: `${date} already exists` });
-        });
-
-        const data = await DateDetails.create([...dates]);
-        return res.status(201).json({ success: true, data });
+            } else {
+                delete item["time_details"];
+            }
+            dates[index] = item;
+        }
+        return res.status(201).json({ success: true, data: true });
     } catch (error) {
         throw new ErrorResponse(`Server error :${error}`, 400);
     }
@@ -191,7 +211,7 @@ exports.AddActuals = asyncHandler(async (req, res) => {
             if (!validation.status) throw new ErrorResponse(`Please provide a ${validation?.errorAt} in actuals_details at ${i}`, 400);
         }
 
-        const data = await DateDetails.findOneAndUpdate({ _id: dateid }, {  actuals_details } , { returnOriginal: false });
+        const data = await DateDetails.findOneAndUpdate({ _id: dateid }, { actuals_details }, { returnOriginal: false });
         if (!data) throw new ErrorResponse(`date id not found`, 400);
 
         return res.status(201).json({ success: true, data });
