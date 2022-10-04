@@ -27,7 +27,7 @@ exports.createLibraryBook = asyncHandler(async (req, res) => {
 exports.getLibraryBook = asyncHandler(async (req, res) => {
     const { page, limit, populate } = req.query;
     try {
-        const libData = await LibraryBook.find({}).select(populate?.split(",")).limit(Number(limit)).skip(Number(page) * Number(limit)).sort({ createdAt: -1 });;
+        const libData = await LibraryBook.find({}).select(populate?.split(",")).limit(Number(limit)).skip(Number(page) * Number(limit)).sort({ createdAt: -1 }).populate('courses addedby');
         return res.status(201).json({ success: true, data: libData });
     } catch (error) {
         throw new ErrorResponse(`Server error :${error}`, 400);
