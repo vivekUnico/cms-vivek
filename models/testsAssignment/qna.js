@@ -32,7 +32,7 @@ const questionAnswerScheme = new mongoose.Schema(
             require: [false, "Please provide marks"],
             trim: true,
         },
-        default: {
+        defaultans: {
             type: Boolean,
             require: [false, "Please provide default"],
             trim: true,

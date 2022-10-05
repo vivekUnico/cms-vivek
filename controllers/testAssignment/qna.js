@@ -6,15 +6,15 @@ const { validationCheck } = require('../../middleware/validationCheck');
 const QuestionAnswer = require('../../models/testsAssignment/qna');
 
 exports.createQuestionAnswer = asyncHandler(async (req, res) => {
-    const { qpid, question, ans, type, mcq, questionimage, answerimage } = req.body;
+    const { qpid, question, ans, type, mcq, questionimage, defaultans, answerimage, marks } = req.body;
     //type : normal | mcq
     const qp = {
-        qpid, question, ans, type, mcq, answerimage
+        qpid, question, ans, type, mcq, answerimage, defaultans, marks
     };
-    if(questionimage){
+    if (questionimage) {
         qp["questionimage"] = questionimage;
     }
-    if(answerimage){
+    if (answerimage) {
         qp["answerimage"] = answerimage;
     }
 
@@ -31,7 +31,7 @@ exports.createQuestionAnswer = asyncHandler(async (req, res) => {
     }
 
     try {
-        const QuestionAnswerData = await QuestionAnswer.create(qp);
+        const QuestionAnswerData = await QuestionAnswer.create({ ...qp });
         return res.status(201).json({ success: true, data: QuestionAnswerData });
     } catch (error) {
         throw new ErrorResponse(`Server error :${error}`, 400);
@@ -41,12 +41,13 @@ exports.createQuestionAnswer = asyncHandler(async (req, res) => {
 
 exports.getAllQA = asyncHandler(async (req, res) => {
     const { qp_id } = req.params;
+    const { page, limit, populate, select } = req.query;
     // console.log('api ok')
     if (!qp_id) {
         throw new ErrorResponse(`Please provide qp_id`, 400);
     }
     try {
-        const QuestionAnswerData = await QuestionAnswer.find({ qpid: qp_id });
+        const QuestionAnswerData = await QuestionAnswer.find({ qpid: qp_id }).select(select?.split(",")).limit(Number(limit)).skip(Number(page) * Number(limit)).sort({ createdAt: -1 }).populate(populate?.split(","));
         return res.status(201).json({ success: true, data: QuestionAnswerData });
     } catch (error) {
         throw new ErrorResponse(`Server error :${error}`, 400);
@@ -55,11 +56,13 @@ exports.getAllQA = asyncHandler(async (req, res) => {
 
 exports.getSingleQA = asyncHandler(async (req, res) => {
     const { id } = req.params;
+    const { populate, select } = req.query;
+
     if (!id) {
         throw new ErrorResponse(`Please provide id`, 400);
     }
     try {
-        const QuestionAnswerData = await QuestionAnswer.findOne({ _id: id });
+        const QuestionAnswerData = await QuestionAnswer.findOne({ _id: id }).select(select?.split(",")).populate(populate?.split(","));
         return res.status(201).json({ success: true, data: QuestionAnswerData });
     } catch (error) {
         throw new ErrorResponse(`Server error :${error}`, 400);
@@ -68,17 +71,16 @@ exports.getSingleQA = asyncHandler(async (req, res) => {
 
 exports.updateQA = asyncHandler(async (req, res) => {
     const { id } = req.params;
-    const { question, ans, type, mcq, questionimage, answerimage } = req.body;
+    const { question, ans, type, mcq, questionimage, answerimage,marks } = req.body;
     const qp = {
-        question, ans, type, mcq
+        question, ans, type, mcq, questionimage, answerimage ,marks
     };
-    if(questionimage){
+    if (questionimage) {
         qp["questionimage"] = questionimage;
     }
-    if(answerimage){
+    if (answerimage) {
         qp["answerimage"] = answerimage;
     }
-
 
     const validation = validationCheck({
         question, type,
@@ -95,7 +97,8 @@ exports.updateQA = asyncHandler(async (req, res) => {
     } catch (error) {
         throw new ErrorResponse(`Server error :${error}`, 400);
     }
-})
+});
+
 exports.deleteQA = asyncHandler(async (req, res) => {
     const { id } = req.params;
     if (!id) {
