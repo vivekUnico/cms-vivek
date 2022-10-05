@@ -68,7 +68,7 @@ exports.getLibraryBookRequested = asyncHandler(async (req, res) => {
     const { page, limit, populate, select } = req.query;
     try {
         const libData = await Book.find({ type: "request" }).select(select?.split(",")).limit(Number(limit)).skip(Number(page) * Number(limit)).sort({ createdAt: -1 }).populate(populate?.split(","));
-        return res.status(201).json({ success: true, data: libData });
+        return res.status(200).json({ success: true, data: libData });
     } catch (error) {
         throw new ErrorResponse(`Server error :${error}`, 400);
     }

@@ -3,7 +3,7 @@ const ErrorResponse = require('../../utils/ErrorResponse');
 const { validationCheck } = require('../../middleware/validationCheck');
 
 //models
-const QuestionAnswer = require('../../models/qna');
+const QuestionAnswer = require('../../models/testsAssignment/qna');
 
 exports.createQuestionAnswer = asyncHandler(async (req, res) => {
     const { qpid, question, ans, type, mcq, questionimage, answerimage } = req.body;

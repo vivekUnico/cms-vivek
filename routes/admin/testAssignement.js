@@ -2,8 +2,8 @@ const express = require("express");
 const router = express.Router();
 
 // User pre login controller s
-const { createQuestionPaper, deleteQP, getAllQP, getSingleQP, updateQP } = require('../../controllers/questions/qp');
-const { createQuestionAnswer, deleteQA, getAllQA, getSingleQA, updateQA } = require('../../controllers/questions/qna');
+const { createQuestionPaper, deleteQP, getAllQP, getSingleQP, updateQP } = require('../../controllers/testAssignment/qp');
+const { createQuestionAnswer, deleteQA, getAllQA, getSingleQA, updateQA } = require('../../controllers/testAssignment/qna');
 
 router.route('/paper').post(createQuestionPaper);
 router.route('/paper').get(getAllQP);

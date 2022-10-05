@@ -3,22 +3,22 @@ const ErrorResponse = require('../../utils/ErrorResponse');
 const { validationCheck } = require('../../middleware/validationCheck');
 
 //models
-const QuestionPaper = require('../../models/qp');
+const QuestionPaper = require('../../models/testsAssignment/qp');
 
 exports.createQuestionPaper = asyncHandler(async (req, res) => {
-    const { name, subject, bannerInstructionFirst, bannerInstructionSecond, tbc, serialno, timeallowed, marks, testbookletseries } = req.body;
+    const { name, subject, center, course, batch, testDate, testType, totalMarks, bannerInstructionFirst, bannerInstructionSecond, tbc, serialno, timeallowed, testbookletseries } = req.body;
     const qp = {
-        name, subject, bannerInstructionFirst, bannerInstructionSecond, tbc, serialno, timeallowed, marks, testbookletseries
+        name, subject, center, course, batch, testDate, testType, totalMarks,
     };
     const validation = validationCheck({
-        name, subject, marks,
+        name, subject, center, course, batch, testDate, testType, totalMarks,
     });
     if (!validation.status) {
         throw new ErrorResponse(`Please provide a ${validation?.errorAt}`, 400);
     }
 
     try {
-        const QuestionPaperData = await QuestionPaper.create(qp);
+        const QuestionPaperData = await QuestionPaper.create({ ...qp, bannerInstructionFirst, bannerInstructionSecond, tbc, serialno, timeallowed, testbookletseries });
         return res.status(201).json({ success: true, data: QuestionPaperData });
     } catch (error) {
         throw new ErrorResponse(`Server error :${error}`, 400);
@@ -26,8 +26,10 @@ exports.createQuestionPaper = asyncHandler(async (req, res) => {
 })
 
 exports.getAllQP = asyncHandler(async (req, res) => {
+    const { page, limit, populate, select } = req.query;
+
     try {
-        const QuestionPaperData = await QuestionPaper.find();
+        const QuestionPaperData = await QuestionPaper.find().select(select?.split(",")).limit(Number(limit)).skip(Number(page) * Number(limit)).sort({ createdAt: -1 }).populate(populate?.split(","));;
         return res.status(201).json({ success: true, data: QuestionPaperData });
     } catch (error) {
         throw new ErrorResponse(`Server error :${error}`, 400);
@@ -36,11 +38,13 @@ exports.getAllQP = asyncHandler(async (req, res) => {
 
 exports.getSingleQP = asyncHandler(async (req, res) => {
     const { id } = req.params;
+    const { populate, select } = req.query;
+
     if (!id) {
         throw new ErrorResponse(`Please provide id`, 400);
     }
     try {
-        const QuestionPaperData = await QuestionPaper.findOne({ _id: id });
+        const QuestionPaperData = await QuestionPaper.findOne({ _id: id }).select(select?.split(",")).populate(populate?.split(","));;;
         return res.status(201).json({ success: true, data: QuestionPaperData });
     } catch (error) {
         throw new ErrorResponse(`Server error :${error}`, 400);
@@ -49,16 +53,16 @@ exports.getSingleQP = asyncHandler(async (req, res) => {
 
 exports.updateQP = asyncHandler(async (req, res) => {
     const { id } = req.params;
-    const { name, subject, bannerInstructionFirst, bannerInstructionSecond, tbc, serialno, timeallowed, marks, testbookletseries, bannerLabel } = req.body;
+    const { name, subject, center, course, batch, testDate, testType, totalMarks, bannerInstructionFirst, bannerInstructionSecond, tbc, serialno, timeallowed, testbookletseries } = req.body;
     const qp = {
-        name, subject, bannerInstructionFirst, bannerInstructionSecond, tbc, serialno, timeallowed, marks, testbookletseries, bannerLabel
+        name, subject, center, course, batch, testDate, testType, totalMarks, bannerInstructionFirst, bannerInstructionSecond, tbc, serialno, timeallowed, testbookletseries
     };
-    const validation = validationCheck({
-        name, subject, bannerInstructionFirst, bannerInstructionSecond, tbc, serialno, timeallowed, marks, bannerLabel
-    });
-    if (!validation.status) {
-        throw new ErrorResponse(`Please provide a ${validation?.errorAt}`, 400);
-    }
+    // const validation = validationCheck({
+    //     name, subject, bannerInstructionFirst, bannerInstructionSecond, tbc, serialno, timeallowed, marks, bannerLabel
+    // });
+    // if (!validation.status) {
+    //     throw new ErrorResponse(`Please provide a ${validation?.errorAt}`, 400);
+    // }
     if (!id) {
         throw new ErrorResponse(`Please provide id`, 400);
     }
@@ -78,7 +82,7 @@ exports.deleteQP = asyncHandler(async (req, res) => {
     try {
         const QuestionPaperData = await QuestionPaper.deleteOne({ _id: id });
         // Delete associated questions and answer
-        return res.status(201).json({ success: true, data: "Question Paper Delete Successfully" });
+        return res.status(201).json({ success: true, data: "Test Paper Deleted Successfully" });
     } catch (error) {
         throw new ErrorResponse(`Server error :${error}`, 400);
     }

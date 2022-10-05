@@ -23,7 +23,7 @@ const studymaterial = require("./studymaterial");
 
 const librarybook = require("./librarybook");
 
-const QuestionRouter = require("./qp");
+const QuestionRouter = require("./testAssignement");
 const NotesRouter = require("./notes");
 
 const MentorshipRouter = require("./mentorship");
@@ -50,7 +50,7 @@ router.use('/studymaterial', studymaterial);
 
 router.use('/library', librarybook);
 
-router.use('/question', QuestionRouter);
+router.use('/test', QuestionRouter);
 router.use('/notes', NotesRouter);
 
 router.use('/mentorship', MentorshipRouter);

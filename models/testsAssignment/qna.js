@@ -20,15 +20,21 @@ const questionAnswerScheme = new mongoose.Schema(
         },
         type: {
             type: String, // Text , MCQ
+            enum: ["text", "mcq"],
             require: [true, "Please provide question type"],
             trim: true,
         },
         mcq: [{
             type: String
         }],
-        marks:{
-            type: Number, // Text , MCQ
+        marks: {
+            type: Number,
             require: [false, "Please provide marks"],
+            trim: true,
+        },
+        default: {
+            type: Boolean,
+            require: [false, "Please provide default"],
             trim: true,
         },
         questionimage: {
@@ -49,6 +55,7 @@ const questionAnswerScheme = new mongoose.Schema(
                 trim: true,
             }
         },
+
     },
     { timestamps: true }
 );
