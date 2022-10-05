@@ -4,7 +4,7 @@ const ErrorResponse = require('../../utils/ErrorResponse');
 const { validationCheck, findUniqueData } = require('../../middleware/validationCheck');
 
 //models
-const LibraryBook = require("../../models/librarybook");
+const LibraryBook = require("../../models/librarybook/librarybook");
 
 exports.createLibraryBook = asyncHandler(async (req, res) => {
     const { name, bookid, courses, totalBooks, addedby } = req.body;

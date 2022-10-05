@@ -40,7 +40,6 @@ const LibraryScheme = new mongoose.Schema(
             trim: false,
             required: [false, "Please provide totalReturned"],
             default: 0
-
         },
         addedby: {
             type: mongoose.Schema.Types.ObjectId,

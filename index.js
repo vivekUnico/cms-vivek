@@ -17,6 +17,7 @@ if (process.env.NODE_ENV !== "production") {
 // --------------------------------- import routers files ---------------------------------
 
 const adminRouter = require('./routes/admin');
+const studentRouter = require('./routes/student');
 // const customerRouter = require('./routes/user/user');
 // --------------------------------- initialize app ---------------------------------
 const app = express();
@@ -32,6 +33,8 @@ app.use(cors());
 
 //  --------------------------------- main route setup ---------------------------------
 app.use("/api/v1/admin/", adminRouter);
+app.use("/api/v1/student/", studentRouter);
+
 // app.use("/api/v1/customer/", customerRouter);
 // --------------------------------- error handler ---------------------------------
 app.use(errorHandler);
