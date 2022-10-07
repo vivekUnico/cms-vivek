@@ -8,29 +8,25 @@ const followupScheme = new mongoose.Schema(
             enum: ["lead","enquiry"],
             required: [true, "Please provide followup_type"],
         },
-        // connection_id: {
-        //     type: String,
-        //     trim: true,
-        //     required: [true, "Please provide connection_id"],
-        // },
+        created_by:  {
+            required: [true, "Please provide created_by"],
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'staff'
+        },
         connection_id: {
             type: mongoose.Schema.Types.ObjectId,
             ref: "lead-and-enquiry"
         },
-        followup_by:  {
-            required: [true, "Please provide followup_by"],
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'staff'
-        },
-        completed: {
-            type: Boolean,
-            required: [true, "Please provide completed"],
-        },
         followup_list: [
             {
-                next_date: {
+                date: {
                     type: Date,
-                    required: [true,"Please provide followup next_date"]
+                    required: [true,"Please provide followup date"]
+                },
+                followup_by:  {
+                    required: [true, "Please provide followup_by"],
+                    type: mongoose.Schema.Types.ObjectId,
+                    ref: 'staff'
                 },
                 status: {
                     type: String,
@@ -38,10 +34,14 @@ const followupScheme = new mongoose.Schema(
                     enum: ["HOT TA", "Enquiry Done", "Warn", "Cold", "Rejected"],
                     required: [true,"Please provide followup status"]
                 },
-                conversation: {
-                    type: String,
-                    required: [true,"Please provide followup conversation"]
-                }
+                comment: {
+                    type: String
+                },
+                completed_comment: String, 
+                completed: {
+                    type: Boolean,
+                    default: false
+                },
             }
         ]
     },

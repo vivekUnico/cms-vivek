@@ -41,7 +41,16 @@ exports.GetAllSubject = asyncHandler(async (req, res) => {
 
 //Get Single Subject
 exports.GetSingleSubject = asyncHandler(async (req, res) => {
-    let { populate } = req.query;
+    let { populate,academic_year,master_id } = req.query;
+    let filter = {};
+
+    if(academic_year && master_id){
+        filter = {
+            ...filter,
+            academic_year,
+            master_id
+        };
+    }
 
     try {
         const { id } = req.params;
