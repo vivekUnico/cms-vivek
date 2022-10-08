@@ -40,12 +40,20 @@ exports.CreateTimetable = asyncHandler(async (req, res) => {
 //Get All Timetable
 exports.GetAllTimetable = asyncHandler(async (req, res) => {
     try {
-        let { populate } = req.query;
-        const data = await Timetable.find({});
+        let { populate,datepopulate, center,batch } = req.query;
+        let filter = {};
+        if(center){
+            filter = {...filter, center};
+        };
+        if(batch){
+            filter = {...filter, batch};
+        }
+
+        const data = await Timetable.find(filter).populate(populate?.split(",").map((item) => ({ path: item })));
 
         for (let index = 0; index < data.length; index++) {
             let item = data[index]._doc;
-            item["date_details"] = await DateDetails.find({ timetable: item._id }).populate(populate?.split(",").map((item) => ({ path: item })));;
+            item["date_details"] = await DateDetails.find({ timetable: item._id }).populate(datepopulate?.split(",").map((item) => ({ path: item })));
         }
 
         return res.status(200).json({ success: true, data });

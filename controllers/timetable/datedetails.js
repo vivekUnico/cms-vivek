@@ -181,9 +181,7 @@ exports.DeleteLecture = asyncHandler(async (req, res) => {
         const { id } = req.params;
         if (!id) throw new ErrorResponse(`Please provide a lecture _id `, 400);
 
-        const { start_time, end_time, subject, topics, teacher } = req.body;
-
-        const data = await DateDetails.findOneAndUpdate({ "time_details._id": id }, { $pull: { time_details: { _id: id } }, $pull: { actuals_details: { timedetailId: id } } }, { returnOriginal: false });
+        const data = await DateDetails.findOneAndUpdate({ "time_details._id": id }, { $pull: { time_details: { _id: id }, actuals_details: { timedetailId: id } } }, { returnOriginal: false });
         if (!data) throw new ErrorResponse(`lecture id not found`, 400);
 
         return res.status(201).json({ success: true, data });
