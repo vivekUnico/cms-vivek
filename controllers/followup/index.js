@@ -10,10 +10,13 @@ const LeadAndEnquiry = require("../../models/leadAndEnquiry");
 //Get All Followup
 exports.GetAllFollowup = asyncHandler(async (req, res) => {
     try {
-        let { populate, created_by } = req.query;
+        let { populate, created_by, followup_type } = req.query;
         let filter = {};
         if (created_by) {
             filter["created_by"] = String(created_by);
+        }
+        if(followup_type){
+            filter["followup_type"] = String(followup_type);
         }
 
         let data = await Followup.find({ ...filter }).populate(populate?.split(",").map((item) => ({ path: item })));
