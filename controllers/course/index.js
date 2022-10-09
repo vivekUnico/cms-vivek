@@ -136,7 +136,10 @@ exports.AddCoursesInAY = asyncHandler(async (req, res) => {
         let SubjectThisAy = [];
         let CourseThisAy = [];
         const getData = courses.map(async itm => {
+            let thisCourseSubject = [];
+            
             const CourseMasterData = await Course.findOne({ _id: itm });
+
             CourseMasterData?.subjects?.map(async item => {
                 const SubjectMasterData = await Subject.findOne({ _id: item });
                 const NewAySubject = await Subject.create({
@@ -147,6 +150,7 @@ exports.AddCoursesInAY = asyncHandler(async (req, res) => {
                     academic_year,
                 })
                 SubjectThisAy.push({ ay_subject_id: NewAySubject._id, master_course_id: itm });
+                thisCourseSubject.push(NewAySubject._id);
             })
 
             const NewAyCourse = Course.create({
@@ -155,7 +159,7 @@ exports.AddCoursesInAY = asyncHandler(async (req, res) => {
                 name: CourseMasterData.name,
                 price: CourseMasterData.name,
                 centers: CourseMasterData.name,
-                subjects: SubjectThisAy,
+                subjects: thisCourseSubject,
                 description: CourseMasterData.name,
                 course_id: CourseMasterData.name,
             })
