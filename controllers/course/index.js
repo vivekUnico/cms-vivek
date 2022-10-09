@@ -12,7 +12,7 @@ const { findByIdAndUpdate } = require('../../models/course');
 
 //Get All Course
 exports.GetAllCourse = asyncHandler(async (req, res) => {
-    let { populate, centers, name, dateFrom, dateTo } = req.query;
+    let { populate, centers, name, dateFrom, dateTo, academic_year } = req.query;
 
     try {
         let filter = {};
@@ -21,7 +21,11 @@ exports.GetAllCourse = asyncHandler(async (req, res) => {
             filter["centers"] = centersFilter.length > 1 ? centersFilter : centers;
         } if (name) {
             filter['name'] = { '$regex': name, '$options': 'i' };
-        } if (dateFrom && dateTo) {
+        }
+        if (academic_year) {
+            filter['academic_year'] = { '$regex': academic_year, '$options': 'i' };
+        }
+        if (dateFrom && dateTo) {
             dateFrom = new Date(dateFrom)
             dateFrom = dateFrom.toISOString()
 
@@ -36,7 +40,7 @@ exports.GetAllCourse = asyncHandler(async (req, res) => {
         }
 
 
-        const data = await Course.find({ ...filter, academic_year: 'master' }).populate(populate?.split(",").map((item) => ({ path: item })));
+        const data = await Course.find({ ...filter }).populate(populate?.split(",").map((item) => ({ path: item })));
 
         for (let index = 0; index < data.length; index++) {
             let item = data[index]._doc;
@@ -127,58 +131,71 @@ exports.UpdateCourse = asyncHandler(async (req, res) => {
 //Add courses in academic year
 exports.AddCoursesInAY = asyncHandler(async (req, res) => {
     try {
-        const [courses, academic_year] = req.body;
+        const { courses, academic_year } = req.body;
         let validation = validationCheck({ courses, academic_year });
         if (!validation.status) {
             throw new ErrorResponse(`Please provide a ${validation?.errorAt}`, 400);
         }
-
         let SubjectThisAy = [];
         let CourseThisAy = [];
-        const getData = courses.map(async itm => {
+
+        for (let i = 0; i < courses.length; i++) {
             let thisCourseSubject = [];
-            
-            const CourseMasterData = await Course.findOne({ _id: itm });
 
-            CourseMasterData?.subjects?.map(async item => {
+            const CourseMasterData = await Course.findOne({ _id: courses[i] });
+
+            for (let j = 0; j < CourseMasterData?.subjects?.length; j++) {
+                let item = CourseMasterData?.subjects[j];
                 const SubjectMasterData = await Subject.findOne({ _id: item });
-                const NewAySubject = await Subject.create({
-                    topics: SubjectMasterData.topics,
-                    description: SubjectMasterData.description,
-                    subject_id: SubjectMasterData.subject_id,
-                    master_id: SubjectMasterData._id,
-                    academic_year,
-                })
-                SubjectThisAy.push({ ay_subject_id: NewAySubject._id, master_course_id: itm });
-                thisCourseSubject.push(NewAySubject._id);
-            })
+                // check condifgrtion to avoid repeat
+                let searchForMaster = SubjectThisAy.find(itm => itm.master_subject_id == SubjectMasterData._id);
+                console.log("Searched Masterd",SubjectThisAy,searchForMaster)
+                if (searchForMaster) {
 
-            const NewAyCourse = Course.create({
+                    SubjectThisAy.push({ ay_subject_id: searchForMaster?.ay_subject_id, master_course_id: courses[i], master_subject_id: SubjectMasterData._id });
+                    thisCourseSubject.push(searchForMaster?.ay_subject_id);
+
+                } else {
+                    const NewAySubject = await Subject.create({
+                        name: SubjectMasterData.name,
+                        topics: SubjectMasterData.topics,
+                        description: SubjectMasterData.description,
+                        subject_id: SubjectMasterData.subject_id,
+                        master_id: SubjectMasterData._id,
+                        academic_year,
+                    })
+                    SubjectThisAy.push({ ay_subject_id: NewAySubject._id, master_course_id: courses[i], master_subject_id: SubjectMasterData._id });
+                    thisCourseSubject.push(NewAySubject._id);
+                }
+            }
+
+            const NewAyCourse = await Course.create({
                 academic_year,
-                master_id: itm,
+                master_id: courses[i],
                 name: CourseMasterData.name,
-                price: CourseMasterData.name,
-                centers: CourseMasterData.name,
+                price: CourseMasterData.price,
+                centers: CourseMasterData.centers,
                 subjects: thisCourseSubject,
-                description: CourseMasterData.name,
-                course_id: CourseMasterData.name,
+                description: CourseMasterData.description,
+                course_id: CourseMasterData.course_id,
             })
-            CourseThisAy.push({ ay_course_id: NewAyCourse._id, master_course_id: itm })
-        })
-        Promise.all(getData).then(dt => {
-            SubjectThisAy.map(async itm => {
-                let newCourseArrOfSubject = [];
-                CourseThisAy.map(item => {
-                    if (itm?.master_course_id === item?.master_course_id) {
-                        newCourseArrOfSubject.push(item?.ay_course_id)
-                    }
-                })
+            CourseThisAy.push({ ay_course_id: NewAyCourse._id, master_course_id: courses[i] })
+        }
 
-                await Subject.findByIdAndUpdate(itm.ay_subject_id, { courses: newCourseArrOfSubject });
+        SubjectThisAy.map(async itm => {
+            let newCourseArrOfSubject = [];
+            CourseThisAy.map(item => {
+                if (itm?.master_course_id === item?.master_course_id) {
+                    newCourseArrOfSubject.push(item?.ay_course_id)
+                }
             })
 
-            return res.status(200).json({ success: true, data: `All selected courses added in AY-${academic_year}` });
+            await Subject.findByIdAndUpdate(itm.ay_subject_id, { courses: newCourseArrOfSubject });
         })
+        // console.log('SubjectThisAy - ', SubjectThisAy)
+        // console.log('CourseThisAy - ', CourseThisAy)
+        return res.status(200).json({ success: true, data: `All selected courses added in AY-${academic_year}` });
+
     } catch (error) {
         throw new ErrorResponse(`Server error :${error}`, 400);
     }
