@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 
-const { CreateSubject, GetAllSubject, UpdateSubject,DeleteSubject, GetSingleSubject } = require("../../controllers/subject");
+const { CreateSubject, GetAllSubject, UpdateSubject,DeleteSubject, GetSingleSubject, } = require("../../controllers/subject");
 
 router.route('/').get(GetAllSubject)
 router.route('/:id').get(GetSingleSubject)
