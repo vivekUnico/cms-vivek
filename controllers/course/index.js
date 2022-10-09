@@ -149,12 +149,10 @@ exports.AddCoursesInAY = asyncHandler(async (req, res) => {
                 const SubjectMasterData = await Subject.findOne({ _id: item });
                 // check condifgrtion to avoid repeat
                 let searchForMaster = SubjectThisAy.find(itm => itm.master_subject_id == SubjectMasterData._id);
-                console.log("Searched Masterd",SubjectThisAy,searchForMaster)
+
                 if (searchForMaster) {
-
-                    SubjectThisAy.push({ ay_subject_id: searchForMaster?.ay_subject_id, master_course_id: courses[i], master_subject_id: SubjectMasterData._id });
+                    SubjectThisAy.push({ ay_subject_id: searchForMaster?.ay_subject_id, master_course_id: courses[i], master_subject_id: String(SubjectMasterData._id) });
                     thisCourseSubject.push(searchForMaster?.ay_subject_id);
-
                 } else {
                     const NewAySubject = await Subject.create({
                         name: SubjectMasterData.name,
@@ -163,8 +161,9 @@ exports.AddCoursesInAY = asyncHandler(async (req, res) => {
                         subject_id: SubjectMasterData.subject_id,
                         master_id: SubjectMasterData._id,
                         academic_year,
+                        courses: []
                     })
-                    SubjectThisAy.push({ ay_subject_id: NewAySubject._id, master_course_id: courses[i], master_subject_id: SubjectMasterData._id });
+                    SubjectThisAy.push({ ay_subject_id: NewAySubject._id, master_course_id: courses[i], master_subject_id: String(SubjectMasterData._id) });
                     thisCourseSubject.push(NewAySubject._id);
                 }
             }
@@ -185,12 +184,12 @@ exports.AddCoursesInAY = asyncHandler(async (req, res) => {
         SubjectThisAy.map(async itm => {
             let newCourseArrOfSubject = [];
             CourseThisAy.map(item => {
-                if (itm?.master_course_id === item?.master_course_id) {
+                if (itm?.master_course_id == item?.master_course_id) {
                     newCourseArrOfSubject.push(item?.ay_course_id)
                 }
             })
-
-            await Subject.findByIdAndUpdate(itm.ay_subject_id, { courses: newCourseArrOfSubject });
+            // console.log(itm?.master_course_id, item?.master_course_id)
+            await Subject.findByIdAndUpdate(itm.ay_subject_id, { $push: { courses: newCourseArrOfSubject } });
         })
         // console.log('SubjectThisAy - ', SubjectThisAy)
         // console.log('CourseThisAy - ', CourseThisAy)
