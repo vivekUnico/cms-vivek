@@ -26,20 +26,20 @@ const datedetailsScheme = new mongoose.Schema(
             {
                 start_time: {
                     type: Date,
-                    required: [true, "Please provide start time"],
+                    // required: [true, "Please provide start time"],
                 },
                 end_time: {
                     type: Date,
-                    required: [true, "Please provide end time"],
+                    // required: [true, "Please provide end time"],
                 },
                 subject: {
-                    required: [true, "Please provide subject"],
+                    // required: [true, "Please provide subject"],
                     type: mongoose.Schema.Types.ObjectId,
                     ref: 'subject'
                 },
                 topics: [],
                 teacher: {
-                    required: [true, "Please provide teacher"],
+                    // required: [true, "Please provide teacher"],
                     type: mongoose.Schema.Types.ObjectId,
                     ref: 'staff'
                 }

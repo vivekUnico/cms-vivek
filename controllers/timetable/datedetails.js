@@ -43,11 +43,6 @@ exports.CreateDateDetails = asyncHandler(async (req, res, next) => {
         const { dates, create } = req.body;
         if (!dates || dates.length == 0) throw new ErrorResponse(`Please provide dates`, 400);
 
-        if (create) {
-            const data = await DateDetails.create([...dates]);
-            return res.status(201).json({ success: true, data });
-        }
-
         for (let index = 0; index < dates.length; index++) {
             const item = dates[index];
             const { timetable, date, date_type, lecture_type, time_details } = item;
@@ -77,6 +72,11 @@ exports.CreateDateDetails = asyncHandler(async (req, res, next) => {
                 delete item["time_details"];
             }
             dates[index] = item;
+        }
+
+        if (create) {
+            const data = await DateDetails.create([...dates]);
+            return res.status(201).json({ success: true, data });
         }
         return res.status(201).json({ success: true, data: true });
     } catch (error) {
