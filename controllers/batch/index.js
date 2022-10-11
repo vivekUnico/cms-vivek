@@ -85,7 +85,6 @@ exports.CreateBatch = asyncHandler(async (req, res) => {
         let ac = (new Date(batch_date.start_date)).getFullYear();
         for (let i = 0; i < courses.length; i++) {
             let dataCourseAy = await Course.findOne({ master_id: courses[i], academic_year: ac });
-            console.log('ay->', dataCourseAy._id, 'master->', courses[i])
             if (dataCourseAy) {
                 ayCoursesArr.push(dataCourseAy._id)
             } else {
