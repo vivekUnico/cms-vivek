@@ -10,17 +10,30 @@ const LeadAndEnquiry = require("../../models/leadAndEnquiry");
 //Get All Followup
 exports.GetAllFollowup = asyncHandler(async (req, res) => {
     try {
-        let { populate, created_by, followup_type } = req.query;
+        let { populate, created_by, followup_type, followup_by } = req.query;
         let filter = {};
-        if (created_by) {
-            filter["created_by"] = String(created_by);
-        }
-        if(followup_type){
+        if (followup_type) {
             filter["followup_type"] = String(followup_type);
         }
-
+        if (created_by) {
+            filter["$or"] = [
+                { created_by: String(created_by) }
+            ];
+        }
+        if (followup_by) {
+            if (filter["$or"]) {
+                filter["$or"] = [
+                    ...filter["$or"],
+                    { "followup_list.followup_by": String(followup_by) }
+                ];
+            } else {
+                filter["$or"] = [
+                    { "followup_list.followup_by": String(followup_by) }
+                ];
+            }
+        }
         let data = await Followup.find({ ...filter }).populate(populate?.split(",").map((item) => ({ path: item })));
-        return res.status(200).json({ success: true, data });
+        return res.status(200).json({ success: true, filter,data });
     } catch (error) {
         throw new ErrorResponse(`Server error :${error}`, 400);
     }
