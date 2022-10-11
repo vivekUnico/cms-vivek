@@ -10,12 +10,14 @@ const Course = require("../../models/course");
 
 //Get All Subject
 exports.GetAllSubject = asyncHandler(async (req, res) => {
-    let { populate, courses, name, dateFrom, dateTo } = req.query;
+    let { populate, courses, name, dateFrom, dateTo, academic_year } = req.query;
     try {
         let filter = {};
         if (courses) {
             let courseFilter = String(courses).split(",");
             filter["courses"] = courseFilter.length > 1 ? courseFilter : courses;
+        } if (academic_year) {
+            filter['academic_year'] = { '$regex': academic_year, '$options': 'i' };
         } if (name) {
             filter['name'] = { '$regex': name, '$options': 'i' };
         } if (dateFrom && dateTo) {
@@ -41,10 +43,10 @@ exports.GetAllSubject = asyncHandler(async (req, res) => {
 
 //Get Single Subject
 exports.GetSingleSubject = asyncHandler(async (req, res) => {
-    let { populate,academic_year,master_id } = req.query;
+    let { populate, academic_year, master_id } = req.query;
     let filter = {};
 
-    if(academic_year && master_id){
+    if (academic_year && master_id) {
         filter = {
             ...filter,
             academic_year,

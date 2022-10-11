@@ -6,7 +6,7 @@ const { validationCheck, findUniqueData } = require('../../middleware/validation
 //models
 const Batch = require("../../models/batch");
 const Center = require("../../models/center");
-
+const Course = require('../../models/course');
 //Get All Batch
 exports.GetAllBatch = asyncHandler(async (req, res) => {
     let { populate, center, courses, name, dateFrom, dateTo, startDate, endDate } = req.query;
@@ -49,7 +49,7 @@ exports.GetAllBatch = asyncHandler(async (req, res) => {
             };
         }
 
-        const data = await Batch.find({...filter}).populate(populate?.split(",").map((item) => ({ path: item })));
+        const data = await Batch.find({ ...filter }).populate(populate?.split(",").map((item) => ({ path: item })));
         return res.status(200).json({ success: true, data });
     } catch (error) {
         throw new ErrorResponse(`Server error :${error}`, 400);
@@ -80,8 +80,20 @@ exports.CreateBatch = asyncHandler(async (req, res) => {
             throw new ErrorResponse(`Please provide a ${validation?.errorAt}`, 400);
         } else if (courses?.length == 0) throw new ErrorResponse(`Please provide courses`, 400);
 
+        //
+        let ayCoursesArr = [];
+        let ac = (new Date(batch_date.start_date)).getFullYear();
+        for (let i = 0; i < courses.length; i++) {
+            let dataCourseAy = await Course.findOne({ master_id: courses[i], academic_year: ac });
+            console.log('ay->', dataCourseAy._id, 'master->', courses[i])
+            if (dataCourseAy) {
+                ayCoursesArr.push(dataCourseAy._id)
+            } else {
+                throw new ErrorResponse(`One of the courses selected doesn't have academic year ${ac}`, 400);
+            }
+        }
 
-        let schemaData = { name, center, courses, description, batch_id, batch_date };
+        let schemaData = { name, center, courses: ayCoursesArr, description, batch_id, batch_date };
 
         let checkBatchID = await findUniqueData(Batch, { batch_id });
         if (checkBatchID) throw new ErrorResponse(`Batch id already exist`, 400);
