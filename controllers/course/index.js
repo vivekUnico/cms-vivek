@@ -12,8 +12,9 @@ const { findByIdAndUpdate } = require('../../models/course');
 
 //Get All Course
 exports.GetAllCourse = asyncHandler(async (req, res) => {
-    let { populate, centers, name, dateFrom, dateTo, academic_year } = req.query;
-
+    let { populate, centers, name, dateFrom, dateTo, academic_year, select } = req.query;
+    let acArr = [];
+    academic_year?.split(',').map(itm => acArr.push({ academic_year: itm }));
     try {
         let filter = {};
         if (centers) {
@@ -23,7 +24,7 @@ exports.GetAllCourse = asyncHandler(async (req, res) => {
             filter['name'] = { '$regex': name, '$options': 'i' };
         }
         if (academic_year) {
-            filter['academic_year'] = { '$regex': academic_year, '$options': 'i' };
+            filter['$or'] = acArr;
         }
         if (dateFrom && dateTo) {
             dateFrom = new Date(dateFrom)
@@ -40,7 +41,7 @@ exports.GetAllCourse = asyncHandler(async (req, res) => {
         }
 
 
-        const data = await Course.find({ ...filter }).populate(populate?.split(",").map((item) => ({ path: item })));
+        const data = await Course.find({ ...filter }).select(select).populate(populate?.split(",").map((item) => ({ path: item })));
 
         for (let index = 0; index < data.length; index++) {
             let item = data[index]._doc;
