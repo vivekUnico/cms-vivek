@@ -24,6 +24,7 @@ const studymaterial = require("./studymaterial");
 const librarybook = require("./librarybook");
 
 const QuestionRouter = require("./testAssignement");
+const AssignmentRouter = require("./assignment");
 const NotesRouter = require("./notes");
 
 const MentorshipRouter = require("./mentorship");
@@ -51,6 +52,7 @@ router.use('/studymaterial', studymaterial);
 router.use('/library', librarybook);
 
 router.use('/test', QuestionRouter);
+router.use('/assignment', AssignmentRouter);
 router.use('/notes', NotesRouter);
 
 router.use('/mentorship', MentorshipRouter);
