@@ -3,6 +3,8 @@ const mongoose = require("mongoose");
 // const req = express();
 const chalk = require("chalk");
 
+require('dotenv').config()
+
 module.exports = async () => {
   try {
     const conn = await mongoose.connect(
