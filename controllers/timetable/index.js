@@ -27,7 +27,7 @@ exports.CreateTimetable = asyncHandler(async (req, res) => {
                 throw new ErrorResponse(`date has already been used, choose a different date`, 400);
             }
         }
-        if (create){
+        if (create) {
             const data = await Timetable.create(schemaData);
             return res.status(210).json({ success: true, data: data });
         };
@@ -40,20 +40,39 @@ exports.CreateTimetable = asyncHandler(async (req, res) => {
 //Get All Timetable
 exports.GetAllTimetable = asyncHandler(async (req, res) => {
     try {
-        let { populate,datepopulate, center,batch } = req.query;
-        let filter = {};
-        if(center){
-            filter = {...filter, center};
+        let { populate, datepopulate, center, batch, startDate, endDate } = req.query;
+        let filter = { dateFilter: {} };
+        if (center) {
+            filter = { ...filter, "center": { $in: String(center).split(",") } };
         };
-        if(batch){
-            filter = {...filter, batch};
+        if (batch) {
+            filter = { ...filter, "batch": { $in: String(batch).split(",") } };
         }
+        if (startDate && endDate) {
+            startDate = new Date(startDate)
+            startDate = startDate.toISOString()
+
+            endDate = new Date(endDate)
+            endDate.setDate(endDate.getDate() + 1);
+            endDate = endDate.toISOString()
+
+            filter = {
+                ...filter, dateFilter: {
+                    date: {
+                        $gte: startDate,
+                        $lte: endDate
+                    }
+                }
+            }
+        }
+
+        console.log(filter);
 
         const data = await Timetable.find(filter).populate(populate?.split(",").map((item) => ({ path: item })));
 
         for (let index = 0; index < data.length; index++) {
             let item = data[index]._doc;
-            item["date_details"] = await DateDetails.find({ timetable: item._id }).populate(datepopulate?.split(",").map((item) => ({ path: item })));
+            item["date_details"] = await DateDetails.find({ timetable: item._id, ...filter.dateFilter }).populate(datepopulate?.split(",").map((item) => ({ path: item })));
         }
 
         return res.status(200).json({ success: true, data });
