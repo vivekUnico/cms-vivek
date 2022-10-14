@@ -21,7 +21,9 @@ const datedetailsScheme = new mongoose.Schema(
             enum: ["online", "offline"],
             required: [true, "Please provide lecture_type"]
         },
-
+        status: {
+            type: String
+        },
         time_details: [
             {
                 start_time: {
@@ -42,7 +44,10 @@ const datedetailsScheme = new mongoose.Schema(
                     // required: [true, "Please provide teacher"],
                     type: mongoose.Schema.Types.ObjectId,
                     ref: 'staff'
-                }
+                },
+                status: {
+                    type: String
+                },
             }
         ],
 

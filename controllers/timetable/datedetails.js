@@ -90,9 +90,9 @@ exports.UpdateDateDetails = asyncHandler(async (req, res) => {
     try {
         const { id } = req.params;
         if (!id) throw new ErrorResponse(`Please provide a date _id `, 400);
-        const { date, date_type, lecture_type } = req.body;
+        const { date, date_type, lecture_type, status } = req.body;
 
-        let schemaData = { date, date_type, lecture_type };
+        let schemaData = { date, date_type, lecture_type, status };
         if (schemaData.date_type && schemaData.date_type == "holiday") {
             schemaData["time_details"] = [];
         }
@@ -156,7 +156,25 @@ exports.UpdateLecture = asyncHandler(async (req, res) => {
         const { id } = req.params;
         if (!id) throw new ErrorResponse(`Please provide a lecture _id `, 400);
 
-        const { start_time, end_time, subject, topics, teacher } = req.body;
+        let { start_time, end_time, subject, topics, teacher, status } = req.body;
+
+        let oldLecture = await DateDetails.findOne({ "time_details._id": id });
+        if (!oldLecture) throw new ErrorResponse(`lecture id not found`, 400);
+        oldLecture = oldLecture.time_details.find((tim)=> tim._id == id);
+
+        let oldStartTime = moment(oldLecture.start_time).hour();
+        let oldEndTime = moment(oldLecture.end_time).hour();
+
+        let latestStartTime = moment(start_time).hour();
+        let latestEndTime = moment(end_time).hour();
+
+        if (start_time && oldStartTime != latestStartTime || end_time && oldEndTime != latestEndTime) {
+            if(start_time && latestStartTime > oldStartTime){
+                status = "Postponed"
+            }else if(start_time && latestStartTime < oldStartTime){
+                status = "Preponed"
+            }
+        }
 
         const data = await DateDetails.findOneAndUpdate({ "time_details._id": id }, {
             '$set': {
@@ -165,9 +183,9 @@ exports.UpdateLecture = asyncHandler(async (req, res) => {
                 'time_details.$.subject': subject,
                 'time_details.$.topics': topics,
                 'time_details.$.teacher': teacher,
+                'time_details.$.status': status,
             }
         }, { returnOriginal: false });
-        if (!data) throw new ErrorResponse(`lecture id not found`, 400);
 
         return res.status(201).json({ success: true, data });
     } catch (error) {
