@@ -42,6 +42,7 @@ exports.GetAllTimetable = asyncHandler(async (req, res) => {
     try {
         let { populate, datepopulate, center, batch, startDate, endDate } = req.query;
         let filter = { dateFilter: {} };
+
         if (center) {
             filter = { ...filter, "center": { $in: String(center).split(",") } };
         };

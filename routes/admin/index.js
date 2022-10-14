@@ -30,6 +30,8 @@ const NotesRouter = require("./notes");
 const MentorshipRouter = require("./mentorship");
 const SeminarRouter = require("./seminar");
 
+const feedbackRouter = require("./feedback");
+
 router.use('/center', center);
 
 router.use('/batch', batch);
@@ -57,5 +59,8 @@ router.use('/notes', NotesRouter);
 
 router.use('/mentorship', MentorshipRouter);
 router.use('/seminar', SeminarRouter);
+
+router.use('/feedback', feedbackRouter);
+
 
 module.exports = router;
