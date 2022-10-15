@@ -38,15 +38,35 @@ const assignmentScheme = new mongoose.Schema(
         },
         submissionDateTime: {
             type: Date,
-            require: [true, "Please provide submissionDateTime"],
+            require: [false, "Please provide submissionDateTime"],
             trim: true,
         },
         description: {
             type: String,
-            require: [true, "Please provide description"],
+            require: [false, "Please provide description"],
             trim: true,
         },
-
+        type: {
+            type: String,
+            enum: ["submission", "assignment"],
+            require: [false, "Please provide type"],
+            trim: true,
+        },
+        submitted_value: {
+            type: String,
+            require: [false, "Please provide submitted_value"],
+        },
+        submission_type: {
+            type: String,
+            enum: ["online", "offline"],
+            require: [false, "Please provide submitted_value"],
+        },
+        submitted_by: {
+            type: mongoose.Schema.Types.ObjectId,
+            require: [true, "Please provide submitted_by"],
+            trim: true,
+            ref: "student"
+        }
 
     },
     { timestamps: true }

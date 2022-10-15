@@ -1,6 +1,7 @@
 const createFilter = (elements) => {
     let filter = {};
     elements.map(itm => {
+        // console.log(`${itm?.name} value =>`, itm?.value)
         if (itm?.value) {
             if (itm?.type == 'date' && itm?.value) {
                 // For dates
@@ -28,4 +29,4 @@ const createFilter = (elements) => {
     return filter;
 }
 
-module.exports = { createFilter }
+module.exports = { createFilter };
