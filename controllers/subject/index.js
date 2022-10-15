@@ -45,23 +45,22 @@ exports.GetAllSubject = asyncHandler(async (req, res) => {
 
 //Get Single Subject
 exports.GetSingleSubject = asyncHandler(async (req, res) => {
-    let { populate, academic_year, master_id } = req.query;
+    let { populate, academic_year, mastersearch } = req.query;
     let filter = {};
 
-    if (academic_year && master_id) {
+    if (academic_year) {
         filter = {
             ...filter,
             academic_year,
-            master_id
         };
     }
 
     try {
         const { id } = req.params;
         if (!id) throw new ErrorResponse(`Please provide a subject id `, 400);
-
-        const data = await Subject.findOne({ _id: id }).populate(populate?.split(",").map((item) => ({ path: item })));;
-        if (!data) throw new ErrorResponse(`Subject id not found`, 400);
+        // id is master id
+        const data = await Subject.findOne({ [mastersearch == 'true' ? 'master_id' : '_id']: id, ...filter }).populate(populate?.split(",").map((item) => ({ path: item })));;
+        // if (!data) throw new ErrorResponse(`Subject not found`, 400);
 
         return res.status(200).json({ success: true, data });
     } catch (error) {
