@@ -168,13 +168,21 @@ exports.UpdateLecture = asyncHandler(async (req, res) => {
         let latestStartTime = moment(start_time).hour();
         let latestEndTime = moment(end_time).hour();
 
-        if (start_time && oldStartTime != latestStartTime || end_time && oldEndTime != latestEndTime) {
+        if (start_time && oldStartTime != latestStartTime) {
             if(start_time && latestStartTime > oldStartTime){
                 status = "Postponed"
             }else if(start_time && latestStartTime < oldStartTime){
                 status = "Preponed"
             }
         }
+        if (end_time && oldEndTime != latestEndTime) {
+            if(end_time && latestEndTime > oldEndTime){
+                status = "Postponed"
+            }else if(end_time && latestEndTime < oldEndTime){
+                status = "Preponed"
+            }
+        }
+
 
         const data = await DateDetails.findOneAndUpdate({ "time_details._id": id }, {
             '$set': {

@@ -13,7 +13,7 @@ exports.createAssignment = asyncHandler(async (req, res) => {
     }
 
     const validation = validationCheck({
-        name, timetable_datedetails, lecture_subject, center, course, batch, submissionDateTime, description, topic
+        name, timetable_datedetails, lecture_subject, center,batch, submissionDateTime, description, topic
     });
 
     if (!validation.status) {

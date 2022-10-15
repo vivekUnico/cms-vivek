@@ -31,6 +31,7 @@ const MentorshipRouter = require("./mentorship");
 const SeminarRouter = require("./seminar");
 
 const feedbackRouter = require("./feedback");
+const attendanceRouter = require("./attendance");
 
 router.use('/center', center);
 
@@ -61,6 +62,7 @@ router.use('/mentorship', MentorshipRouter);
 router.use('/seminar', SeminarRouter);
 
 router.use('/feedback', feedbackRouter);
+router.use('/attendance', attendanceRouter);
 
 
 module.exports = router;
