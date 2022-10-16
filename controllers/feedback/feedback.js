@@ -53,11 +53,22 @@ exports.UpdateFeedback = asyncHandler(async (req, res) => {
 
 exports.getFeedback = asyncHandler(async (req, res) => {
     try {
-        const { created_by, feedback_type, date_id, populate } = req.query;
-        const filter = createFilter([
-            { name: 'feedback_type', value: feedback_type },
-            { name: 'data.date_id', value: date_id },
-        ]);
+        const { created_by, feedback_type, date_id, populate, attendance_type, type, lecture } = req.query;
+        let filter = {};
+        if (attendance_type) {
+            filter = { attendance_type };
+        }
+        if (date_id) {
+            filter = { ...filter, "data.date_id": date_id };
+        }
+        //optional
+        if (type) {
+            filter = { ...filter, "created_by_type": type };
+        }
+        if (lecture) {
+            filter = { ...filter, "data.lecture_id": { $in: String(lecture).split(",") } };
+        }
+
 
         const feedbackData = await Feedback.find({ ...filter }).populate(populate?.split(",").map((item) => ({ path: item })));
         return res.status(201).json({ success: true, data: feedbackData });
