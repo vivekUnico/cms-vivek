@@ -6,6 +6,7 @@ const { validationCheck, findUniqueData } = require('../../middleware/validation
 //models
 const Book = require("../../models/librarybook/bookRequestIssued");
 const LibraryBook = require("../../models/librarybook/librarybook");
+const { createFilter } = require('../../utils/filter');
 
 /* 
 * **************** Students related controller *****************
@@ -65,9 +66,13 @@ exports.cancelRequestBook = asyncHandler(async (req, res) => {
 */
 
 exports.getLibraryBookRequested = asyncHandler(async (req, res) => {
-    const { page, limit, populate, select } = req.query;
+    const { page, limit, populate, select, student } = req.query;
     try {
-        const libData = await Book.find({ type: "request" }).select(select?.split(",")).limit(Number(limit)).skip(Number(page) * Number(limit)).sort({ createdAt: -1 }).populate(populate?.split(","));
+        const filter = createFilter([
+            { name: 'requestedBy', value: student },
+            { name: 'request', value: 'request' },
+        ])
+        const libData = await Book.find({ ...filter }).select(select?.split(",")).limit(Number(limit)).skip(Number(page) * Number(limit)).sort({ createdAt: -1 }).populate(populate?.split(","));
         return res.status(200).json({ success: true, data: libData });
     } catch (error) {
         throw new ErrorResponse(`Server error :${error}`, 400);
