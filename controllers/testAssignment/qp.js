@@ -1,6 +1,7 @@
 const asyncHandler = require('../../middleware/asyncHandler');
 const ErrorResponse = require('../../utils/ErrorResponse');
 const { validationCheck } = require('../../middleware/validationCheck');
+const { createFilter } = require('../../utils/filter');
 
 //models
 const QuestionPaper = require('../../models/testsAssignment/qp');
@@ -26,11 +27,16 @@ exports.createQuestionPaper = asyncHandler(async (req, res) => {
 })
 
 exports.getAllQP = asyncHandler(async (req, res) => {
-    const { page, limit, populate, select } = req.query;
-
+    const { page, limit, populate, select, subject, course, center } = req.query;
+    const filter = createFilter([
+        { name: 'subject', value: subject },
+        { name: 'course', value: course },
+        { name: 'center', value: center },
+    ])
+    console.log(filter)
     try {
-        const QuestionPaperData = await QuestionPaper.find().select(select?.split(",")).limit(Number(limit)).skip(Number(page) * Number(limit)).sort({ createdAt: -1 }).populate(populate?.split(","));;
-        return res.status(201).json({ success: true, data: QuestionPaperData });
+        const QuestionPaperData = await QuestionPaper.find({ ...filter }).select(select?.split(",")).limit(Number(limit)).skip(Number(page) * Number(limit)).sort({ createdAt: -1 }).populate(populate?.split(","));;
+        return res.status(200).json({ success: true, data: QuestionPaperData });
     } catch (error) {
         throw new ErrorResponse(`Server error :${error}`, 400);
     }

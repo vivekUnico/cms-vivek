@@ -58,11 +58,12 @@ exports.GetAllBatch = asyncHandler(async (req, res) => {
 
 //Get Single Batch
 exports.GetSingleBatch = asyncHandler(async (req, res) => {
+    const { populate } = req.query;
     try {
         const { id } = req.params;
         if (!id) throw new ErrorResponse(`Please provide a Batch id `, 400);
 
-        const data = await Batch.findById(id);
+        const data = await Batch.findById(id).populate(populate?.split(",").map((item) => ({ path: item })));
         if (!data) throw new ErrorResponse(`Batch id not found`, 400);
 
         return res.status(200).json({ success: true, data });

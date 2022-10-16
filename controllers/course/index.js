@@ -56,14 +56,23 @@ exports.GetAllCourse = asyncHandler(async (req, res) => {
 
 //Get Single Course
 exports.GetSingleCourse = asyncHandler(async (req, res) => {
-    let { populate } = req.query;
+    let { populate, academic_year, mastersearch } = req.query;
+
+    let filter = {};
+
+    if (academic_year) {
+        filter = {
+            ...filter,
+            academic_year,
+        };
+    }
 
     try {
         const { id } = req.params;
         if (!id) throw new ErrorResponse(`Please provide a Course id `, 400);
 
-        const data = await Course.findOne({ _id: id }).populate(populate?.split(",").map((item) => ({ path: item })));;
-        if (!data) throw new ErrorResponse(`Course id not found`, 400);
+        const data = await Course.findOne({ [mastersearch == 'true' ? 'master_id' : '_id']: id, ...filter }).populate(populate?.split(",").map((item) => ({ path: item })));;
+        // if (!data) throw new ErrorResponse(`Course id not found`, 400);
 
         return res.status(200).json({ success: true, data });
     } catch (error) {

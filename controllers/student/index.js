@@ -2,6 +2,7 @@
 const asyncHandler = require('../../middleware/asyncHandler');
 const ErrorResponse = require('../../utils/ErrorResponse');
 const { validationCheck, findUniqueData } = require('../../middleware/validationCheck');
+const { createFilter } = require('../../utils/filter');
 
 //models
 const Student = require("../../models/student");
@@ -11,15 +12,18 @@ const LeadAndEnquiry = require("../../models/leadAndEnquiry");
 
 //Get All Student
 exports.GetAllStudent = asyncHandler(async (req, res) => {
-    let { populate, assign_to } = req.query;
+    let { populate, assign_to, course, select } = req.query;
 
     try {
         let filter = {};
         if (assign_to) {
             filter["assign_to"] = String(assign_to);
         }
-
-        const data = await Student.find({ ...filter }).populate(populate?.split(",").map((item) => ({ path: item })));
+        const filterData = createFilter([
+            { name: 'courses', value: course, type: 'array' }
+        ])
+        console.log(filterData)
+        const data = await Student.find({ ...filter, ...filterData }).select(select).populate(populate?.split(",").map((item) => ({ path: item })));
         return res.status(200).json({ success: true, data });
     } catch (error) {
         throw new ErrorResponse(`Server error :${error}`, 400);
@@ -179,7 +183,7 @@ exports.StudentFeesAnalytics = asyncHandler(async (req, res) => {
                 if (!emi.paid) {
                     pendingFees += emi.amount;
                 }
-                if(new Date(emi.date) <= today && new Date(emi.date) >= priorDate){
+                if (new Date(emi.date) <= today && new Date(emi.date) >= priorDate) {
                     RangeDateFees += emi.amount;
                 }
             });
