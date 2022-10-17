@@ -55,7 +55,7 @@ exports.UpdateAttendance = asyncHandler(async (req, res) => {
 
 exports.getAttendance = asyncHandler(async (req, res) => {
     try {
-        const { created_by, attendance_type, date_id, type, lecture, populate } = req.query;
+        const { created_by, attendance_type, date_id, type, lecture, populate,submit_type } = req.query;
         let filter = {};
         if (attendance_type) {
             filter = { attendance_type };
@@ -68,6 +68,9 @@ exports.getAttendance = asyncHandler(async (req, res) => {
         }
         if (lecture) {
             filter = { ...filter, "data.timedetailId": { $in: String(lecture).split(",") } };
+        }
+        if (submit_type) {
+            filter = { ...filter, submit_type };
         }
 
         const AttendanceData = await Attendance.find({ ...filter }).populate(populate?.split(",").map((item) => ({ path: item })));

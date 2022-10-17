@@ -25,6 +25,20 @@ const staffScheme = new mongoose.Schema({
         unique: true,
         required: [true, "Please provide a email address"],
     },
+    password: {
+        type: String,
+        trim: true,
+    },
+    resetToken: {
+        token: {
+            type: String,
+            default: null,
+        },
+        expiry: {
+            type: Date,
+            default: null,
+        },
+    },
     mobile: {
         type: String,
         required: [true, "Please provide mobile"],

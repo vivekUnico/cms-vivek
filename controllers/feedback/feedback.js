@@ -11,7 +11,7 @@ exports.CreateFeedback = asyncHandler(async (req, res) => {
     try {
         const { feedback, created_by, data, feedback_type, created_by_type, submit_type } = req.body;
         const feedbackD = {
-            feedback, created_by, data, feedback_type, created_by_type, submit_type
+            created_by, data, feedback_type, created_by_type, submit_type
         }
 
         const validation = validationCheck(
@@ -22,7 +22,7 @@ exports.CreateFeedback = asyncHandler(async (req, res) => {
             throw new ErrorResponse(`Please provide a ${validation?.errorAt}`, 400);
         }
 
-        const feedbackData = await Feedback.create(feedbackD);
+        const feedbackData = await Feedback.create({ ...feedbackD, feedback });
         return res.status(201).json({ success: true, data: feedbackData });
 
     } catch (error) {
@@ -53,7 +53,7 @@ exports.UpdateFeedback = asyncHandler(async (req, res) => {
 
 exports.getFeedback = asyncHandler(async (req, res) => {
     try {
-        const { created_by, feedback_type, date_id, populate, attendance_type, type, lecture } = req.query;
+        const { created_by, feedback_type, date_id, populate, attendance_type, type, lecture, submit_type } = req.query;
         let filter = {};
         if (attendance_type) {
             filter = { attendance_type };
@@ -67,6 +67,9 @@ exports.getFeedback = asyncHandler(async (req, res) => {
         }
         if (lecture) {
             filter = { ...filter, "data.lecture_id": { $in: String(lecture).split(",") } };
+        }
+        if (submit_type) {
+            filter = { ...filter, submit_type };
         }
 
 

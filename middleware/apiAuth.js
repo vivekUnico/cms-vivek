@@ -2,7 +2,7 @@ const jwt = require("jsonwebtoken");
 const ErrorResponse = require('../utils/ErrorResponse');
 
 //Models
-const User = require("../models/userbranch");
+const Staff = require("../models/staff");
 
 /*
 * Main JWT Auth 
@@ -27,9 +27,9 @@ exports.ApiAuthentication = (req, res, next) => {
 */
 exports.AdminAuthenctication = async (req, res, next) => {
     const user = req.user;
-    const userData = await User.findOne({ _id: user?.userid });
+    const userData = await Staff.findOne({ _id: user?.userid });
     if (userData?.role === 'admin') {
-        req.id = user.userid;
+        req.id = Staff.userid;
         next();
     } else {
         return res.status(401).json({ success: false, data: "unauthorized user" })
@@ -41,9 +41,9 @@ exports.AdminAuthenctication = async (req, res, next) => {
 */
 exports.ManagerAuthenctication = async (req, res, next) => {
     const user = req.user;
-    const userData = await User.findOne({ _id: user?.userid });
+    const userData = await Staff.findOne({ _id: user?.userid });
     if (userData?.role === 'manager') {
-        req.id = user.userid;
+        req.id = Staff.userid;
         next();
     } else {
         return res.status(401).json({ success: false, data: "unauthorized user" })
@@ -55,9 +55,9 @@ exports.ManagerAuthenctication = async (req, res, next) => {
 */
 exports.ExecutiveAuthenctication = async (req, res, next) => {
     const user = req.user;
-    const userData = await User.findOne({ _id: user?.userid });
+    const userData = await Staff.findOne({ _id: user?.userid });
     if (userData?.role === 'executive') {
-        req.id = user.userid;
+        req.id = Staff.userid;
         next();
     } else {
         return res.status(401).json({ success: false, data: "unauthorized user" })
@@ -69,9 +69,9 @@ exports.ExecutiveAuthenctication = async (req, res, next) => {
 */
 exports.CutomerAuthenctication = async (req, res, next) => {
     const user = req.user;
-    const userData = await User.findOne({ _id: user?.userid });
+    const userData = await Staff.findOne({ _id: user?.userid });
     if (userData?.role === 'customer') {
-        req.id = user.userid;
+        req.id = Staff.userid;
         next();
     } else {
         return res.status(401).json({ success: false, data: "unauthorized user" })

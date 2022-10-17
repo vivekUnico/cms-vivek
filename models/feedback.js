@@ -5,7 +5,6 @@ const feedbackScheme = new mongoose.Schema(
         feedback: {
             type: String,
             trim: true,
-            required: [true, "Please provide feedback"],
         },
         created_by: {
             type: mongoose.Schema.Types.ObjectId,

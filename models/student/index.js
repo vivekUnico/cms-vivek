@@ -22,6 +22,20 @@ const student = new mongoose.Schema({
         ],
         unique: true,
     },
+    password: {
+        type: String,
+        trim: true,
+    },
+    resetToken: {
+        token: {
+            type: String,
+            default: null,
+        },
+        expiry: {
+            type: Date,
+            default: null,
+        },
+    },
     date: {
         type: Date,
         trim: true,
