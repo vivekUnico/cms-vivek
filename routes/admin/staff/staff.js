@@ -4,7 +4,7 @@ const router = express.Router();
 const { GetAllStaff, CreateStaff, GetSingleStaff, DeleteStaff, UpdateStaff,loginUser,forgetPassword,forgetPasswordWithToken } = require("../../../controllers/staff");
 const { ApiAuthentication } = require("../../../middleware/apiAuth");
 
-router.route('/').get(ApiAuthentication,GetAllStaff)
+router.route('/').get(GetAllStaff)
 router.route('/').post(CreateStaff)
 
 router.route('/:id').get(GetSingleStaff);
