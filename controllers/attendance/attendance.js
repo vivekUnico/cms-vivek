@@ -11,22 +11,29 @@ const { createFilter } = require('../../utils/filter');
 
 exports.CreateAttendance = asyncHandler(async (req, res) => {
     try {
-        const { created_by, data, attendance_type, created_by_type, submit_type } = req.body;
-        const AttendanceD = {
-            created_by, data, attendance_type, created_by_type, submit_type
+        let { body } = req.body;
+        if(!body || body.length == 0) throw new ErrorResponse(`Please provide a body`, 400);
+
+        for (let i = 0; i < body.length; i++) {
+            const item = body[i];
+
+            const { created_by, data, attendance_type, created_by_type, submit_type } = item;
+            const AttendanceD = {
+                created_by, data, attendance_type, created_by_type, submit_type
+            }
+
+            const validation = validationCheck(
+                AttendanceD
+            );
+
+            if (!validation.status) {
+                throw new ErrorResponse(`Please provide a ${validation.errorAt} in body at index ${i}`, 400);
+            }    
         }
 
-        const validation = validationCheck(
-            AttendanceD
-        );
 
-        if (!validation.status) {
-            throw new ErrorResponse(`Please provide a ${validation?.errorAt}`, 400);
-        }
-
-        const AttendanceData = await Attendance.create(AttendanceD);
+        const AttendanceData = await Attendance.create(body);
         return res.status(201).json({ success: true, data: AttendanceData });
-
     } catch (error) {
         throw new ErrorResponse(`Server error :${error}`, 400);
     }
@@ -51,11 +58,25 @@ exports.UpdateAttendance = asyncHandler(async (req, res) => {
     }
 });
 
+exports.DeleteAttendance = asyncHandler(async (req, res) => {
+    try {
+        const { id } = req.params;
+        if (!id) throw new ErrorResponse(`Please provide a Attendance id `, 400);
+
+        const AttendanceData = await Attendance.findByIdAndDelete(id);
+        if (!AttendanceData) throw new ErrorResponse(`Attendance not found`, 400);
+
+        return res.status(201).json({ success: true, data: `Attendance Deleted Successful` });
+    } catch (error) {
+        throw new ErrorResponse(`Server error :${error}`, 400);
+    }
+});
+
 
 
 exports.getAttendance = asyncHandler(async (req, res) => {
     try {
-        const { created_by, attendance_type, date_id, type, lecture, populate,submit_type } = req.query;
+        const { created_by, attendance_type, date_id, type, subject,timedetailId,populate,submit_type } = req.query;
         let filter = {};
         if (attendance_type) {
             filter = { attendance_type };
@@ -66,8 +87,11 @@ exports.getAttendance = asyncHandler(async (req, res) => {
         if (type) {
             filter = { ...filter, "created_by_type": type };
         }
-        if (lecture) {
-            filter = { ...filter, "data.timedetailId": { $in: String(lecture).split(",") } };
+        if (subject) {
+            filter = { ...filter, "data.subject": { $in: String(subject).split(",") } };
+        }
+        if (timedetailId) {
+            filter = { ...filter, "data.timedetailId": timedetailId };
         }
         if (submit_type) {
             filter = { ...filter, submit_type };
