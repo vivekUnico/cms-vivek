@@ -41,14 +41,13 @@ exports.createQuestionAnswer = asyncHandler(async (req, res) => {
 
 exports.getAllQA = asyncHandler(async (req, res) => {
     const { qp_id } = req.params;
-    const { page, limit, populate, select, course } = req.query;
+    const { page, limit, populate, select, course, } = req.query;
     // console.log('api ok')
     if (!qp_id) {
         throw new ErrorResponse(`Please provide qp_id`, 400);
     }
     try {
-
-        const QuestionAnswerData = await QuestionAnswer.find({ qpid: qp_id }).select(select?.split(",")).limit(Number(limit)).skip(Number(page) * Number(limit)).sort({ createdAt: -1 }).populate(populate?.split(","));
+        const QuestionAnswerData = await QuestionAnswer.find({ qpid: qp_id, ...filter }).select(select?.split(",")).limit(Number(limit)).skip(Number(page) * Number(limit)).sort({ createdAt: -1 }).populate(populate?.split(","));
         return res.status(201).json({ success: true, data: QuestionAnswerData });
     } catch (error) {
         throw new ErrorResponse(`Server error :${error}`, 400);

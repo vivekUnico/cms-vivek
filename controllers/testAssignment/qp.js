@@ -3,6 +3,8 @@ const ErrorResponse = require('../../utils/ErrorResponse');
 const { validationCheck } = require('../../middleware/validationCheck');
 const { createFilter } = require('../../utils/filter');
 
+const { startOfDay, endOfDay, parseISO } = require('date-fns');
+
 //models
 const QuestionPaper = require('../../models/testsAssignment/qp');
 
@@ -27,12 +29,25 @@ exports.createQuestionPaper = asyncHandler(async (req, res) => {
 })
 
 exports.getAllQP = asyncHandler(async (req, res) => {
-    const { page, limit, populate, select, subject, course, center } = req.query;
-    const filter = createFilter([
-        { name: 'subject', value: subject },
-        { name: 'course', value: course },
-        { name: 'center', value: center },
-    ])
+    const { page, limit, populate, select, subject, testDate, totalMarks, name, course, center } = req.query;
+
+    let filter = [];
+    if (testDate) {
+        filter = createFilter([
+            { name: 'course', value: course },
+            { name: 'testDate', value: { dateFrom: startOfDay(parseISO(testDate)), dateTo: endOfDay(parseISO(testDate)) }, type: 'date' },
+            { name: 'totalMarks', value: totalMarks },
+            { name: 'center', value: center },
+            { name: 'name', value: name },
+        ])
+    } else {
+        filter = createFilter([
+            { name: 'course', value: course },
+            { name: 'totalMarks', value: totalMarks },
+            { name: 'center', value: center },
+            { name: 'name', value: name },
+        ])
+    }
     console.log(filter)
     try {
         const QuestionPaperData = await QuestionPaper.find({ ...filter }).select(select?.split(",")).limit(Number(limit)).skip(Number(page) * Number(limit)).sort({ createdAt: -1 }).populate(populate?.split(","));;
