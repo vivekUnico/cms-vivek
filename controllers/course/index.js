@@ -119,17 +119,29 @@ exports.UpdateCourse = asyncHandler(async (req, res) => {
 
         //remove course from subject
         let oldCourse = await Course.findOne({ _id: id });
-        await oldCourse?.subjects?.map(async (oldS) => {
-            if (!subjects.includes(String(oldS))) {
-                await Subject.findByIdAndUpdate(oldS, { $pull: { courses: oldCourse._id } });
-            };
-        });
-        //add course from subject
-        await subjects.map(async (id) => {
-            await Subject.findByIdAndUpdate(id, { $addToSet: { courses: oldCourse._id } });
-        });
+        if (subjects) {
+            // if updating subjects then do this 
+            await oldCourse?.subjects?.map(async (oldS) => {
+                if (!subjects?.includes(String(oldS))) {
+                    await Subject.findByIdAndUpdate(oldS, { $pull: { courses: oldCourse._id } });
+                };
+            });
+            //add course from subject
+            await subjects.map(async (id) => {
+                await Subject.findByIdAndUpdate(id, { $addToSet: { courses: oldCourse._id } });
+            });
+        };
 
         const data = await Course.findOneAndUpdate({ _id: id }, schemaData, { returnOriginal: false });
+
+        // if master then update all academic_years under this master.
+        if (oldCourse.academic_year == 'master') {
+            delete schemaData.academic_year;
+            delete schemaData.master_id;
+            await Course.updateMany({ master_id: oldCourse._id }, schemaData)
+        }
+
+
         if (!data) throw new ErrorResponse(`Course id not found`, 400);
 
         return res.status(200).json({ success: true, data });
