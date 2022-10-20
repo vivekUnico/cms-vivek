@@ -112,6 +112,13 @@ exports.UpdateSubject = asyncHandler(async (req, res) => {
         };
 
         const data = await Subject.findOneAndUpdate({ _id: id }, schemaData, { returnOriginal: false });
+        // if master then update all academic_years under this master.
+        if (oldSubject.academic_year == 'master') {
+            delete schemaData.academic_year;
+            delete schemaData.master_id;
+            await Subject.updateMany({ master_id: oldSubject._id }, schemaData)
+        }
+
         if (!data) throw new ErrorResponse(`Subject id not found`, 400);
 
         return res.status(200).json({ success: true, data });
