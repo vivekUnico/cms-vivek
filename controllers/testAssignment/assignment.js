@@ -2,6 +2,9 @@ const asyncHandler = require('../../middleware/asyncHandler');
 const ErrorResponse = require('../../utils/ErrorResponse');
 const { validationCheck } = require('../../middleware/validationCheck');
 const { createFilter } = require('../../utils/filter');
+
+const { parseISO, sub, add } = require('date-fns');
+
 //models
 const Assignment = require('../../models/testsAssignment/assignment');
 
@@ -13,7 +16,7 @@ exports.createAssignment = asyncHandler(async (req, res) => {
     }
 
     const validation = validationCheck({
-        name, timetable_datedetails, lecture_subject, center,batch, submissionDateTime, description, topic
+        name, timetable_datedetails, lecture_subject, center, batch, submissionDateTime, description, topic
     });
 
     if (!validation.status) {
@@ -33,17 +36,22 @@ exports.getAllAssignment = asyncHandler(async (req, res) => {
     const { name, timetable_datedetails, lecture_subject, center, course, batch, submissionDateTime, page, limit, populate, select } = req.query;
     // console.log('api ok')
     const filter = createFilter([
-        { name: 'name', value: name },
+        { name: 'name', value: name, type: 'text' },
         { name: 'timetable_datedetails', value: timetable_datedetails },
         { name: 'lecture_subject', value: lecture_subject, type: 'array' },
         { name: 'center', value: center, type: 'array' },
         { name: 'course', value: course, type: 'array' },
         { name: 'batch', value: batch, type: 'array' },
-        { name: 'submissionDateTime', value: submissionDateTime, type: 'date' }]);
-
-    console.log(JSON.stringify(filter));
+    ]);
+    let filterDate = [];
+    if (submissionDateTime) {
+        filterDate = createFilter([
+            { name: 'submissionDateTime', value: { dateFrom: `${sub(parseISO(submissionDateTime), { days: 1 }).toISOString()}`, dateTo: `${add(parseISO(submissionDateTime), { days: 1 }).toISOString()}` }, type: 'date' }
+        ])
+    }
+    // console.log(JSON.stringify(filter));
     try {
-        const AssignmentData = await Assignment.find({ ...filter }).select(select?.split(",")).limit(Number(limit)).skip(Number(page) * Number(limit)).sort({ createdAt: -1 }).populate(populate?.split(","));
+        const AssignmentData = await Assignment.find({ ...filter, ...filterDate }).select(select?.split(",")).limit(Number(limit)).skip(Number(page) * Number(limit)).sort({ createdAt: -1 }).populate(populate?.split(","));
         return res.status(200).json({ success: true, data: AssignmentData });
     } catch (error) {
         throw new ErrorResponse(`Server error :${error}`, 400);

@@ -9,7 +9,7 @@ const moment = require('moment');
 
 //Get All DateDetails
 exports.GetAllDateDetails = asyncHandler(async (req, res) => {
-    let { populate } = req.query;
+    let { populate ,} = req.query;
     try {
         const { timetable } = req.params;
         if (!timetable) throw new ErrorResponse(`Please provide a timetable _id `, 400);

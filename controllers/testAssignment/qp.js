@@ -3,7 +3,7 @@ const ErrorResponse = require('../../utils/ErrorResponse');
 const { validationCheck } = require('../../middleware/validationCheck');
 const { createFilter } = require('../../utils/filter');
 
-const { startOfDay, endOfDay, parseISO } = require('date-fns');
+const { parseISO, sub, add } = require('date-fns');
 
 //models
 const QuestionPaper = require('../../models/testsAssignment/qp');
@@ -35,17 +35,17 @@ exports.getAllQP = asyncHandler(async (req, res) => {
     if (testDate) {
         filter = createFilter([
             { name: 'course', value: course },
-            { name: 'testDate', value: { dateFrom: startOfDay(parseISO(testDate)), dateTo: endOfDay(parseISO(testDate)) }, type: 'date' },
-            { name: 'totalMarks', value: totalMarks },
+            { name: 'testDate', value: { dateFrom: `${sub(parseISO(testDate), { days: 1 }).toISOString()}`, dateTo: `${add(parseISO(testDate), { days: 1 }).toISOString()}` }, type: 'date' },
+            { name: 'totalMarks', value: totalMarks, type: 'text' },
             { name: 'center', value: center },
-            { name: 'name', value: name },
+            { name: 'name', value: name, type: 'text' },
         ])
     } else {
         filter = createFilter([
             { name: 'course', value: course },
-            { name: 'totalMarks', value: totalMarks },
+            { name: 'totalMarks', value: totalMarks, type: 'text' },
             { name: 'center', value: center },
-            { name: 'name', value: name },
+            { name: 'name', value: name, type: 'text' },
         ])
     }
     console.log(filter)

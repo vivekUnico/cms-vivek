@@ -1,10 +1,11 @@
 const createFilter = (elements) => {
     let filter = {};
     elements.map(itm => {
-        // console.log(`${itm?.name} value =>`, itm?.value)
         if (itm?.value) {
+            // console.log(`${itm?.name} value =>`, new Date(itm?.value?.dateFrom).getDate())
             if (itm?.type == 'date' && itm?.value) {
                 // For dates
+
                 filter[itm.name] = {
                     $gte: itm.value.dateFrom,
                     $lte: itm.value.dateTo
@@ -13,6 +14,10 @@ const createFilter = (elements) => {
             else if (itm?.type == 'array' && itm?.value) {
                 // Searcing in docs array
                 filter[itm.name] = { '$in': String(itm.value).split(',') };
+            }
+            else if (itm?.type == 'text' && itm?.value) {
+                // Searcing in docs array
+                filter[itm.name] = { '$regex': itm.value, '$options': 'i' };
             }
             else {
                 /* 

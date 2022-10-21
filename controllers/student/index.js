@@ -8,6 +8,7 @@ const jwt = require("jsonwebtoken");
 const crypto = require('crypto')
 const { sendEmail } = require('../../utils/sendEmail');
 const { hashPassword, comparePassword } = require('../../utils/hashing')
+const { parseISO, sub, add } = require('date-fns');
 
 //models
 const Student = require("../../models/student");
@@ -17,7 +18,7 @@ const LeadAndEnquiry = require("../../models/leadAndEnquiry");
 
 //Get All Student
 exports.GetAllStudent = asyncHandler(async (req, res) => {
-    let { populate, assign_to, course, select } = req.query;
+    let { populate, assign_to, course, select, name, date } = req.query;
 
     try {
         let filter = {};
@@ -25,10 +26,17 @@ exports.GetAllStudent = asyncHandler(async (req, res) => {
             filter["assign_to"] = String(assign_to);
         }
         const filterData = createFilter([
-            { name: 'courses', value: course, type: 'array' }
+            { name: 'courses', value: course, type: 'array' },
+            { name: 'name', value: name, type: 'text' },
         ])
-        console.log(filterData)
-        const data = await Student.find({ ...filter, ...filterData }).select(select).populate(populate?.split(",").map((item) => ({ path: item })));
+        let filterDate = [];
+        if (date) {
+            filterDate = createFilter([
+                { name: 'date', value: { dateFrom: `${sub(parseISO(date), { days: 1 }).toISOString()}`, dateTo: `${add(parseISO(date), { days: 1 }).toISOString()}` }, type: 'date' }
+            ])
+        }
+        // console.log(filterData)
+        const data = await Student.find({ ...filter, ...filterData, ...filterDate }).select(select).populate(populate?.split(",").map((item) => ({ path: item })));
         return res.status(200).json({ success: true, data });
     } catch (error) {
         throw new ErrorResponse(`Server error :${error}`, 400);
@@ -41,7 +49,7 @@ exports.CreateStudent = asyncHandler(async (req, res) => {
         const { name, gender, mobile, email, date, assign_to, comment, alternate_number, status, source, courses, center, medium, city } = req.body;
         let { gross_amount, committed_amount, bifuraction, fees } = req.body;
 
-        let validation = await validationCheck({ name, email,mobile, date, assign_to, status, source, center });
+        let validation = await validationCheck({ name, email, mobile, date, assign_to, status, source, center });
         if (!validation.status) {
             throw new ErrorResponse(`Please provide a ${validation?.errorAt}`, 400);
         }
@@ -295,7 +303,7 @@ exports.forgetPassword = asyncHandler(async (req, res) => {
 exports.forgetPasswordWithToken = asyncHandler(async (req, res) => {
     // const { token } = req.params;
     const { password, token } = req.body;
-    const validation = validationCheck({ password,token });
+    const validation = validationCheck({ password, token });
     if (!validation.status) {
         throw new ErrorResponse(`Please provide a ${validation?.errorAt}`, 400);
     }

@@ -4,6 +4,8 @@ const ErrorResponse = require('../../utils/ErrorResponse');
 const { validationCheck, findUniqueData } = require('../../middleware/validationCheck');
 const { createFilter } = require('../../utils/filter');
 
+const { parseISO, sub, add } = require('date-fns');
+
 //models
 const Staff = require("../../models/staff");
 
@@ -14,12 +16,20 @@ const { hashPassword, comparePassword } = require('../../utils/hashing')
 
 //Get All Staff
 exports.GetAllStaff = asyncHandler(async (req, res) => {
-    let { populate, subjects } = req.query;
+    let { populate, subjects, name, createdAt } = req.query;
     const filter = createFilter([
-        { name: 'subjects', value: subjects, type: 'array' }
+        { name: 'subjects', value: subjects, type: 'array' },
+        { name: 'first_name', value: name, type: 'text' },
     ])
+    let filterDate = [];
+    if (createdAt) {
+        filterDate = createFilter([
+            { name: 'createdAt', value: { dateFrom: `${sub(parseISO(createdAt), { days: 1 }).toISOString()}`, dateTo: `${add(parseISO(createdAt), { days: 1 }).toISOString()}` }, type: 'date' },
+        ])
+    }
+    console.log(filter,filterDate)
     try {
-        const data = await Staff.find({ ...filter }).populate(populate?.split(",").map((item) => ({ path: item })));
+        const data = await Staff.find({ ...filter, ...filterDate }).populate(populate?.split(",").map((item) => ({ path: item })));
         return res.status(200).json({ success: true, data });
     } catch (error) {
         throw new ErrorResponse(`Server error :${error}`, 400);
@@ -36,7 +46,7 @@ exports.CreateStaff = asyncHandler(async (req, res) => {
             throw new ErrorResponse(`Please provide a ${validation?.errorAt}`, 400);
         }
         let schemaData = { initial, first_name, last_name, email, mobile, dob, center, staffCode, salary_type, loginId, role, department, position, grade, shift, qualification, manager, joining_date, job_type, gender, account_status, subjects };
-        
+
         const hashedPassword = await hashPassword(mobile);
         schemaData.password = hashedPassword;
 
@@ -206,7 +216,7 @@ exports.forgetPassword = asyncHandler(async (req, res) => {
 exports.forgetPasswordWithToken = asyncHandler(async (req, res) => {
     // const { token } = req.params;
     const { password, token } = req.body;
-    const validation = validationCheck({ password,token });
+    const validation = validationCheck({ password, token });
     if (!validation.status) {
         throw new ErrorResponse(`Please provide a ${validation?.errorAt}`, 400);
     }
