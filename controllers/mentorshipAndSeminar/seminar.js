@@ -2,6 +2,9 @@ const asyncHandler = require('../../middleware/asyncHandler');
 const ErrorResponse = require('../../utils/ErrorResponse');
 const { validationCheck, findUniqueData } = require('../../middleware/validationCheck');
 
+const { createZoomMeeting } = require('../../utils/zoom')
+
+
 //models
 const Seminar = require("../../models/mentorshipseminar");
 
@@ -14,7 +17,13 @@ exports.createSeminar = asyncHandler(async (req, res) => {
         throw new ErrorResponse(`Please provide a ${validation?.errorAt}`, 400);
     }
     try {
-        const dataCreated = await Seminar.create({ type: "seminar", teacher_name, meet_date_time, meet_type, type, mode, description });
+        let zoom_link = undefined;
+        if (mode == 'online') {
+            let zoomconfig = { start_time: meet_date_time, hostemail: 'chandan7666h@gmail.com', topic: description, duration: 20, agenda: 'testing' }
+            const zoomData = await createZoomMeeting(zoomconfig)
+            zoom_link = zoomData?.start_url;
+        }
+        const dataCreated = await Seminar.create({ type: "seminar", teacher_name, meet_date_time, meet_type, type, mode, description, zoom_link });
         return res.status(201).json({ success: true, data: dataCreated });
     } catch (error) {
         throw new ErrorResponse(`Server error :${error}`, 400);

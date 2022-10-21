@@ -2,6 +2,7 @@
 const asyncHandler = require('../../middleware/asyncHandler');
 const ErrorResponse = require('../../utils/ErrorResponse');
 const { validationCheck, findUniqueData } = require('../../middleware/validationCheck');
+const { createZoomMeeting } = require('../../utils/zoom')
 
 //models
 const DateDetails = require("../../models/timetable/datedetails");
@@ -9,7 +10,7 @@ const moment = require('moment');
 
 //Get All DateDetails
 exports.GetAllDateDetails = asyncHandler(async (req, res) => {
-    let { populate ,} = req.query;
+    let { populate, } = req.query;
     try {
         const { timetable } = req.params;
         if (!timetable) throw new ErrorResponse(`Please provide a timetable _id `, 400);
@@ -60,7 +61,11 @@ exports.CreateDateDetails = asyncHandler(async (req, res, next) => {
 
             if (date_type == "lecture") {
                 if (!time_details || time_details.length == 0) throw new ErrorResponse(`Please provide time_details at ${index}`);
-
+                if (lecture_type == 'online') {
+                    let zoomconfig = { start_time: time_details[0].start_time, hostemail: 'chandan7666h@gmail.com', topic: 'Zoom Test', duration: 20, agenda: 'testing' }
+                    const zoomData = await createZoomMeeting(zoomconfig)
+                    item.zoom_link = zoomData?.start_url;
+                }
                 for (let i = 0; i < time_details.length; i++) {
                     const time_item = time_details[i];
                     const { start_time, end_time, subject, topics, teacher } = time_item;
@@ -160,7 +165,7 @@ exports.UpdateLecture = asyncHandler(async (req, res) => {
 
         let oldLecture = await DateDetails.findOne({ "time_details._id": id });
         if (!oldLecture) throw new ErrorResponse(`lecture id not found`, 400);
-        oldLecture = oldLecture.time_details.find((tim)=> tim._id == id);
+        oldLecture = oldLecture.time_details.find((tim) => tim._id == id);
 
         let oldStartTime = moment(oldLecture.start_time).hour();
         let oldEndTime = moment(oldLecture.end_time).hour();
@@ -169,16 +174,16 @@ exports.UpdateLecture = asyncHandler(async (req, res) => {
         let latestEndTime = moment(end_time).hour();
 
         if (start_time && oldStartTime != latestStartTime) {
-            if(start_time && latestStartTime > oldStartTime){
+            if (start_time && latestStartTime > oldStartTime) {
                 status = "Postponed"
-            }else if(start_time && latestStartTime < oldStartTime){
+            } else if (start_time && latestStartTime < oldStartTime) {
                 status = "Preponed"
             }
         }
         if (end_time && oldEndTime != latestEndTime) {
-            if(end_time && latestEndTime > oldEndTime){
+            if (end_time && latestEndTime > oldEndTime) {
                 status = "Postponed"
-            }else if(end_time && latestEndTime < oldEndTime){
+            } else if (end_time && latestEndTime < oldEndTime) {
                 status = "Preponed"
             }
         }

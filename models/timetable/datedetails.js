@@ -21,6 +21,14 @@ const datedetailsScheme = new mongoose.Schema(
             enum: ["online", "offline"],
             required: [true, "Please provide lecture_type"]
         },
+        zoom_link: {
+            type: String,
+            // enum: ["online", "offline"],
+        },
+        zoom_password: {
+            type: String,
+            // enum: ["online", "offline"],
+        },
         status: {
             type: String
         },

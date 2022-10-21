@@ -2,7 +2,6 @@
 const asyncHandler = require('../../middleware/asyncHandler');
 const ErrorResponse = require('../../utils/ErrorResponse');
 const { validationCheck, findUniqueData } = require('../../middleware/validationCheck');
-
 //models
 const Timetable = require("../../models/timetable/timetable");
 const DateDetails = require("../../models/timetable/datedetails");

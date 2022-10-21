@@ -12,14 +12,14 @@ const payload = {
 };
 const tokenMain = jwt.sign(payload, API_SECRET);
 
-async function createZoomMeeting({ hostemail, topic, duration, password, agenda }, settings) {
+async function createZoomMeeting({ start_time, hostemail, topic, duration, password, agenda }, settings) {
     try {
         const token = tokenMain;
         const email = hostemail;
         const result = await axios.post("https://api.zoom.us/v2/users/" + email + "/meetings", {
             "topic": topic,
             "type": 2,
-            "start_time": ((new Date()).getTime() + 5000),
+            "start_time": start_time,
             "duration": duration,
             "timezone": "India",
             "password": password && "1234567",
@@ -59,14 +59,14 @@ async function createZoomMeeting({ hostemail, topic, duration, password, agenda 
     }
 }
 
-async function updateMeeting({ meetingid, topic, duration, password, agenda }, settings) {
+async function updateMeeting({ start_time, meetingid, topic, duration, password, agenda }, settings) {
     try {
         const token = tokenMain;
         const meetingId = meetingid;
         const result = await axios.patch("https://api.zoom.us/v2/meetings/" + meetingId, {
             "topic": topic,
             "type": 2,
-            "start_time": ((new Date()).getTime() + 5000),
+            "start_time": start_time,
             "duration": duration,
             "timezone": "India",
             "password": password && "1234567",

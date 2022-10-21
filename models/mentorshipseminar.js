@@ -24,6 +24,9 @@ const mentorSeminarScheme = new mongoose.Schema(
             require: [true, "Please provide type"],
             trim: true,
         },
+        zoom_link: {
+            type: String
+        },
         mode: {
             type: String,
             trim: true,
