@@ -9,21 +9,21 @@ const { createZoomMeeting } = require('../../utils/zoom')
 const Seminar = require("../../models/mentorshipseminar");
 
 exports.createSeminar = asyncHandler(async (req, res) => {
-    const { teacher_name, meet_date_time, meet_type, type, mode, description } = req.body;
+    const { teacher_name, meet_date_time, type, description } = req.body;
     const validation = validationCheck({
-        teacher_name, meet_date_time, meet_type, type, mode, description
+        teacher_name, meet_date_time, type, description
     });
     if (!validation.status) {
         throw new ErrorResponse(`Please provide a ${validation?.errorAt}`, 400);
     }
     try {
         let zoom_link = undefined;
-        if (mode == 'online') {
-            let zoomconfig = { start_time: meet_date_time, hostemail: 'chandan7666h@gmail.com', topic: description, duration: 20, agenda: 'testing' }
-            const zoomData = await createZoomMeeting(zoomconfig)
-            zoom_link = zoomData?.start_url;
-        }
-        const dataCreated = await Seminar.create({ type: "seminar", teacher_name, meet_date_time, meet_type, type, mode, description, zoom_link });
+        // if (mode == 'online') {
+        let zoomconfig = { start_time: meet_date_time, hostemail: 'chandan7666h@gmail.com', topic: description, duration: 20, agenda: 'testing' }
+        const zoomData = await createZoomMeeting(zoomconfig)
+        zoom_link = zoomData?.start_url;
+        // }
+        const dataCreated = await Seminar.create({ type: "seminar", teacher_name, meet_date_time, type, description, zoom_link });
         return res.status(201).json({ success: true, data: dataCreated });
     } catch (error) {
         throw new ErrorResponse(`Server error :${error}`, 400);
@@ -47,7 +47,7 @@ exports.getSeminar = asyncHandler(async (req, res) => {
         };
     }
     try {
-        const data = await Seminar.find({ type: 'seminar', ...filter });
+        const data = await Seminar.find({ type: 'seminar', ...filter }).populate('teacher_name');
         return res.status(201).json({ success: true, data: data });
 
     } catch (error) {

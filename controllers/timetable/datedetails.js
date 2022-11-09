@@ -6,6 +6,7 @@ const { createZoomMeeting } = require('../../utils/zoom')
 
 //models
 const DateDetails = require("../../models/timetable/datedetails");
+const Subject = require("../../models/subject");
 const moment = require('moment');
 
 //Get All DateDetails
@@ -61,14 +62,16 @@ exports.CreateDateDetails = asyncHandler(async (req, res, next) => {
 
             if (date_type == "lecture") {
                 if (!time_details || time_details.length == 0) throw new ErrorResponse(`Please provide time_details at ${index}`);
-                if (lecture_type == 'online') {
-                    let zoomconfig = { start_time: time_details[0].start_time, hostemail: 'chandan7666h@gmail.com', topic: 'Zoom Test', duration: 20, agenda: 'testing' }
-                    const zoomData = await createZoomMeeting(zoomconfig)
-                    item.zoom_link = zoomData?.start_url;
-                }
                 for (let i = 0; i < time_details.length; i++) {
                     const time_item = time_details[i];
                     const { start_time, end_time, subject, topics, teacher } = time_item;
+                    if (lecture_type == 'online') {
+                        const subjectData = await Subject.findOne({ _id: subject });
+                        // console.log(subjectData)
+                        let zoomconfig = { start_time: start_time, hostemail: 'chandan7666h@gmail.com', topic: subjectData?.name, duration: 20, agenda: 'Online Lecture' }
+                        const zoomData = await createZoomMeeting(zoomconfig)
+                        time_details[i].zoom_link = zoomData?.start_url;
+                    }
 
                     validation = await validationCheck({ start_time, end_time, subject, topics, teacher });
                     if (!validation.status) throw new ErrorResponse(`Please provide a ${validation?.errorAt} in time_details at ${i} date ${moment(date).format("DD MMM YYYY")}`);

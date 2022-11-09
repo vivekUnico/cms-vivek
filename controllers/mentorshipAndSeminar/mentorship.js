@@ -9,7 +9,7 @@ const { createZoomMeeting } = require('../../utils/zoom')
 const Mentorship = require("../../models/mentorshipseminar");
 
 exports.createMentorShip = asyncHandler(async (req, res) => {
-    const { teacher_name, meet_date_time, meet_type, type, mode, description } = req.body;
+    const { teacher_name, meet_date_time, meet_type, type, mode, description, student } = req.body;
     const validation = validationCheck({
         teacher_name, meet_date_time, meet_type, type, mode, description
     });
@@ -20,11 +20,11 @@ exports.createMentorShip = asyncHandler(async (req, res) => {
         let zoom_link = undefined;
         console.log(mode)
         if (mode == 'Online') {
-            let zoomconfig = { start_time: meet_date_time, hostemail: 'chandan7666h@gmail.com', topic: description, duration: 20, agenda: 'testing' }
+            let zoomconfig = { start_time: meet_date_time, hostemail: 'chandan7666h@gmail.com', topic: description, duration: 20, agenda: description }
             const zoomData = await createZoomMeeting(zoomconfig)
             zoom_link = zoomData?.start_url;
         }
-        const dataCreated = await Mentorship.create({ type: "mentorship", teacher_name, meet_date_time, meet_type, type, mode, description, zoom_link });
+        const dataCreated = await Mentorship.create({ type: "mentorship", teacher_name, meet_date_time, meet_type, type, mode, description, zoom_link, student });
         return res.status(201).json({ success: true, data: dataCreated });
     } catch (error) {
         throw new ErrorResponse(`Server error :${error}`, 400);
@@ -48,7 +48,7 @@ exports.getMentorShip = asyncHandler(async (req, res) => {
         };
     }
     try {
-        const data = await Mentorship.find({ type: 'mentorship', ...filter });
+        const data = await Mentorship.find({ type: 'mentorship', ...filter }).populate('teacher_name student');
         return res.status(201).json({ success: true, data: data });
 
     } catch (error) {
@@ -57,7 +57,7 @@ exports.getMentorShip = asyncHandler(async (req, res) => {
 });
 
 exports.updateMentorShip = asyncHandler(async (req, res) => {
-    const { teacher_name, meet_date_time, meet_type, type, mode, description } = req.body;
+    const { teacher_name, meet_date_time, meet_type, type, mode, description, student } = req.body;
     const { id } = req.params;
     const validation = validationCheck({
         id
@@ -68,7 +68,7 @@ exports.updateMentorShip = asyncHandler(async (req, res) => {
     try {
         const dataUpdated = await Mentorship.findOneAndUpdate({ _id: id },
             {
-                type: "mentorship", teacher_name, meet_date_time, meet_type, type, mode, description
+                type: "mentorship", teacher_name, meet_date_time, meet_type, type, mode, description, student
             }, { returnOriginal: false });
         return res.status(201).json({ success: true, data: dataUpdated });
     } catch (error) {
@@ -105,7 +105,7 @@ exports.getSingleMentorShip = asyncHandler(async (req, res) => {
     try {
         const data = await Mentorship.findOne(
             { _id: id }
-        );
+        ).populate('teacher_name student');;
         return res.status(201).json({ success: true, data: data });
     } catch (error) {
         throw new ErrorResponse(`Server error :${error}`, 400);

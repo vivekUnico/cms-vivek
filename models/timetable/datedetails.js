@@ -21,14 +21,6 @@ const datedetailsScheme = new mongoose.Schema(
             enum: ["online", "offline"],
             required: [true, "Please provide lecture_type"]
         },
-        zoom_link: {
-            type: String,
-            // enum: ["online", "offline"],
-        },
-        zoom_password: {
-            type: String,
-            // enum: ["online", "offline"],
-        },
         status: {
             type: String
         },
@@ -52,6 +44,14 @@ const datedetailsScheme = new mongoose.Schema(
                     // required: [true, "Please provide teacher"],
                     type: mongoose.Schema.Types.ObjectId,
                     ref: 'staff'
+                },
+                zoom_link: {
+                    type: String,
+                    // enum: ["online", "offline"],
+                },
+                zoom_password: {
+                    type: String,
+                    // enum: ["online", "offline"],
                 },
                 status: {
                     type: String

@@ -3,9 +3,8 @@ const mongoose = require("mongoose");
 const mentorSeminarScheme = new mongoose.Schema(
     {
         teacher_name: {
-            type: String,
-            trim: true,
-            required: [true, "Please provide Teacher's name"],
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'staff',
         },
         meet_date_time: {
             type: Date,
@@ -30,14 +29,16 @@ const mentorSeminarScheme = new mongoose.Schema(
         mode: {
             type: String,
             trim: true,
-            required: [true, "Please provide Mode"],
         },
         description: {
             type: String,
             trim: true,
             required: [true, "Please provide description"],
         },
-
+        student: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'student',
+        },
     },
     { timestamps: true }
 );
