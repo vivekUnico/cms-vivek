@@ -27,7 +27,7 @@ exports.GetAllStaff = asyncHandler(async (req, res) => {
             { name: 'createdAt', value: { dateFrom: `${sub(parseISO(createdAt), { days: 1 }).toISOString()}`, dateTo: `${add(parseISO(createdAt), { days: 1 }).toISOString()}` }, type: 'date' },
         ])
     }
-    console.log(filter,filterDate)
+    console.log(filter, filterDate)
     try {
         const data = await Staff.find({ ...filter, ...filterDate }).populate(populate?.split(",").map((item) => ({ path: item })));
         return res.status(200).json({ success: true, data });
@@ -168,6 +168,21 @@ exports.loginUser = asyncHandler(async (req, res) => {
         } else {
             throw new ErrorResponse(`email or password incorrect`, 400);
         }
+    } catch (error) {
+        throw new ErrorResponse(`${error}`, 400);
+    }
+})
+
+//Login
+exports.verifyToken = asyncHandler(async (req, res) => {
+    const { token } = req.body;
+    try {
+        jwt.verify(token, process.env.JWT_SECRET, (err, response) => {
+            if (err) {
+                throw new ErrorResponse(`Please login again`, 403);
+            }
+            return res.status(200).json({ success: true, data: 'User Token valid.', msg: 'OK' });
+        })
     } catch (error) {
         throw new ErrorResponse(`${error}`, 400);
     }

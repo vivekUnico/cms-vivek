@@ -57,6 +57,10 @@ const staffScheme = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'course',
     }],
+    total_leave: {
+        type: Number,
+        default: 0
+    },
     staffCode: {
         type: String,
         required: [true, "Please provide staffCode"],
@@ -86,6 +90,7 @@ const staffScheme = new mongoose.Schema({
     },
     position: {
         type: String,
+        enum: ["admin", "manager", "employee", "sales", "marketing", "teacher", "accountant"],
         required: [true, "Please provide position"],
         trim: true,
     },

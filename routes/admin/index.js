@@ -33,6 +33,8 @@ const SeminarRouter = require("./seminar");
 const feedbackRouter = require("./feedback");
 const attendanceRouter = require("./attendance");
 
+const leavesRouter = require("./leave");
+
 router.use('/center', center);
 
 router.use('/batch', batch);
@@ -63,6 +65,8 @@ router.use('/seminar', SeminarRouter);
 
 router.use('/feedback', feedbackRouter);
 router.use('/attendance', attendanceRouter);
+
+router.use('/staff/leaves', leavesRouter);
 
 
 module.exports = router;
