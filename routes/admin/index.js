@@ -34,6 +34,7 @@ const feedbackRouter = require("./feedback");
 const attendanceRouter = require("./attendance");
 
 const leavesRouter = require("./leave");
+const adminSupportRouter = require("./adminsupport");
 
 router.use('/center', center);
 
@@ -67,6 +68,7 @@ router.use('/feedback', feedbackRouter);
 router.use('/attendance', attendanceRouter);
 
 router.use('/staff/leaves', leavesRouter);
+router.use('/admin-support', adminSupportRouter);
 
 
 module.exports = router;

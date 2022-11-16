@@ -12,6 +12,11 @@ const commentScheme = new mongoose.Schema(
             ref: 'staff',
             required: [true, "Please provide assignedTo"]
         },
+        ticketId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'asTicket',
+            required: [true, "Please provide ticketId"]
+        },
     },
     { timestamps: true }
 );
