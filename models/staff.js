@@ -50,7 +50,7 @@ const staffScheme = new mongoose.Schema({
     },
     center: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'course',
+        ref: 'center',
         required: [true, "Please provide center"],
     },
     subjects: [{
