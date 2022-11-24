@@ -32,14 +32,13 @@ module.exports = (io) => {
             let userid = userValidation.data.userid;
             if (!communityid && !userid) return;
             let _id = communityid;
-            await Community.findOneAndUpdate(
+            const msgData = await Community.findOneAndUpdate(
                 { _id },
                 {
                     $push: { messages: { message, user: userid, created_by_type, type } }
                 },
                 { new: true, useFindAndModify: false, returnOriginal: false }
-            );
-            const msgData = await Community.findOne({ _id }).populate({ path: 'messages.user' })
+            ).populate({ path: 'messages.user' });
             return io.in(communityid).emit('send-message', msgData);
 
         })
