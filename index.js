@@ -5,6 +5,16 @@ const cors = require("cors");
 const connectDB = require("./config/db");
 const errorHandler = require("./middleware/errorHandler");
 
+/*
+* ###################################### For socket io implementation ######################################
+*/
+const http = require('http');
+// --------------------------------- initialize app ---------------------------------
+const app = express();
+const server = http.createServer(app);
+const io = require('socket.io').listen(server);
+require('./controllers/community/socket')(io);
+
 // Models
 const StudyMaterial = require("./models/studymaterial");
 
@@ -19,8 +29,6 @@ if (process.env.NODE_ENV !== "production") {
 const adminRouter = require('./routes/admin');
 const studentRouter = require('./routes/student');
 // const customerRouter = require('./routes/user/user');
-// --------------------------------- initialize app ---------------------------------
-const app = express();
 
 // --------------------------------- Logging Middleware ---------------------------------
 app.use(morgan("dev"));
@@ -41,7 +49,7 @@ app.use(errorHandler);
 
 // --------------------------------- Express App setup ---------------------------------
 const PORT = process.env.PORT || 5000;
-const server = app.listen(PORT, async () => {
+const servermain = server.listen(PORT, async () => {
   await connectDB();
   const rootStudyMateialFolderExists = await StudyMaterial.find({});
   if (rootStudyMateialFolderExists.length == 0) {

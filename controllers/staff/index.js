@@ -150,7 +150,9 @@ exports.loginUser = asyncHandler(async (req, res) => {
             throw new ErrorResponse(`email provided doesn't exist`, 400);
         }
 
+        console.log('is Password ok -->', password, userData.password)
         const passwordOk = await comparePassword(password, userData.password);
+        console.log('is Password ok -->', passwordOk)
         if (passwordOk) {
             const token = jwt.sign(
                 {

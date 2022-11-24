@@ -35,6 +35,7 @@ const attendanceRouter = require("./attendance");
 
 const leavesRouter = require("./leave");
 const adminSupportRouter = require("./adminsupport");
+const communityRouter = require("./community");
 
 router.use('/center', center);
 
@@ -69,6 +70,7 @@ router.use('/attendance', attendanceRouter);
 
 router.use('/staff/leaves', leavesRouter);
 router.use('/admin-support', adminSupportRouter);
+router.use('/community', communityRouter);
 
 
 module.exports = router;
