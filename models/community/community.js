@@ -24,25 +24,25 @@ const communityScheme = new Schema(
                 default: false
             }
         }],
-        messages: [
-            {
-                message: {
-                    type: String,
-                },
-                user: {
-                    type: mongoose.Schema.Types.ObjectId,
-                    refPath: 'created_by_type'
-                },
-                created_by_type: {
-                    type: String,
-                    enum: ["student", "staff"],
-                },
-                type: {
-                    type: String,
-                    enum: ["text", "image"],
-                }
-            }
-        ],
+        // messages: [
+        //     {
+        //         message: {
+        //             type: String,
+        //         },
+        //         user: {
+        //             type: mongoose.Schema.Types.ObjectId,
+        //             refPath: 'created_by_type'
+        //         },
+        //         created_by_type: {
+        //             type: String,
+        //             enum: ["student", "staff"],
+        //         },
+        //         type: {
+        //             type: String,
+        //             enum: ["text", "image"],
+        //         }
+        //     }
+        // ],
         createdby: {
             type: mongoose.Schema.Types.ObjectId,
             require: [true, "Please provide course price"],

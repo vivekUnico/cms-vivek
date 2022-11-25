@@ -1,6 +1,7 @@
 const { validateUser } = require('../../utils/validateUser');
 //models
-const Community = require('../../models/community');
+const Community = require('../../models/community/community');
+const Messages = require('../../models/community/messages');
 
 module.exports = (io) => {
     io.on('connection', (socket) => {
@@ -10,6 +11,7 @@ module.exports = (io) => {
          */
         socket.on('join-room', (data) => {
             const { roomId, token } = data;
+            console.log('join room')
             const user = validateUser(token);
             //validation
             if (!user.data.userid && !roomId) return;
@@ -24,23 +26,27 @@ module.exports = (io) => {
             socket.leave(communityid);
         });
         /*
-         * Send messages in room
+         * Load Messages of a community chat room
+        */
+        socket.on('load-messages', async (data) => {
+            const { communityid, user, } = data;//here type can be text|image|etc;
+            const userValidation = validateUser(user);
+            if (!communityid) return;
+            if (userValidation.message === 'error') { console.log(userValidation); return; };
+            const msgData = await Messages.find({ communityid }).populate('user', 'first_name name').sort({ createdAt: 'ascending' });
+            io.in(communityid).emit('send-message', msgData);
+        })
+        /*
+         * Send messages in community chat room
         */
         socket.on('send-message', async (data) => {
             const { communityid, message, user, created_by_type, type } = data;//here type can be text|image|etc;
             const userValidation = validateUser(user);
             let userid = userValidation.data.userid;
             if (!communityid && !userid) return;
-            let _id = communityid;
-            const msgData = await Community.findOneAndUpdate(
-                { _id },
-                {
-                    $push: { messages: { message, user: userid, created_by_type, type } }
-                },
-                { new: true, useFindAndModify: false, returnOriginal: false }
-            ).populate({ path: 'messages.user' });
-            return io.in(communityid).emit('send-message', msgData);
-
+            await Messages.create({ communityid, message, user: userid, created_by_type, type });
+            const msgData = await Messages.find({ communityid }).populate('user', 'first_name name').sort({ createdAt: 'ascending' });
+            io.in(communityid).emit('send-message', msgData);
         })
     })
 

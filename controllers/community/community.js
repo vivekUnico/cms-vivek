@@ -5,7 +5,7 @@ const { validationCheck, findUniqueData } = require('../../middleware/validation
 const { createFilter } = require('../../utils/filter');
 
 //models
-const Community = require("../../models/community");
+const Community = require("../../models/community/community");
 let modelName = Community;
 
 exports.CreateCommunity = asyncHandler(async (req, res) => {
