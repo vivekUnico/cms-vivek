@@ -9,6 +9,7 @@ const Vendor = require("../../models/adminSupport/asVendors");
 let modelName = Vendor;
 
 exports.CreateVendors = asyncHandler(async (req, res) => {
+    console.log('v')
     const { vendorName, kpc, email, phone, websiteURL, typeOfVendor, RegisteredOn } = req.body;
     const schemaData = { vendorName, kpc, email, phone, websiteURL, typeOfVendor, RegisteredOn };
     let validation = validationCheck(schemaData);

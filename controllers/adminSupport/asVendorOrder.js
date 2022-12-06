@@ -5,14 +5,16 @@ const { validationCheck, findUniqueData } = require('../../middleware/validation
 const { createFilter } = require('../../utils/filter');
 
 //models
-const Contact = require("../../models/adminSupport/asContact");
-let modelName = Contact;
+const VendorOrder = require("../../models/adminSupport/asVendorOrder");
+let modelName = VendorOrder;
 
 
-exports.CreateContact = asyncHandler(async (req, res) => {
-    const { contactName, center, email, phone, comment } = req.body;
-    const schemaData = { contactName, center, email, phone, comment };
-    let validation = validationCheck(schemaData);
+exports.CreateVendorsOrder = asyncHandler(async (req, res) => {
+    console.log('vo')
+
+    const { orderName, totalCost, totalPaid, totalPending, deliveryDate, orderStatus, quotetion, invoice } = req.body;
+    const schemaData = { orderName, totalCost, totalPaid, totalPending, deliveryDate, orderStatus, quotetion, invoice };
+    let validation = validationCheck(orderName, totalCost, totalPaid, totalPending, deliveryDate, orderStatus);
     if (!validation.status) {
         throw new ErrorResponse(`Please provide a ${validation?.errorAt}`, 400);
     }
@@ -25,9 +27,8 @@ exports.CreateContact = asyncHandler(async (req, res) => {
 })
 
 
-exports.GetAllContacts = asyncHandler(async (req, res) => {
-    console.log('contact get')
-    let {select, populate, name, createdAt } = req.query;
+exports.ReadVendorsOrder = asyncHandler(async (req, res) => {
+    let { select, populate, name, createdAt } = req.query;
     const filter = createFilter([
         // { name: 'first_name', value: name, type: 'text' },
     ])
@@ -45,7 +46,7 @@ exports.GetAllContacts = asyncHandler(async (req, res) => {
     }
 });
 
-exports.ReadSingleContact = asyncHandler(async (req, res) => {
+exports.ReadSingleVendorsOrder = asyncHandler(async (req, res) => {
     const { id } = req.params;
     const { select, populate } = req.query;
 
@@ -57,17 +58,17 @@ exports.ReadSingleContact = asyncHandler(async (req, res) => {
     }
 })
 
-exports.UpdateContact = asyncHandler(async (req, res) => {
+exports.UpdateVendorsOrder = asyncHandler(async (req, res) => {
     const { id } = req.params;
     try {
-        const data = await modelName.findOneAndUpdate({ _id: id }, {$set:req.body}, { returnOriginal: false });
+        const data = await modelName.findOneAndUpdate({ _id: id }, { $set: req.body }, { returnOriginal: false });
         return res.status(201).json({ success: true, data });
     } catch (error) {
         throw new ErrorResponse(`Server error :${error}`, 400);
     }
 })
 
-exports.DeleteContact = asyncHandler(async (req, res) => {
+exports.DeleteVendorsOrder = asyncHandler(async (req, res) => {
     const { id } = req.params;
     try {
         const data = await modelName.deleteOne({ _id: id });

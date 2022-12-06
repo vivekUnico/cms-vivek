@@ -9,7 +9,8 @@ const { CreateResolution, DeleteResolution, ReadResolution, UpdateResolution } =
 const { CreateInfastructure, DeleteInfastructure, ReadInfastructure, ReadSingleInfastructure, UpdateInfastructure } = require('../../controllers/adminSupport/asInfastructure');
 const { CreateVendors, DeleteVendors, ReadSingleVendors, ReadVendors, UpdateVendors } = require('../../controllers/adminSupport/asVendors');
 const { CreatePhysicalMaterials, DeletePhysicalMaterials, ReadPhysicalMaterials, ReadSinglePhysicalMaterials, UpdatePhysicalMaterials } = require('../../controllers/adminSupport/asPhysicalMaterials');
-const { GetAllContacts } = require('../../controllers/adminSupport/asContacts');
+const { GetAllContacts, CreateContact, ReadSingleContact, DeleteContact, UpdateContact } = require('../../controllers/adminSupport/asContacts');
+const { CreateVendorsOrder, ReadVendorsOrder, ReadSingleVendorsOrder, DeleteVendorsOrder, UpdateVendorsOrder } = require("../../controllers/adminSupport/asVendorOrder");
 
 
 /*
@@ -53,6 +54,15 @@ router.route('/vendor/:id').put(UpdateVendors);
 
 
 /*
+* Vendors Route order
+*/
+router.route('/vendor-order').post(CreateVendorsOrder);
+router.route('/vendor-order').get(ReadVendorsOrder);
+router.route('/vendor-order/single/:id').get(ReadSingleVendorsOrder);
+router.route('/vendor-order/:id').delete(DeleteVendorsOrder);
+router.route('/vendor-order/:id').put(UpdateVendorsOrder);
+
+/*
 * Physical Matertial Route
 */
 router.route('/physicalmaterial').post(CreatePhysicalMaterials);
@@ -66,7 +76,10 @@ router.route('/physicalmaterial/:id').put(UpdatePhysicalMaterials);
 * Contact Route
 */
 router.route('/contact').get(GetAllContacts);
-
+router.route('/contact').post(CreateContact);
+router.route('/contact/single/:id').get(ReadSingleContact);
+router.route('/contact/:id').delete(DeleteContact);
+router.route('/contact/:id').put(UpdateContact);
 
 
 module.exports = router;
