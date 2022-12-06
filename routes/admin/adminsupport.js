@@ -57,7 +57,7 @@ router.route('/vendor/:id').put(UpdateVendors);
 * Vendors Route order
 */
 router.route('/vendor-order').post(CreateVendorsOrder);
-router.route('/vendor-order').get(ReadVendorsOrder);
+router.route('/vendor-order/:id').get(ReadVendorsOrder);
 router.route('/vendor-order/single/:id').get(ReadSingleVendorsOrder);
 router.route('/vendor-order/:id').delete(DeleteVendorsOrder);
 router.route('/vendor-order/:id').put(UpdateVendorsOrder);

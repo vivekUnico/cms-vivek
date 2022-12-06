@@ -12,9 +12,9 @@ let modelName = VendorOrder;
 exports.CreateVendorsOrder = asyncHandler(async (req, res) => {
     console.log('vo')
 
-    const { orderName, totalCost, totalPaid, totalPending, deliveryDate, orderStatus, quotetion, invoice } = req.body;
-    const schemaData = { orderName, totalCost, totalPaid, totalPending, deliveryDate, orderStatus, quotetion, invoice };
-    let validation = validationCheck(orderName, totalCost, totalPaid, totalPending, deliveryDate, orderStatus);
+    const { orderName,vendorId, totalCost, totalPaid, totalPending, deliveryDate, orderStatus, quotetion, invoice } = req.body;
+    const schemaData = { orderName,vendorId, totalCost, totalPaid, totalPending, deliveryDate, orderStatus, quotetion, invoice };
+    let validation = validationCheck(orderName,vendorId, totalCost, totalPaid, totalPending, deliveryDate, orderStatus);
     if (!validation.status) {
         throw new ErrorResponse(`Please provide a ${validation?.errorAt}`, 400);
     }
@@ -29,6 +29,7 @@ exports.CreateVendorsOrder = asyncHandler(async (req, res) => {
 
 exports.ReadVendorsOrder = asyncHandler(async (req, res) => {
     let { select, populate, name, createdAt } = req.query;
+    const { id } = req.params;
     const filter = createFilter([
         // { name: 'first_name', value: name, type: 'text' },
     ])
@@ -38,8 +39,13 @@ exports.ReadVendorsOrder = asyncHandler(async (req, res) => {
             { name: 'createdAt', value: { dateFrom: `${sub(parseISO(createdAt), { days: 1 }).toISOString()}`, dateTo: `${add(parseISO(createdAt), { days: 1 }).toISOString()}` }, type: 'date' },
         ])
     }
+   
     try {
-        const data = await modelName.find({ ...filter, ...filterDate }).select(select?.split(",")).populate(populate?.split(",").map((item) => ({ path: item })));
+        if(!id){
+            console.log('vendor id ==>',id)
+            throw new ErrorResponse("please Provide Valide Vendor Id", 400);
+        }
+        const data = await modelName.find({ ...filter, ...filterDate, vendorId: id }).select(select?.split(",")).populate(populate?.split(",").map((item) => ({ path: item })));
         return res.status(200).json({ success: true, data });
     } catch (error) {
         throw new ErrorResponse(`Server error :${error}`, 400);

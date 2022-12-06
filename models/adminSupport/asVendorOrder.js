@@ -7,6 +7,11 @@ const orderScheme = new mongoose.Schema(
             trim: true,
             required: [true, "Please provide orderName"]
         },
+        vendorId: {
+            type: String,
+            trim: true,
+            required: [true, "Please provide vendorId"]
+        },
         totalCost: {
             type: String,
             trim: true,
