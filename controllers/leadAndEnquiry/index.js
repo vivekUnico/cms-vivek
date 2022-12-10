@@ -35,10 +35,10 @@ exports.GetAllLeadAndEnquiry = asyncHandler(async (req, res) => {
 //Create Single LeadAndEnquiry
 exports.CreateLeadAndEnquiry = asyncHandler(async (req, res) => {
     try {
-        const { name, gender, mobile, email, date, assign_to, comment, alternate_number, status, source, courses, center, medium, city } = req.body;
+        const { name, gender, mobile, email, date, assign_to, comment, alternate_number, status, source, courses, center, medium, city,batch } = req.body;
         let { currentStatus } = req.body;
 
-        let validation = await validationCheck({ currentStatus, name, email, date, assign_to, status, source, center });
+        let validation = await validationCheck({ currentStatus, name, email, date, assign_to, status, source, center,batch });
         if (!validation.status) {
             throw new ErrorResponse(`Please provide a ${validation?.errorAt}`, 400);
         }
@@ -51,7 +51,7 @@ exports.CreateLeadAndEnquiry = asyncHandler(async (req, res) => {
         if (checkEmail) throw new ErrorResponse(`email already exist`, 400);
 
         //main and final body
-        let schemaData = { currentStatus, name, gender, mobile, email, date, assign_to, comment, alternate_number, status, source, courses, center, medium, city };
+        let schemaData = { currentStatus, name, gender, mobile, email, date, assign_to, comment, alternate_number, status, source, courses, center, medium, city,batch };
 
         if (currentStatus == "lead") {
             let leadSchema = { isLead: true };
