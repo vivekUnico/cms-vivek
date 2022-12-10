@@ -59,6 +59,10 @@ let mainSchema = {
         type: String,
         enum: ["English", "Hindi", "Other"]
     },
+    batch: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'batch'
+    },
     city: {
         type: String,
         trim: true

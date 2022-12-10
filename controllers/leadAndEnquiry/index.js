@@ -125,7 +125,7 @@ exports.MoveLeadToEnquiry = asyncHandler(async (req, res) => {
 
         let oldLeadAndEnquiry = await findUniqueData(LeadAndEnquiry, { _id: id });
         if (!oldLeadAndEnquiry) throw new ErrorResponse(`Lead not found`, 400);
-        if (oldLeadAndEnquiry.currentStatus != "lead") throw new ErrorResponse(`You cannot update this lead.`, 400);
+        if (oldLeadAndEnquiry.currentStatus != "lead") throw new ErrorResponse(`This lead is already moved into Enquiry stage.`, 400);
 
         const data = await LeadAndEnquiry.findOneAndUpdate({ _id: id }, { isEnquiry: true, currentStatus: "enquiry" }, { returnOriginal: false });
         return res.status(201).json({ success: true, data });
