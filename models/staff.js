@@ -74,9 +74,9 @@ const staffScheme = new mongoose.Schema({
     },
     loginId: {
         type: String,
-        required: [true, "Please provide loginId"],
+        // required: [true, "Please provide loginId"],
         trim: true,
-        unique: true,
+        // unique: true,
     },
     role: {
         type: String,
@@ -131,7 +131,7 @@ const staffScheme = new mongoose.Schema({
     account_status: {
         type: String,
         enum: ["active", "block", "old"],
-        required: [true, "Please provide account_status"]
+        // required: [true, "Please provide account_status"]
     },
 }, { timestamps: true }
 );

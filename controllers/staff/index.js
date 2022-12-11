@@ -39,15 +39,15 @@ exports.GetAllStaff = asyncHandler(async (req, res) => {
 //Create Single Staff
 exports.CreateStaff = asyncHandler(async (req, res) => {
     try {
-        const { initial, first_name, last_name, email, mobile, dob, center, staffCode, salary_type, loginId, role, department, position, grade, shift, qualification, manager, joining_date, job_type, gender, account_status, subjects } = req.body;
+        const { initial, first_name, last_name, email, mobile,password, dob, center, staffCode, salary_type, loginId, role, department, position, grade, shift, qualification, manager, joining_date, job_type, gender, account_status, subjects } = req.body;
 
-        let validation = await validationCheck({ initial, first_name, last_name, email, mobile, dob, center, staffCode, salary_type, loginId, role, department, position, grade, shift, qualification, manager, joining_date, job_type, gender, account_status, subjects });
+        let validation = await validationCheck({ initial, first_name, last_name, email, mobile,password, dob, center, staffCode, salary_type, role, department, position, shift, qualification, manager, joining_date, job_type, gender });
         if (!validation.status) {
             throw new ErrorResponse(`Please provide a ${validation?.errorAt}`, 400);
         }
-        let schemaData = { initial, first_name, last_name, email, mobile, dob, center, staffCode, salary_type, loginId, role, department, position, grade, shift, qualification, manager, joining_date, job_type, gender, account_status, subjects };
+        let schemaData = { initial, first_name, last_name, email,password, mobile, dob, center, staffCode, salary_type, role, department, position, shift, qualification, manager, joining_date, job_type, gender };
 
-        const hashedPassword = await hashPassword(mobile);
+        const hashedPassword = await hashPassword(password);
         schemaData.password = hashedPassword;
 
         let checkEmail = await findUniqueData(Staff, { email });
