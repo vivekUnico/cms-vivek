@@ -96,7 +96,7 @@ const staffScheme = new mongoose.Schema({
     },
     grade: {
         type: String,
-        required: [true, "Please provide grade"],
+        // required: [true, "Please provide grade"],
         trim: true,
     },
     shift: {
