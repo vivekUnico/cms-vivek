@@ -9,6 +9,7 @@ module.exports = async () => {
   try {
     const conn = await mongoose.connect(
       `${process.env.MONGODB_CONNECTION_STRING}`,//connection string
+      // "mongodb+srv://vivek:123@cluster0.jrtk4.mongodb.net/?retryWrites=true&w=majority",
       {
         //   useCreateIndex: true,
         //   useFindAndModify: false,
