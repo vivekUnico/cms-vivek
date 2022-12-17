@@ -56,18 +56,21 @@ exports.GetSingleFollowup = asyncHandler(async (req, res) => {
 
 //Create Single Followup, Update Single Followup
 exports.CreateFollowup = asyncHandler(async (req, res) => {
+    console.log("i got called....");
     try {
         const { followup_type, connection_id, created_by, followup_list } = req.body;
         let validation = await validationCheck({ followup_type, connection_id, created_by, followup_list });
+
         if (!validation.status) {
             throw new ErrorResponse(`Please provide a ${validation?.errorAt}`, 400);
         } else if (!followup_list || followup_list?.length == 0) {
             throw new ErrorResponse(`Please provide followup_list`, 400);
         };
+
         let check = await LeadAndEnquiry.findOne({ _id: connection_id })
         if (!check) throw new ErrorResponse(`connection_id not found`, 400);
 
-        for (let i = 0; i < followup_list.length; i++) {
+        for (let i = 0; i < followup_list?.length; i++) {
             const item = followup_list[i];
             let { date, followup_by, status, comment, completed_comment, completed } = item;
             let validation = await validationCheck({ date, followup_by, status });
