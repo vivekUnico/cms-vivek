@@ -42,6 +42,10 @@ const followupScheme = new mongoose.Schema(
                     type: Boolean,
                     default: false
                 },
+                addedTime : {
+                    type: Date,
+                    default : new Date()
+                }
             }
         ]
     },

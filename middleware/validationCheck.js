@@ -7,6 +7,16 @@ exports.validationCheck = (data) => {
   return { status: true };
 };
 
+exports.validationImportent = (data) => {
+  let importent = ["name", "mobile", "date", "courses"];
+  for (let key in data) {
+    if (importent.includes(key) && ((!data[key]) || (data[key].length == 0))) {
+      return { status: false, errorAt: key };
+    }
+  }
+  return { status: true };
+}
+
 exports.validateEmail = (emailAdress) => {
   // let regexEmail = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
   let regexEmail = /^(("[\w-\s]+")|([\w-]+(?:\.[\w-]+)*)|("[\w-\s]+")([\w-]+(?:\.[\w-]+)*))(@((?:[\w-]+\.)*\w[\w-]{0,66})\.([a-z]{2,6}(?:\.[a-z]{2})?)$)|(@\[?((25[0-5]\.|2[0-4][0-9]\.|1[0-9]{2}\.|[0-9]{1,2}\.))((25[0-5]|2[0-4][0-9]|1[0-9]{2}|[0-9]{1,2})\.){2}(25[0-5]|2[0-4][0-9]|1[0-9]{2}|[0-9]{1,2})\]?$)/;
