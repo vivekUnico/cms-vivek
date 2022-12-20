@@ -1,7 +1,7 @@
 //validation middleware
 const asyncHandler = require('../../middleware/asyncHandler');
 const ErrorResponse = require('../../utils/ErrorResponse');
-const { validationCheck, findUniqueData } = require('../../middleware/validationCheck');
+const { validationCheck, findUniqueData, validationImportent } = require('../../middleware/validationCheck');
 
 //models
 const LeadAndEnquiry = require("../../models/leadAndEnquiry");
@@ -35,28 +35,27 @@ exports.GetAllLeadAndEnquiry = asyncHandler(async (req, res) => {
 //Create Single LeadAndEnquiry
 exports.CreateLeadAndEnquiry = asyncHandler(async (req, res) => {
     try {
-        const { name, gender, mobile, email, date, assign_to, comment, alternate_number, status, source, courses, center, medium, city,batch } = req.body;
-        let { currentStatus } = req.body;
-
-        let validation = await validationCheck({ currentStatus, name, email, date, assign_to, status, source, center,batch });
+        const { name, gender, mobile, email, date, assign_to, comment, next_followup_date,
+            alternate_number, status, source, courses, center, medium, city, currentStatus } = req.body;
+        let validation = validationImportent({ currentStatus, name, email, date, assign_to, status, source, center });
         if (!validation.status) {
             throw new ErrorResponse(`Please provide a ${validation?.errorAt}`, 400);
         }
-        if (currentStatus == "lead" && currentStatus != "enquiry" || currentStatus == "enquiry" && currentStatus != "lead") { } else {
+        if (currentStatus == "lead" && currentStatus != "enquiry" || currentStatus == "enquiry" && currentStatus != "lead") { } 
+        else {
             throw new ErrorResponse(`Please provide valid currentStatus`, 400);
         }
-
-
-        let checkEmail = await findUniqueData(LeadAndEnquiry, { email });
-        if (checkEmail) throw new ErrorResponse(`email already exist`, 400);
-
+        if (email) {
+            let checkEmail = await findUniqueData(LeadAndEnquiry, { email });
+            if (checkEmail) 
+                throw new ErrorResponse(`email already exist`, 400);
+        }
         //main and final body
-        let schemaData = { currentStatus, name, gender, mobile, email, date, assign_to, comment, alternate_number, status, source, courses, center, medium, city,batch };
-
+        let schemaData = { currentStatus, name, gender, mobile, email, date, assign_to, comment, 
+            alternate_number, status, source, courses, center, medium, city };
         if (currentStatus == "lead") {
             let leadSchema = { isLead: true };
             schemaData = { ...schemaData, ...leadSchema };
-
         } else if (currentStatus == "enquiry") {
             let { gross_amount, committed_amount, bifuraction } = req.body;
             let enquirySchema = {
@@ -66,16 +65,15 @@ exports.CreateLeadAndEnquiry = asyncHandler(async (req, res) => {
                     gross_amount, committed_amount, bifuraction
                 }
             };
-
-            validation = await validationCheck({ ...enquirySchema, ...enquirySchema.enquiry_data });
-            if (!validation.status) {
-                throw new ErrorResponse(`Please provide a ${validation?.errorAt}`, 400);
-            };
-
             schemaData = { ...schemaData, ...enquirySchema };
         }
-
+        validation = validationImportent({ ...schemaData });
+        if (!validation.status) {
+            throw new ErrorResponse(`Please provide a ${validation?.errorAt}`, 400);
+        };
+        Object.keys(schemaData).map((key) => (!schemaData[key]) ? delete schemaData[key] : "");
         const data = await LeadAndEnquiry.create(schemaData);
+        console.log(data._id);
         return res.status(201).json({ success: true, data });
     } catch (error) {
         throw new ErrorResponse(`Server error :${error}`, 400);
