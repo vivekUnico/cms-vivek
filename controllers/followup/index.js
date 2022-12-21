@@ -78,7 +78,8 @@ exports.CreateFollowup = asyncHandler(async (req, res) => {
                 throw new ErrorResponse(`Please provide a ${validation?.errorAt} in followup_list ${i}`, 400);
             }
         }
-        followup_list[followup_list?.length - 1]["addedTime"] = new Date().toISOString();
+        if (followup_list?.length && followup_list[followup_list?.length - 1]["addedTime"] == undefined)
+            followup_list[followup_list?.length - 1]["addedTime"] = new Date().toISOString();
         console.log(new Date(followup_list[followup_list?.length - 1]['date']).toLocaleTimeString());
         let schemaData = { followup_type, connection_id, created_by, followup_list };
 
