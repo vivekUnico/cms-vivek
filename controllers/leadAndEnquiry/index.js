@@ -144,8 +144,8 @@ exports.UpdateLead = asyncHandler(async (req, res) => {
         if (!oldLeadAndEnquiry) throw new ErrorResponse(`Lead not found`, 400);
         if (oldLeadAndEnquiry.currentStatus != "lead") throw new ErrorResponse(`You cannot update this lead.`, 400);
 
-        const { name, gender, mobile, email, date, assign_to, comment, alternate_number, status, source, courses, center, medium, city } = req.body;
-
+        const { name, gender, mobile, email, date, assign_to, comment, alternate_number, 
+            status, source, courses, center, medium, city } = req.body;
         //validate email
         if (oldLeadAndEnquiry.email != email) {
             let checkEmail = await findUniqueData(LeadAndEnquiry, { email });
@@ -175,7 +175,7 @@ exports.UpdateEnquiry = asyncHandler(async (req, res) => {
 
         const { name, gender, mobile, email, date, assign_to, comment, alternate_number, status, source, courses, center, medium, city } = req.body;
         let { gross_amount, committed_amount, bifuraction, fees } = req.body;
-
+        console.log(alternate_number);
         //validate email
         if (email && oldLeadAndEnquiry.enquiry_data.email != email) {
             let checkEmail = await findUniqueData(LeadAndEnquiry, { $or: [{ "enquiry_data.email": email, "isEnquiry": true }, { email, "isEnquiry": true }] });
@@ -183,13 +183,14 @@ exports.UpdateEnquiry = asyncHandler(async (req, res) => {
         }
 
         //main and final body
-        let schemaData = { gross_amount, committed_amount, bifuraction, name, gender, mobile, email, date, assign_to, comment, alternate_number, status, source, courses, center, medium, city, fees };
+        let schemaData = { gross_amount, committed_amount, bifuraction, name, gender, mobile, email, 
+                date, assign_to, comment, alternate_number, status, source, courses, center, medium, city, fees };
         let updateData = {};
         Object.entries(schemaData).map((item) => {
             updateData[`enquiry_data.${item[0]}`] = item[1];
+            updateData[`${item[0]}`] = item[1];
         });
-
-        const data = await LeadAndEnquiry.findOneAndUpdate({ _id: id }, { $set: updateData }, { returnOriginal: false });
+        const data = await LeadAndEnquiry.findOneAndUpdate({ _id: id }, { $set: updateData }, { returnOriginal: true });
         return res.status(201).json({ success: true, data });
     } catch (error) {
         throw new ErrorResponse(`Server error :${error}`, 400);
