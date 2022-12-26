@@ -2,10 +2,11 @@ const express = require("express");
 const router = express.Router();
 
 const { CreateLeadAndEnquiry, GetAllLeadAndEnquiry, GetSingleLeadAndEnquiry, DeleteLeadAndEnquiry, UpdateLead, 
-        UpdateEnquiry, MoveLeadToEnquiry } = require("../../../controllers/leadAndEnquiry");
+        GetLeadAndEnquiryByFilter,  UpdateEnquiry, MoveLeadToEnquiry } = require("../../../controllers/leadAndEnquiry");
 
 router.route('/').get(GetAllLeadAndEnquiry)
 router.route('/').post(CreateLeadAndEnquiry)
+router.route('/filter').get(GetLeadAndEnquiryByFilter);
 
 router.route('/:id').get(GetSingleLeadAndEnquiry)
 router.route('/:id').delete(DeleteLeadAndEnquiry)
