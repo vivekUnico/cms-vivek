@@ -33,7 +33,7 @@ exports.GetAllFollowup = asyncHandler(async (req, res) => {
             }
         }
         let data = await Followup.find({ ...filter }).populate(populate?.split(",").map((item) => ({ path: item })));
-        return res.status(200).json({ success: true, filter,data });
+        return res.status(200).json({ success: true, filter, data });
     } catch (error) {
         throw new ErrorResponse(`Server error :${error}`, 400);
     }

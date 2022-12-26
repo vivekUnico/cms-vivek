@@ -7,6 +7,37 @@ const { validationCheck, findUniqueData, validationImportent } = require('../../
 const LeadAndEnquiry = require("../../models/leadAndEnquiry");
 const Followup = require("../../models/followup");
 
+// Get LeadAndEnquiry by filter
+exports.GetLeadAndEnquiryByFilter = asyncHandler(async (req, res) => {
+    try {
+        const { populate, type } = req.query;
+        let temp = [], Arr = [];
+        for (let key in req.query) {
+            if (key == "populate" || key == "created_by" || key == "type")  
+                continue;
+            if (key === "courses") {
+                (req.query[key].split(',')).map(val => {
+                    Arr.push({ courses: { $in : val } })
+                });
+            } else {
+                temp.push({ [key]: req.query[key] });
+            }
+        }
+        if (type) {
+            if (type == "lead") {
+                temp.push({ isLead: true });
+            } else if (type == "enquiry") {
+                temp.push({ isEnquiry: true });
+            }
+        }
+        if (Arr.length == 0) Arr.push({}); 
+        let data = await LeadAndEnquiry.find({ $and : [...temp, { $or : Arr }]})
+            .populate(populate?.split(",").map((item) => ({ path: item })));
+        return res.status(200).json({ success: true, data });
+    } catch (error) {
+        throw new ErrorResponse(`Server error :${error}`, 400);
+    }
+});
 //Get All LeadAndEnquiry
 exports.GetAllLeadAndEnquiry = asyncHandler(async (req, res) => {
     let { populate, type, assign_to } = req.query;
@@ -83,7 +114,6 @@ exports.CreateLeadAndEnquiry = asyncHandler(async (req, res) => {
 //Get Single LeadAndEnquiry
 exports.GetSingleLeadAndEnquiry = asyncHandler(async (req, res) => {
     let { populate } = req.query;
-
     try {
         const { id } = req.params;
         if (!id) throw new ErrorResponse(`Please provide a LeadAndEnquiry id `, 400);
@@ -177,8 +207,10 @@ exports.UpdateEnquiry = asyncHandler(async (req, res) => {
         let { gross_amount, committed_amount, bifuraction, fees } = req.body;
         console.log(alternate_number);
         //validate email
-        if (email && oldLeadAndEnquiry.enquiry_data.email != email) {
-            let checkEmail = await findUniqueData(LeadAndEnquiry, { $or: [{ "enquiry_data.email": email, "isEnquiry": true }, { email, "isEnquiry": true }] });
+        if (email && oldLeadAndEnquiry.email != email) {
+            // let checkEmail = await findUniqueData(LeadAndEnquiry, { $or: [{ "enquiry_data.email": email, "isEnquiry": true }, { email, "isEnquiry": true }] });
+            // if (checkEmail) throw new ErrorResponse(`email already exist`, 400);
+            let checkEmail = await findUniqueData(LeadAndEnquiry, { email });
             if (checkEmail) throw new ErrorResponse(`email already exist`, 400);
         }
 
