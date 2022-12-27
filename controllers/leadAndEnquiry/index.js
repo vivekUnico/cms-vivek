@@ -200,12 +200,15 @@ exports.UpdateEnquiry = asyncHandler(async (req, res) => {
         if (!id) throw new ErrorResponse(`Please provide a Enquiry id `, 400);
 
         let oldLeadAndEnquiry = await findUniqueData(LeadAndEnquiry, { _id: id });
-        if (!oldLeadAndEnquiry) throw new ErrorResponse(`Enquiry not found`, 400);
-        if (oldLeadAndEnquiry.currentStatus != "enquiry") throw new ErrorResponse(`You cannot update this Enquiry.`, 400);
+        if (!oldLeadAndEnquiry) 
+            throw new ErrorResponse(`Enquiry not found`, 400);
+        if (oldLeadAndEnquiry.currentStatus != "enquiry") 
+            throw new ErrorResponse(`You cannot update this Enquiry.`, 400);
 
-        const { name, gender, mobile, email, date, assign_to, comment, alternate_number, status, source, courses, center, medium, city } = req.body;
+        const { name, gender, mobile, email, date, assign_to, comment, 
+                alternate_number, status, source, courses, center, medium, city } = req.body;
         let { gross_amount, committed_amount, bifuraction, fees } = req.body;
-        console.log(alternate_number);
+        console.log(gross_amount, committed_amount, bifuraction, fees);
         //validate email
         if (email && oldLeadAndEnquiry.email != email) {
             // let checkEmail = await findUniqueData(LeadAndEnquiry, { $or: [{ "enquiry_data.email": email, "isEnquiry": true }, { email, "isEnquiry": true }] });
@@ -222,7 +225,8 @@ exports.UpdateEnquiry = asyncHandler(async (req, res) => {
             updateData[`enquiry_data.${item[0]}`] = item[1];
             updateData[`${item[0]}`] = item[1];
         });
-        const data = await LeadAndEnquiry.findOneAndUpdate({ _id: id }, { $set: updateData }, { returnOriginal: true });
+        await LeadAndEnquiry.findByIdAndUpdate(id, { $set: updateData });
+        let data = await LeadAndEnquiry.findOne({ _id: id }).populate("courses center assign_to");
         return res.status(201).json({ success: true, data });
     } catch (error) {
         throw new ErrorResponse(`Server error :${error}`, 400);
