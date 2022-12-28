@@ -113,6 +113,7 @@ exports.CreateLeadAndEnquiry = asyncHandler(async (req, res) => {
 //Get Single LeadAndEnquiry
 exports.GetSingleLeadAndEnquiry = asyncHandler(async (req, res) => {
     let { populate } = req.query;
+    console.log("enquiry_id..........");
     try {
         const { id } = req.params;
         if (!id) throw new ErrorResponse(`Please provide a LeadAndEnquiry id `, 400);
