@@ -79,23 +79,26 @@ exports.CutomerAuthenctication = async (req, res, next) => {
     }
 }
 
-exports.PermissionAuthenctication = async (req, res, next) => {
-    let authHeader = req.headers['authorization'], temp = "nothing";
-    const token = authHeader && authHeader.split(' ')[1];
-    if (token == null) {
-        throw new ErrorResponse(`unauthorized, please provide a valid jwt token`, 401);
-    }
-    jwt.verify(token, process.env.JWT_SECRET, async (err, response) => {
-        if (err) {
-            throw new ErrorResponse(`token expired or invalid token, please try again with valid jwt token`, 403);
+exports.PermissionAuthenctication = async (headers, temp) => {
+    try {
+        let authHeader = headers['authorization'], user;
+        const token = authHeader && authHeader.split(' ')[1];
+        if (token == null) {
+            throw new ErrorResponse(`unauthorized, please provide a valid jwt token`, 401);
         }
-        req.user = response;
-    });
-    let { permission_id } = req.user;
-    let result = await Permissions.findOne({ _id: permission_id });
-    if (result[`${temp}`] == false) {
-        // throw new ErrorResponse(`you have not permission to access this Route`, 401);
-        console.log("you have not permission to access this Route");
+        jwt.verify(token, process.env.JWT_SECRET, async (err, response) => {
+            if (err) {
+                throw new ErrorResponse(`token expired or invalid token, please try again with valid jwt token`, 403);
+            }
+            user = response;
+        });
+        let { permission_id } = user;
+        let result = await Permissions.findOne({ _id: permission_id });
+        if (result[`${temp}`] == false) {
+            throw new ErrorResponse(`you have not permission to access this Route`, 401);
+        }
+        return { success: true, message : "you have permission to access this Route" };
+    } catch (error) {
+        return { success: false, message : error.message };
     }
-    next();
 }

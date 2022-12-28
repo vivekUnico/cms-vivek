@@ -9,7 +9,6 @@ const Followup = require("../../models/followup");
 const LeadAndEnquiry = require("../../models/leadAndEnquiry");
 
 exports.GetFollowupByFilter = asyncHandler(async (req, res) => {
-    console.log("nothing.........", req.headers.authorization);
     try {
         let temp = [], Arr = [];
         for (let key in req.query) {

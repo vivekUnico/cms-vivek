@@ -10,7 +10,6 @@ const Emi = require('../../models/emi');
 
 // Get LeadAndEnquiry by filter
 exports.GetLeadAndEnquiryByFilter = asyncHandler(async (req, res) => {
-    console.log("nothing.........", req.headers);
     try {
         const { populate, type } = req.query;
         let temp = [], Arr = [];

@@ -6,7 +6,6 @@ const {
     GetAllRolls, UpdateRoll
 } = require("../../controllers/permission/index.js");
 
-router.route("/").get(GetAllRolls);
-router.route("/:id").put(PermissionAuthenctication, UpdateRoll);
+router.route("/").get(GetAllRolls).put(UpdateRoll);
 
 module.exports = router;
