@@ -6,6 +6,7 @@ const { validationCheck, findUniqueData, validationImportent } = require('../../
 //models
 const LeadAndEnquiry = require("../../models/leadAndEnquiry");
 const Followup = require("../../models/followup");
+const Emi = require('../../models/emi');
 
 // Get LeadAndEnquiry by filter
 exports.GetLeadAndEnquiryByFilter = asyncHandler(async (req, res) => {
@@ -54,9 +55,7 @@ exports.GetAllLeadAndEnquiry = asyncHandler(async (req, res) => {
         if (assign_to) {
             filter["assign_to"] = String(assign_to);
         }
-
-
-        const data = await LeadAndEnquiry.find({ ...filter }).populate(populate?.split(",").map((item) => ({ path: item })));
+        let data = await LeadAndEnquiry.find({ ...filter }).populate(populate?.split(",").map((item) => ({ path: item })));
         return res.status(200).json({ success: true, data });
     } catch (error) {
         throw new ErrorResponse(`Server error :${error}`, 400);
@@ -118,9 +117,13 @@ exports.GetSingleLeadAndEnquiry = asyncHandler(async (req, res) => {
         const { id } = req.params;
         if (!id) throw new ErrorResponse(`Please provide a LeadAndEnquiry id `, 400);
 
-        const data = await LeadAndEnquiry.findOne({ _id: id }).populate(populate?.split(",").map((item) => ({ path: item })));;
+        let data = await LeadAndEnquiry.findOne({ _id: id }).populate(populate?.split(",").map((item) => ({ path: item })));;
         if (!data) throw new ErrorResponse(`LeadAndEnquiry id not found`, 400);
-
+        if (data.isEnquiry) {
+            let result = await Emi.findOne({ enquiry_id: id });
+            data = { ...data._doc, enquiry_id : { ...result._doc } };
+            console.log("result.......", data);
+        }
         return res.status(200).json({ success: true, data });
     } catch (error) {
         throw new ErrorResponse(`Server error :${error}`, 400);
