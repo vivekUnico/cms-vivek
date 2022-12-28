@@ -14,11 +14,11 @@ exports.GetLeadAndEnquiryByFilter = asyncHandler(async (req, res) => {
         const { populate, type } = req.query;
         let temp = [], Arr = [];
         for (let key in req.query) {
-            if (key == "populate" || key == "created_by" || key == "type")  
+            if (key == "populate" || key == "created_by" || key == "type")
                 continue;
             if (key === "courses") {
                 (req.query[key].split(',')).map(val => {
-                    Arr.push({ courses: { $in : val } })
+                    Arr.push({ courses: { $in: val } })
                 });
             } else {
                 temp.push({ [key]: req.query[key] });
@@ -31,8 +31,8 @@ exports.GetLeadAndEnquiryByFilter = asyncHandler(async (req, res) => {
                 temp.push({ isEnquiry: true });
             }
         }
-        if (Arr.length == 0) Arr.push({}); 
-        let data = await LeadAndEnquiry.find({ $and : [...temp, { $or : Arr }]})
+        if (Arr.length == 0) Arr.push({});
+        let data = await LeadAndEnquiry.find({ $and: [...temp, { $or: Arr }] })
             .populate(populate?.split(",").map((item) => ({ path: item })));
         return res.status(200).json({ success: true, data });
     } catch (error) {
@@ -71,18 +71,20 @@ exports.CreateLeadAndEnquiry = asyncHandler(async (req, res) => {
         if (!validation.status) {
             throw new ErrorResponse(`Please provide a ${validation?.errorAt}`, 400);
         }
-        if (currentStatus == "lead" && currentStatus != "enquiry" || currentStatus == "enquiry" && currentStatus != "lead") { } 
+        if (currentStatus == "lead" && currentStatus != "enquiry" || currentStatus == "enquiry" && currentStatus != "lead") { }
         else {
             throw new ErrorResponse(`Please provide valid currentStatus`, 400);
         }
         if (email) {
             let checkEmail = await findUniqueData(LeadAndEnquiry, { email });
-            if (checkEmail) 
+            if (checkEmail)
                 throw new ErrorResponse(`email already exist`, 400);
         }
         //main and final body
-        let schemaData = { currentStatus, name, gender, mobile, email, date, assign_to, comment, 
-            alternate_number, status, source, courses, center, medium, city };
+        let schemaData = {
+            currentStatus, name, gender, mobile, email, date, assign_to, comment,
+            alternate_number, status, source, courses, center, medium, city
+        };
         if (currentStatus == "lead") {
             let leadSchema = { isLead: true };
             schemaData = { ...schemaData, ...leadSchema };
@@ -122,8 +124,9 @@ exports.GetSingleLeadAndEnquiry = asyncHandler(async (req, res) => {
         if (!data) throw new ErrorResponse(`LeadAndEnquiry id not found`, 400);
         if (data.isEnquiry) {
             let result = await Emi.findOne({ enquiry_id: id });
+            console.log("result aa gaya", result);
             if (result) {
-                data = { ...data._doc, Emi_Id : { ...result._doc } };
+                data = { ...data._doc, Emi_Id: { ...result._doc } };
             }
         }
         return res.status(200).json({ success: true, data });
@@ -179,7 +182,7 @@ exports.UpdateLead = asyncHandler(async (req, res) => {
         if (!oldLeadAndEnquiry) throw new ErrorResponse(`Lead not found`, 400);
         if (oldLeadAndEnquiry.currentStatus != "lead") throw new ErrorResponse(`You cannot update this lead.`, 400);
 
-        const { name, gender, mobile, email, date, assign_to, comment, alternate_number, 
+        const { name, gender, mobile, email, date, assign_to, comment, alternate_number,
             status, source, courses, center, medium, city } = req.body;
         //validate email
         if (oldLeadAndEnquiry.email != email) {
@@ -205,13 +208,13 @@ exports.UpdateEnquiry = asyncHandler(async (req, res) => {
         if (!id) throw new ErrorResponse(`Please provide a Enquiry id `, 400);
 
         let oldLeadAndEnquiry = await findUniqueData(LeadAndEnquiry, { _id: id });
-        if (!oldLeadAndEnquiry) 
+        if (!oldLeadAndEnquiry)
             throw new ErrorResponse(`Enquiry not found`, 400);
-        if (oldLeadAndEnquiry.currentStatus != "enquiry") 
+        if (oldLeadAndEnquiry.currentStatus != "enquiry")
             throw new ErrorResponse(`You cannot update this Enquiry.`, 400);
 
-        const { name, gender, mobile, email, date, assign_to, comment, 
-                alternate_number, status, source, courses, center, medium, city, isEnquiry } = req.body;
+        const { name, gender, mobile, email, date, assign_to, comment,
+            alternate_number, status, source, courses, center, medium, city, isEnquiry } = req.body;
         let { gross_amount, committed_amount, bifuraction, fees } = req.body;
         console.log(gross_amount, committed_amount, bifuraction, fees);
         //validate email
@@ -223,8 +226,10 @@ exports.UpdateEnquiry = asyncHandler(async (req, res) => {
         }
 
         //main and final body
-        let schemaData = { gross_amount, committed_amount, bifuraction, name, gender, mobile, email, isEnquiry,
-                date, assign_to, comment, alternate_number, status, source, courses, center, medium, city, fees };
+        let schemaData = {
+            gross_amount, committed_amount, bifuraction, name, gender, mobile, email, isEnquiry,
+            date, assign_to, comment, alternate_number, status, source, courses, center, medium, city, fees
+        };
         let updateData = {};
         Object.entries(schemaData).map((item) => {
             updateData[`enquiry_data.${item[0]}`] = item[1];
