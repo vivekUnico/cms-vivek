@@ -121,8 +121,8 @@ exports.GetSingleLeadAndEnquiry = asyncHandler(async (req, res) => {
         if (!data) throw new ErrorResponse(`LeadAndEnquiry id not found`, 400);
         if (data.isEnquiry) {
             let result = await Emi.findOne({ enquiry_id: id });
-            data = { ...data._doc, enquiry_id : { ...result._doc } };
-            console.log("result.......", data);
+            if (result)
+                data = { ...data._doc, enquiry_id : { ...result._doc } };
         }
         return res.status(200).json({ success: true, data });
     } catch (error) {
