@@ -232,6 +232,8 @@ exports.UpdateEnquiry = asyncHandler(async (req, res) => {
         };
         let updateData = {};
         Object.entries(schemaData).map((item) => {
+            if (item[1] == undefined)
+                return ;   
             updateData[`enquiry_data.${item[0]}`] = item[1];
             updateData[`${item[0]}`] = item[1];
         });
