@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 const PermissionSchemma = new mongoose.Schema({
     roll_name : {
         type: String,
-        enum: ["admin", "manager", "teacher", "student", "sales", "accountant", , "other"],
+        enum: ["admin", "manager", "teacher", "operations", "sales", "accountant", , "markting"],
     },
     create_followup_lead: {
         type: Boolean,
@@ -32,7 +32,7 @@ const PermissionSchemma = new mongoose.Schema({
         type: Boolean,
         default: false
     },
-    edit_follwup_lead: {
+    edit_followup_lead: {
         type: Boolean,
         default: false
     },
@@ -68,7 +68,7 @@ const PermissionSchemma = new mongoose.Schema({
         type: Boolean,
         default: false
     },
-    edit_follwup_enquiry: {
+    edit_followup_enquiry: {
         type: Boolean,
         default: false
     },
