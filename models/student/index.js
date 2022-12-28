@@ -123,7 +123,7 @@ const student = new mongoose.Schema({
             payment_mode: String,
             remark: String,
             recepit: String,
-            emi: {
+            Emi_Id: {
                 type: mongoose.Schema.Types.ObjectId,
                 ref: 'emi'
             }

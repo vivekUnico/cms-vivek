@@ -80,8 +80,14 @@ const staffScheme = new mongoose.Schema({
     },
     role: {
         type: String,
+        // enum: ["admin", "manager", "employee", "sales", "marketing", "teacher", "accountant"],
         required: [true, "Please provide role"],
         trim: true,
+    },
+    permission_id: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'permission',
+        // required: [true, "Please provide permission_id"],
     },
     department: {
         type: String,

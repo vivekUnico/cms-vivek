@@ -39,13 +39,17 @@ exports.GetAllStaff = asyncHandler(async (req, res) => {
 //Create Single Staff
 exports.CreateStaff = asyncHandler(async (req, res) => {
     try {
-        const { initial, first_name, last_name, email, mobile, dob, center, staffCode, salary_type, loginId, role, department, position, grade, shift, qualification, manager, joining_date, job_type, gender, account_status, subjects } = req.body;
+        const { initial, first_name, last_name, email, mobile, dob, center, staffCode, salary_type, loginId, role, department, 
+            position, grade, shift, qualification, manager, joining_date, job_type, gender, account_status, subjects, permission_id } = req.body;
 
-        let validation = await validationCheck({ initial, first_name, last_name, email, mobile, dob, center, staffCode, salary_type, loginId, role, department, position, grade, shift, qualification, manager, joining_date, job_type, gender, account_status, subjects });
+        let validation = await validationCheck({ initial, first_name, last_name, email, mobile, dob, 
+            center, staffCode, salary_type, loginId, role, department, position, grade, shift, qualification, 
+            manager, joining_date, job_type, gender, account_status, subjects, permission_id });
         if (!validation.status) {
             throw new ErrorResponse(`Please provide a ${validation?.errorAt}`, 400);
         }
-        let schemaData = { initial, first_name, last_name, email, mobile, dob, center, staffCode, salary_type, loginId, role, department, position, grade, shift, qualification, manager, joining_date, job_type, gender, account_status, subjects };
+        let schemaData = { initial, first_name, last_name, email, mobile, dob, center, staffCode, salary_type, loginId, role, department, 
+            position, grade, shift, qualification, manager, joining_date, job_type, gender, account_status, subjects, permission_id };
 
         const hashedPassword = await hashPassword(mobile);
         schemaData.password = hashedPassword;
@@ -158,10 +162,11 @@ exports.loginUser = asyncHandler(async (req, res) => {
                 {
                     name: userData.name,
                     email: userData.email,
-                    userid: userData._id
+                    userid: userData._id,
+                    permission_id: userData.permission_id,
                 },
                 process.env.JWT_SECRET, {
-                expiresIn: 60 * 60 * 24 * 7
+                expiresIn: 60 * 60 * 24 * 30 // 30 days
             }); // 60*60*24*7 is 7 days, here 60 means 60 seconds
             let date = new Date();
             date.setDate(date.getDate() + 6);
