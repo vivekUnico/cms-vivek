@@ -35,19 +35,23 @@ exports.GetSingleEmi = asyncHandler(async (req, res) => {
 //Create Single EMI
 exports.CreateEmi = asyncHandler(async (req, res) => {
     try {
-        const { applied_from, repeat, type, total_emi, total_amount, emi_list } = req.body;
+        const { applied_from, repeat, type, total_emi, total_amount, emi_list, enquiry_id, student_id } = req.body;
         let validation = await validationCheck({ applied_from, repeat, type, total_emi, total_amount, emi_list });
         if (!validation.status) {
             throw new ErrorResponse(`Please provide a ${validation?.errorAt}`, 400);
         } else if (emi_list?.length == 0) throw new ErrorResponse(`Please provide a emi_list`, 400);
-
+        if ((!enquiry_id) && (!student_id))
+            throw new ErrorResponse(`Please provide a enquiry_id or student_id`, 400);
+        if (enquiry_id && await Emi.findOne({ enquiry_id }))
+            throw new ErrorResponse(`Enquiry id already exist`, 400);
+        if (student_id && await Emi.findOne({ student_id }))
+            throw new ErrorResponse(`Enquiry id already exist`, 400);
         await emi_list.map(async (emi, index) => {
             let { amount, date } = emi;
             validation = await validationCheck({ amount, date });
             if (!validation.status) throw new ErrorResponse(`Please provide a ${validation?.errorAt} in emi_list at ${index}`, 400);
         });
-
-        let schemaData = { applied_from, repeat, type, total_emi, total_amount, emi_list };
+        let schemaData = { applied_from, repeat, type, total_emi, total_amount, emi_list, enquiry_id, student_id };
 
 
         const data = await Emi.create(schemaData);

@@ -6,9 +6,17 @@ const emiScheme = new mongoose.Schema(
             type: Date,
             required: [true, "Please provide a emi applied_from"],
         },
+        enquiry_id: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "lead-and-enquiry"
+        },
+        student_id: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "student"
+        },
         repeat: {
-            type: String,
-            enum: ['7 Days', '15 Days', '1 Month', '2 Month', '3 Month', '3.5 Month', '4 Month', '6 Month', '9 Month', '1 Year'],
+            type: Number,
+            // enum: ['7 Days', '15 Days', '1 Month', '2 Month', '3 Month', '3.5 Month', '4 Month', '6 Month', '9 Month', '1 Year'],
             required: [true, "Please provide a emi applied_from"],
         },
         type: {
