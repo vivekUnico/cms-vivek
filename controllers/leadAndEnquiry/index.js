@@ -209,7 +209,7 @@ exports.UpdateEnquiry = asyncHandler(async (req, res) => {
             throw new ErrorResponse(`You cannot update this Enquiry.`, 400);
 
         const { name, gender, mobile, email, date, assign_to, comment, 
-                alternate_number, status, source, courses, center, medium, city } = req.body;
+                alternate_number, status, source, courses, center, medium, city, isEnquiry } = req.body;
         let { gross_amount, committed_amount, bifuraction, fees } = req.body;
         console.log(gross_amount, committed_amount, bifuraction, fees);
         //validate email
@@ -221,7 +221,7 @@ exports.UpdateEnquiry = asyncHandler(async (req, res) => {
         }
 
         //main and final body
-        let schemaData = { gross_amount, committed_amount, bifuraction, name, gender, mobile, email, 
+        let schemaData = { gross_amount, committed_amount, bifuraction, name, gender, mobile, email, isEnquiry,
                 date, assign_to, comment, alternate_number, status, source, courses, center, medium, city, fees };
         let updateData = {};
         Object.entries(schemaData).map((item) => {
