@@ -15,9 +15,6 @@ exports.GetAllRolls = asyncHandler(async (req, res, next) => {
 
 exports.UpdateRoll = asyncHandler(async (req, res, next) => {
     try {
-        let permission = await PermissionAuthenctication(req.headers, "setting_permission");
-        if (!permission.success)
-            throw new ErrorResponse(`You are not authorized to use this Route`, 401);
         let { Arr } = req.body;
         let promises = Arr.map(async (item) => {
             await Permission.findByIdAndUpdate(item._id, { $set: { ...item } });
