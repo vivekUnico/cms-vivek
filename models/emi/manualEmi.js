@@ -10,9 +10,11 @@ const manualEmiScheme = new mongoose.Schema({
         default: new Date(),
     },
     NIPay: Number,
-    BanckName: String,
+    banckName: String,
+    branchName: String,
     cheque: String,
     city: String,
+    category: String,
     date: Date,
     mode: {
         type: String,
@@ -26,6 +28,7 @@ const manualEmiScheme = new mongoose.Schema({
         default: 0,
     },
     recepit: String,
+    refNo: String,
     remark: String,
     tax: {
         type: String,
