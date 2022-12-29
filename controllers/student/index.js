@@ -50,13 +50,15 @@ exports.CreateStudent = asyncHandler(async (req, res) => {
                 status, source, courses, center, medium, city } = req.body;
         let { gross_amount, committed_amount, bifuraction, fees, Emi_id } = req.body;
 
-        let validation = await validationCheck({ name, email, mobile, date, assign_to, status, source, center });
+        let validation = await validationCheck({ name, mobile, date, courses });
         if (!validation.status) {
             throw new ErrorResponse(`Please provide a ${validation?.errorAt}`, 400);
         }
-        
-        let checkEmail = await findUniqueData(Student, { email });
-        if (checkEmail) throw new ErrorResponse(`email already exist`, 400);
+        if (email) {
+            let checkEmail = await findUniqueData(Student, { email });
+            if (checkEmail) 
+                throw new ErrorResponse(`email already exist`, 400);
+        }
 
         if (fees) {
             let { date, category, committed, remaining, tax, payment_mode, remark, recepit } = fees;
@@ -71,6 +73,7 @@ exports.CreateStudent = asyncHandler(async (req, res) => {
                 gross_amount, committed_amount, bifuraction, fees
             }
         };
+        console.log(schemaData);
         const hashedPassword = await hashPassword(mobile);
         schemaData.password = hashedPassword;
 
