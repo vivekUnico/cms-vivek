@@ -60,6 +60,10 @@ const student = new mongoose.Schema({
         type: String,
         enum: ["Justdail", "Sulekha", "Urbanpro", "Studysid", "Website", "Reference", "Seminar", "Walkin", "IC(Incoming Call)", "Google", "Facebook", "FBZapier", "Page", "FZGForm", "Learnyst", "New Sulekha", "Online Sulekha", "Online UrbanPro"]
     },
+    Emi_Id: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'emi'
+    },
     courses: [
         {
             type: mongoose.Schema.Types.ObjectId,
@@ -107,26 +111,8 @@ const student = new mongoose.Schema({
         ],
 
         fees: {
-            date: Date,
-            category: String,
-            committed: Number,
-            remaining: Number,
-            paid_amount: Number,
-            tax: {
-                type: {
-                    type: String,
-                    enum: ["GST", "IGST", "SGST"]
-                },
-                txt_percent: Number,
-                total_txt_amount: Number
-            },
-            payment_mode: String,
-            remark: String,
-            recepit: String,
-            Emi_Id: {
-                type: mongoose.Schema.Types.ObjectId,
-                ref: 'emi'
-            }
+            type : mongoose.Schema.Types.ObjectId,
+            ref : "manual-emi"
         }
     }
 },

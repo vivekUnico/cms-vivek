@@ -48,8 +48,8 @@ exports.CreateStudent = asyncHandler(async (req, res) => {
     try {
         const { name, gender, mobile, email, date, assign_to, comment, alternate_number, 
                 status, source, courses, center, medium, city } = req.body;
-        let { gross_amount, committed_amount, bifuraction, fees, Emi_id } = req.body;
-
+        let { gross_amount, committed_amount, bifuraction, fees, Emi_Id } = req.body;
+        
         let validation = await validationCheck({ name, mobile, date, courses });
         if (!validation.status) {
             throw new ErrorResponse(`Please provide a ${validation?.errorAt}`, 400);
@@ -59,16 +59,9 @@ exports.CreateStudent = asyncHandler(async (req, res) => {
             if (checkEmail) 
                 throw new ErrorResponse(`email already exist`, 400);
         }
-
-        if (fees) {
-            let { date, category, committed, remaining, tax, payment_mode, remark, recepit } = fees;
-            validation = await validationCheck({ date, category, committed, remaining, payment_mode, recepit });
-            if (!validation.status) throw new ErrorResponse(`Please provide a ${validation?.errorAt} in fees`, 400);
-        };
-
         //main and final body
         let schemaData = {
-            name, gender, mobile, email, date, assign_to, comment, alternate_number, 
+            name, gender, mobile, email, date, assign_to, comment, alternate_number, Emi_Id,
             status, source, courses, center, medium, city, payment_related: {
                 gross_amount, committed_amount, bifuraction, fees
             }
