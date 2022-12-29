@@ -119,7 +119,7 @@ exports.modifyRequestBook = asyncHandler(async (req, res) => {
             await LibraryBook.findOneAndUpdate({ _id: bookid }, {
                 totalReq: BookData.totalReq - RequestData?.totalQty
             })
-            return res.status(201).json({ success: true, data: `Request for ${BookData.name} rejected successfully!` });
+            return res.status(201).json({ success: true, data: `Request for ${BookData.name} REJECTED successfully!` });
         }
         // Issue a  book
         if (type === 'issue') {

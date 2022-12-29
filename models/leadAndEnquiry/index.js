@@ -39,7 +39,7 @@ let mainSchema = {
     },
     status: {
         type: String,
-        enum: ["HOT TA", "Enquiry Done", "Warn", "Cold", "Rejected"]
+        enum: ["HOT", "WARM", "COLD", "REJECTED"]
     },
     source: {
         type: String,
@@ -66,6 +66,10 @@ let mainSchema = {
     city: {
         type: String,
         trim: true
+    },
+    type : {
+        type: String,
+        enum: ["Online", "Offline", "Blended"]
     }
 }
 

@@ -29,7 +29,7 @@ exports.GetAllStaff = asyncHandler(async (req, res) => {
     }
     console.log(filter, filterDate)
     try {
-        const data = await Staff.find({ ...filter, ...filterDate }).populate(populate?.split(",").map((item) => ({ path: item })));
+        const data = await Staff.find({ ...filter, ...filterDate, position : { $ne : 'student' } }).populate(populate?.split(",").map((item) => ({ path: item })));
         return res.status(200).json({ success: true, data });
     } catch (error) {
         throw new ErrorResponse(`Server error :${error}`, 400);

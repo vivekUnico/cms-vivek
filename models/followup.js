@@ -31,7 +31,7 @@ const followupScheme = new mongoose.Schema(
                 status: {
                     type: String,
                     trim: true,
-                    enum: ["HOT TA", "Enquiry Done", "Warn", "Cold", "Rejected"],
+                    enum: ["HOT", "WARM", "COLD", "REJECTED"],
                     required: [true,"Please provide followup status"]
                 },
                 comment: {

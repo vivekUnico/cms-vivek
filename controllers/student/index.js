@@ -36,7 +36,8 @@ exports.GetAllStudent = asyncHandler(async (req, res) => {
             ])
         }
         // console.log(filterData)
-        const data = await Student.find({ ...filter, ...filterData, ...filterDate }).select(select).populate(populate?.split(",").map((item) => ({ path: item })));
+        const data = await Student.find({ ...filter, ...filterData, ...filterDate })
+            .select(select).populate(populate?.split(",").map((item) => ({ path: item }))).populate("Emi_Id");
         return res.status(200).json({ success: true, data });
     } catch (error) {
         throw new ErrorResponse(`Server error :${error}`, 400);

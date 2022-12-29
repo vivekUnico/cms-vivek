@@ -94,8 +94,8 @@ exports.PermissionAuthenctication = async (headers, temp) => {
         });
         let { permission_id } = user;
         let result = await Permissions.findOne({ _id: permission_id });
-        if (result[`${temp}`] == false) {
-            throw new ErrorResponse(`you have not permission to access this Route`, 401);
+        if (!result[`${temp}`]) {
+            return { success: false, message : "you have not permission to access this Route" };
         }
         return { success: true, message : "you have permission to access this Route" };
     } catch (error) {

@@ -8,8 +8,14 @@ const LeadAndEnquiry = require("../../models/leadAndEnquiry");
 const Followup = require("../../models/followup");
 const Emi = require('../../models/emi');
 
+const { PermissionAuthenctication } = require('../../middleware/apiAuth');
 // Get LeadAndEnquiry by filter
 exports.GetLeadAndEnquiryByFilter = asyncHandler(async (req, res) => {
+    let str1 = (req.query.type == "lead") ? "leads_filter" : "enquiry_filter";
+    let permission = await PermissionAuthenctication(req.headers, str1);
+    if (!permission.success) {
+        throw new ErrorResponse(`You are not authorized to access this route`, 401);
+    }
     try {
         const { populate, type } = req.query;
         let temp = [], Arr = [];
@@ -42,7 +48,11 @@ exports.GetLeadAndEnquiryByFilter = asyncHandler(async (req, res) => {
 //Get All LeadAndEnquiry
 exports.GetAllLeadAndEnquiry = asyncHandler(async (req, res) => {
     let { populate, type, assign_to } = req.query;
-
+    let str1 = (type == "lead") ? "all_lead" : "all_enquiry";
+    let permission = await PermissionAuthenctication(req.headers, str1);
+    if (!permission.success) {
+        throw new ErrorResponse(`You are not authorized to access this route`, 401);
+    }
     try {
         let filter = {};
         if (type) {
@@ -65,7 +75,7 @@ exports.GetAllLeadAndEnquiry = asyncHandler(async (req, res) => {
 //Create Single LeadAndEnquiry
 exports.CreateLeadAndEnquiry = asyncHandler(async (req, res) => {
     try {
-        const { name, gender, mobile, email, date, assign_to, comment, next_followup_date,
+        const { name, gender, mobile, email, date, assign_to, comment, next_followup_date, type, batch,
             alternate_number, status, source, courses, center, medium, city, currentStatus } = req.body;
         let validation = validationImportent({ currentStatus, name, email, date, assign_to, status, source, center });
         if (!validation.status) {
@@ -83,7 +93,7 @@ exports.CreateLeadAndEnquiry = asyncHandler(async (req, res) => {
         //main and final body
         let schemaData = {
             currentStatus, name, gender, mobile, email, date, assign_to, comment,
-            alternate_number, status, source, courses, center, medium, city
+            alternate_number, status, source, courses, center, medium, city, type, batch
         };
         if (currentStatus == "lead") {
             let leadSchema = { isLead: true };
@@ -158,12 +168,14 @@ exports.MoveLeadToEnquiry = asyncHandler(async (req, res) => {
     try {
         const { id } = req.params;
         if (!id) throw new ErrorResponse(`Please provide a Lead id `, 400);
-
         let oldLeadAndEnquiry = await findUniqueData(LeadAndEnquiry, { _id: id });
+        console.log("this...", oldLeadAndEnquiry);
         if (!oldLeadAndEnquiry) throw new ErrorResponse(`Lead not found`, 400);
-        if (oldLeadAndEnquiry.currentStatus != "lead") throw new ErrorResponse(`This lead is already moved into Enquiry stage.`, 400);
+        if (oldLeadAndEnquiry.currentStatus != "lead" && oldLeadAndEnquiry.isLead == false) 
+            throw new ErrorResponse(`This lead is already moved into Enquiry stage.`, 400);
 
-        const data = await LeadAndEnquiry.findOneAndUpdate({ _id: id }, { isEnquiry: true, currentStatus: "enquiry" }, { returnOriginal: false });
+        const data = await LeadAndEnquiry.findOneAndUpdate({ _id: id }, 
+            { isEnquiry: true, currentStatus: "enquiry", isLead : false }, { returnOriginal: false });
         return res.status(201).json({ success: true, data });
     } catch (error) {
         throw new ErrorResponse(`Server error :${error}`, 400);
@@ -214,7 +226,7 @@ exports.UpdateEnquiry = asyncHandler(async (req, res) => {
             throw new ErrorResponse(`You cannot update this Enquiry.`, 400);
 
         const { name, gender, mobile, email, date, assign_to, comment,
-            alternate_number, status, source, courses, center, medium, city, isEnquiry } = req.body;
+            alternate_number, status, source, courses, center, medium, city, isEnquiry, type, batch } = req.body;
         let { gross_amount, committed_amount, bifuraction, fees } = req.body;
         console.log(gross_amount, committed_amount, bifuraction, fees);
         //validate email
@@ -227,7 +239,7 @@ exports.UpdateEnquiry = asyncHandler(async (req, res) => {
 
         //main and final body
         let schemaData = {
-            gross_amount, committed_amount, bifuraction, name, gender, mobile, email, isEnquiry,
+            gross_amount, committed_amount, bifuraction, name, gender, mobile, email, isEnquiry, type, batch,
             date, assign_to, comment, alternate_number, status, source, courses, center, medium, city, fees
         };
         let updateData = {};

@@ -54,7 +54,7 @@ const student = new mongoose.Schema({
     },
     status: {
         type: String,
-        enum: ["HOT TA", "Enquiry Done", "Warn", "Cold", "Rejected"]
+        enum: ["HOT", "WARM", "COLD", "REJECTED"]
     },
     source: {
         type: String,
