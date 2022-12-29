@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 const PermissionSchemma = new mongoose.Schema({
     roll_name : {
         type: String,
-        enum: ["admin", "manager", "teacher", "operations", "sales", "accountant", , "markting"],
+        enum: ["admin", "manager", "teacher", "operations", "sales", "accountant", "student" , "markting"],
     },
     create_followup_lead: {
         type: Boolean,

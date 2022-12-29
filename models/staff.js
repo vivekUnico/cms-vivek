@@ -4,7 +4,7 @@ const staffScheme = new mongoose.Schema({
     initial: {
         type: String,
         enum: ["Mr.", "Ms.", "Mrs.", "Miss", "Dr.", "Er.", "Master"],
-        required: [true, "Please provide initial"]
+        // required: [true, "Please provide initial"]
     },
     first_name: {
         type: String,
@@ -13,7 +13,7 @@ const staffScheme = new mongoose.Schema({
     },
     last_name: {
         type: String,
-        required: [true, "Please provide last_name"],
+        // required: [true, "Please provide last_name"],
         trim: true,
     },
     email: {
@@ -46,7 +46,7 @@ const staffScheme = new mongoose.Schema({
     },
     dob: {
         type: Date,
-        required: [true, "Please provide dob"],
+        // required: [true, "Please provide dob"],
     },
     center: {
         type: mongoose.Schema.Types.ObjectId,
@@ -70,7 +70,7 @@ const staffScheme = new mongoose.Schema({
     salary_type: {
         type: String,
         enum: ["Both", "Monthly", "Lecture-wise"],
-        required: [true, "Please provide salary_type"]
+        // required: [true, "Please provide salary_type"]
     },
     loginId: {
         type: String,
@@ -81,7 +81,7 @@ const staffScheme = new mongoose.Schema({
     role: {
         type: String,
         // enum: ["admin", "manager", "employee", "sales", "marketing", "teacher", "accountant"],
-        required: [true, "Please provide role"],
+        // required: [true, "Please provide role"],
         trim: true,
     },
     permission_id: {
@@ -91,13 +91,13 @@ const staffScheme = new mongoose.Schema({
     },
     department: {
         type: String,
-        required: [true, "Please provide department"],
+        // required: [true, "Please provide department"],
         trim: true,
     },
     position: {
         type: String,
-        enum: ["admin", "manager", "employee", "sales", "marketing", "teacher", "accountant"],
-        required: [true, "Please provide position"],
+        enum: ["admin", "manager", "employee", "sales", "marketing", "teacher", "accountant", "student"],
+        // required: [true, "Please provide position"],
         trim: true,
     },
     grade: {
@@ -108,26 +108,26 @@ const staffScheme = new mongoose.Schema({
     shift: {
         type: String,
         enum: ["Day Shift 10-7", "Part Time Shift"],
-        required: [true, "Please provide shift"]
+        // required: [true, "Please provide shift"]
     },
     qualification: {
         type: String,
         enum: ["graduate", "post graduate", "under graduate"],
-        required: [true, "Please provide qualification"]
+        // required: [true, "Please provide qualification"]
     },
     manager: {
         type: String,
-        required: [true, "Please provide manager"],
+        // required: [true, "Please provide manager"],
         trim: true
     },
     joining_date: {
         type: Date,
-        required: [true, "Please provide joining_date"]
+        // required: [true, "Please provide joining_date"]
     },
     job_type: {
         type: String,
         enum: ["full time", "part time", "probation internship"],
-        required: [true, "Please provide job_type"]
+        // required: [true, "Please provide job_type"]
     },
     gender: {
         type: String,

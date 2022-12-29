@@ -39,14 +39,13 @@ exports.GetAllStaff = asyncHandler(async (req, res) => {
 //Create Single Staff
 exports.CreateStaff = asyncHandler(async (req, res) => {
     try {
-        const { initial, first_name, last_name, email, mobile, dob, center, staffCode, salary_type, loginId, role, department,
+        console.log("staff data", req.body);
+        const { initial, first_name, last_name, email, mobile, dob, center, staffCode, salary_type, loginId, role, department, password,
             position, grade, shift, qualification, manager, joining_date, job_type, gender, account_status, subjects, permission_id } = req.body;
 
         let validation = await validationCheck({
-            initial, first_name, last_name, email, mobile, dob,
-            center, staffCode, salary_type, loginId, role, department, position, grade, shift, qualification,
-            manager, joining_date, job_type, gender, account_status, subjects, permission_id
-        });
+            first_name, email, mobile, center, staffCode, 
+            gender, permission_id, password });
         if (!validation.status) {
             throw new ErrorResponse(`Please provide a ${validation?.errorAt}`, 400);
         }
@@ -63,10 +62,6 @@ exports.CreateStaff = asyncHandler(async (req, res) => {
 
         let checkStaffCode = await findUniqueData(Staff, { staffCode });
         if (checkStaffCode) throw new ErrorResponse(`staffCode already exist`, 400);
-
-        let checkLoginId = await findUniqueData(Staff, { loginId });
-        if (checkLoginId) throw new ErrorResponse(`loginId already exist`, 400);
-
 
         const data = await Staff.create(schemaData);
         return res.status(200).json({ success: true, data });
