@@ -56,6 +56,10 @@ const student = new mongoose.Schema({
         type: String,
         trim: true,
     },
+    define_emi : {
+        type: Object,
+        default: {}
+    },
     status: {
         type: String,
         enum: ["HOT", "WARM", "COLD", "REJECTED"]

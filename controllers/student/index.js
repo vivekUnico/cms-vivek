@@ -58,7 +58,7 @@ exports.UpdateStudent = asyncHandler(async (req, res) => {
 exports.CreateStudent = asyncHandler(async (req, res) => {
     try {
         const { name, gender, mobile, email, date, assign_to, comment, alternate_number, batch, type, telegram,
-                status, source, courses, center, medium, city } = req.body;
+                status, source, courses, center, medium, city, define_emi } = req.body;
         let { gross_amount, committed_amount, bifurcation, fees, Emi_Id } = req.body;
         
         let validation = await validationCheck({ name, mobile, date, courses });
@@ -72,7 +72,7 @@ exports.CreateStudent = asyncHandler(async (req, res) => {
         }
         //main and final body
         let schemaData = {
-            name, gender, mobile, email, date, assign_to, comment, alternate_number, Emi_Id, batch, type, telegram,
+            name, gender, mobile, email, date, assign_to, comment, alternate_number, Emi_Id, batch, type, telegram, define_emi,
             status, source, courses, center, medium, city, payment_related: {
                 gross_amount, committed_amount, bifurcation, fees
             }

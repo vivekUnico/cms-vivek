@@ -9,19 +9,20 @@ const Followup = require("../../models/followup");
 const LeadAndEnquiry = require("../../models/leadAndEnquiry");
 
 exports.GetFollowupByFilter = asyncHandler(async (req, res) => {
+    console.log("I am filtering..........");
     try {
         let temp = [], Arr = [];
         for (let key in req.query) {
-            if (key == "created_by" || key.includes("followup_by"))
-                temp.push({[key] : ObjectId(req.query[key])});
+            if ((key == "created_by" || key.includes("followup_by")))
+                Arr.push({[key] : ObjectId(req.query[key])});
             else if (key.includes("courses")) {
                 (req.query[key].split(',')).map(val => {
                     Arr.push({ [key]: ObjectId(val) })
                 });
             } else temp.push({[key] : req.query[key]});
         }
-        console.log(temp, Arr);
         if (Arr.length == 0) Arr.push({});
+        console.log(temp, Arr);
         let data = await Followup.aggregate([
             { $addFields : { "followup_list_length" : { $size : "$followup_list" }}},
             { $unwind: { path: "$followup_list", preserveNullAndEmptyArrays: true }}, 
@@ -145,7 +146,6 @@ exports.CreateFollowup = asyncHandler(async (req, res) => {
     try {
         const { followup_type, connection_id, created_by, followup_list } = req.body;
         let validation = await validationCheck({ followup_type, connection_id, created_by, followup_list });
-
         if (!validation.status) {
             throw new ErrorResponse(`Please provide a ${validation?.errorAt}`, 400);
         } else if (!followup_list) {
