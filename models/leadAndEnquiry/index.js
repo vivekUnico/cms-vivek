@@ -13,13 +13,17 @@ let mainSchema = {
         type: String,
         trim: true
     },
+    created_by: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'staff'
+    },
     email: {
         type: String,
         match: [
             /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
             "Please provide a valid email address",
         ],
-        unique: true,
+        // unique: true,
     },
     date: {
         type: Date,

@@ -44,6 +44,10 @@ const student = new mongoose.Schema({
         type: Date,
         trim: true,
     },
+    created_by: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'staff'
+    },
     assign_to: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'staff'

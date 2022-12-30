@@ -130,7 +130,7 @@ const staffScheme = new mongoose.Schema({
     },
     job_type: {
         type: String,
-        enum: ["full time", "part time", "probation internship"],
+        enum: ["full time", "part time", "probation", "internship"],
         // required: [true, "Please provide job_type"]
     },
     gender: {

@@ -178,7 +178,8 @@ exports.StudentFees = asyncHandler(async (req, res) => {
     try {
         let { populate } = req.query;
 
-        let data = await Student.find({ "payment_related.fees.emi": { $exists: true } }).populate(populate?.split(",").map((item) => ({ path: item })));;
+        let data = await Student.find({ "payment_related.fees": { $exists: true } })
+            .populate(populate?.split(",").map((item) => ({ path: item })));;
         return res.status(200).json({ success: true, data });
     } catch (error) {
         throw new ErrorResponse(`Server error :${error}`, 400);

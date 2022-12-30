@@ -9,11 +9,10 @@ const Followup = require("../../models/followup");
 const LeadAndEnquiry = require("../../models/leadAndEnquiry");
 
 exports.GetFollowupByFilter = asyncHandler(async (req, res) => {
-    console.log("I am filtering..........");
     try {
         let temp = [], Arr = [];
         for (let key in req.query) {
-            if ((key == "created_by" || key.includes("followup_by")))
+            if ((key == "created_by" || key == "followup_list.followup_by._id"))
                 Arr.push({[key] : ObjectId(req.query[key])});
             else if (key.includes("courses")) {
                 (req.query[key].split(',')).map(val => {
@@ -166,7 +165,7 @@ exports.CreateFollowup = asyncHandler(async (req, res) => {
         if (followup_list?.length && followup_list[followup_list?.length - 1]["addedTime"] == undefined)
             followup_list[followup_list?.length - 1]["addedTime"] = new Date().toISOString();
         let schemaData = { followup_type, connection_id, created_by, followup_list };
-
+        console.log(schemaData);
         let checkFollowupID = await Followup.findOne({ connection_id });
         if (checkFollowupID) {
             checkFollowupID["followup_list"] = followup_list;

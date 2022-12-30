@@ -72,6 +72,7 @@ exports.GetAllLeadAndEnquiry = asyncHandler(async (req, res) => {
         if (Arr.length == 0) Arr.push({});
         let data = await LeadAndEnquiry.find({ $and: [...filter, { $or: Arr }] })
             .populate(populate?.split(",").map((item) => ({ path: item })));
+        console.log(data, Arr);
         return res.status(200).json({ success: true, data });
     } catch (error) {
         throw new ErrorResponse(`Server error :${error}`, 400);
@@ -81,7 +82,7 @@ exports.GetAllLeadAndEnquiry = asyncHandler(async (req, res) => {
 //Create Single LeadAndEnquiry
 exports.CreateLeadAndEnquiry = asyncHandler(async (req, res) => {
     try {
-        const { name, gender, mobile, email, date, assign_to, comment, next_followup_date, type, batch, telegram,
+        const { name, gender, mobile, email, date, assign_to, comment, next_followup_date, type, batch, telegram, created_by,
             alternate_number, status, source, courses, center, medium, city, currentStatus } = req.body;
         let validation = validationImportent({ currentStatus, name, email, date, assign_to, status, source, center });
         if (!validation.status) {
@@ -98,9 +99,9 @@ exports.CreateLeadAndEnquiry = asyncHandler(async (req, res) => {
         }
         //main and final body
         let schemaData = {
-            currentStatus, name, gender, mobile, email, date, assign_to, comment,
+            currentStatus, name, gender, mobile, email, date, assign_to, comment, created_by,
             alternate_number, status, source, courses, center, medium, city, type, batch, telegram
-        };
+        }, Arr = ["", null, undefined, [], {}];
         if (currentStatus == "lead") {
             let leadSchema = { isLead: true };
             schemaData = { ...schemaData, ...leadSchema };
@@ -119,8 +120,7 @@ exports.CreateLeadAndEnquiry = asyncHandler(async (req, res) => {
         if (!validation.status) {
             throw new ErrorResponse(`Please provide a ${validation?.errorAt}`, 400);
         };
-        console.log(schemaData);
-        Object.keys(schemaData).map((key) => (!schemaData[key]) ? delete schemaData[key] : "");
+        Object.keys(schemaData).forEach((key) => (Arr.includes(schemaData[key])) && delete schemaData[key]);
         const data = await LeadAndEnquiry.create(schemaData);
         console.log(data._id);
         return res.status(201).json({ success: true, data });
