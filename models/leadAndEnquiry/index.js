@@ -95,7 +95,7 @@ const leadAndEnquiry = new mongoose.Schema({
         committed_amount: {
             type: Number,
         },
-        bifuraction: [
+        bifurcation: [
             {
                 name: {
                     type: String,
@@ -116,7 +116,7 @@ const leadAndEnquiry = new mongoose.Schema({
             }
         ],
         fees: {
-            emi: {
+            Emi_Id: {
                 type: mongoose.Schema.Types.ObjectId,
                 ref: 'emi'
             }

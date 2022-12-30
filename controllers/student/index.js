@@ -44,12 +44,22 @@ exports.GetAllStudent = asyncHandler(async (req, res) => {
     }
 });
 
+exports.UpdateStudent = asyncHandler(async (req, res) => {
+    try {
+        const { id } = req.params;
+        const result = await Student.findByIdAndUpdate(id, { $set: { ...req.body } }, { new: true });
+        return res.status(200).json({ success: true, data: result });
+    } catch (error) {
+        throw new ErrorResponse(`Server error :${error}`, 400);
+    }
+});
+
 //Create Single Student
 exports.CreateStudent = asyncHandler(async (req, res) => {
     try {
         const { name, gender, mobile, email, date, assign_to, comment, alternate_number, 
                 status, source, courses, center, medium, city } = req.body;
-        let { gross_amount, committed_amount, bifuraction, fees, Emi_Id } = req.body;
+        let { gross_amount, committed_amount, bifurcation, fees, Emi_Id } = req.body;
         
         let validation = await validationCheck({ name, mobile, date, courses });
         if (!validation.status) {
@@ -64,7 +74,7 @@ exports.CreateStudent = asyncHandler(async (req, res) => {
         let schemaData = {
             name, gender, mobile, email, date, assign_to, comment, alternate_number, Emi_Id,
             status, source, courses, center, medium, city, payment_related: {
-                gross_amount, committed_amount, bifuraction, fees
+                gross_amount, committed_amount, bifurcation, fees
             }
         };
         console.log(schemaData);

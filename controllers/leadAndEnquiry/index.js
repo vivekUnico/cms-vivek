@@ -7,6 +7,7 @@ const { validationCheck, findUniqueData, validationImportent } = require('../../
 const LeadAndEnquiry = require("../../models/leadAndEnquiry");
 const Followup = require("../../models/followup");
 const Emi = require('../../models/emi');
+const ObjectId = require('mongoose').Types.ObjectId;
 
 const { PermissionAuthenctication } = require('../../middleware/apiAuth');
 // Get LeadAndEnquiry by filter
@@ -47,25 +48,30 @@ exports.GetLeadAndEnquiryByFilter = asyncHandler(async (req, res) => {
 });
 //Get All LeadAndEnquiry
 exports.GetAllLeadAndEnquiry = asyncHandler(async (req, res) => {
-    let { populate, type, assign_to } = req.query;
+    let { populate, type, assign_to, created_by } = req.query;
     let str1 = (type == "lead") ? "all_lead" : "all_enquiry";
     let permission = await PermissionAuthenctication(req.headers, str1);
     if (!permission.success) {
         throw new ErrorResponse(`You are not authorized to access this route`, 401);
     }
     try {
-        let filter = {};
+        let filter = [], Arr = [];
         if (type) {
             if (type == "lead") {
-                filter['isLead'] = true;
+                filter.push({ isLead: true });
             } else if (type == "enquiry") {
-                filter['isEnquiry'] = true;
+                filter.push({ isEnquiry: true });
             }
         }
         if (assign_to) {
-            filter["assign_to"] = String(assign_to);
+            Arr.push({ assign_to: ObjectId(assign_to) });
         }
-        let data = await LeadAndEnquiry.find({ ...filter }).populate(populate?.split(",").map((item) => ({ path: item })));
+        if (created_by) {
+            Arr.push({ created_by: ObjectId(created_by) });
+        }
+        if (Arr.length == 0) Arr.push({});
+        let data = await LeadAndEnquiry.find({ $and: [...filter, { $and: Arr }] })
+            .populate(populate?.split(",").map((item) => ({ path: item })));
         return res.status(200).json({ success: true, data });
     } catch (error) {
         throw new ErrorResponse(`Server error :${error}`, 400);
@@ -99,12 +105,12 @@ exports.CreateLeadAndEnquiry = asyncHandler(async (req, res) => {
             let leadSchema = { isLead: true };
             schemaData = { ...schemaData, ...leadSchema };
         } else if (currentStatus == "enquiry") {
-            let { gross_amount, committed_amount, bifuraction } = req.body;
+            let { gross_amount, committed_amount, bifurcation } = req.body;
             let enquirySchema = {
                 isEnquiry: true,
                 enquiry_data: {
                     courses,
-                    gross_amount, committed_amount, bifuraction
+                    gross_amount, committed_amount, bifurcation
                 }
             };
             schemaData = { ...schemaData, ...enquirySchema };
@@ -113,6 +119,7 @@ exports.CreateLeadAndEnquiry = asyncHandler(async (req, res) => {
         if (!validation.status) {
             throw new ErrorResponse(`Please provide a ${validation?.errorAt}`, 400);
         };
+        console.log(schemaData);
         Object.keys(schemaData).map((key) => (!schemaData[key]) ? delete schemaData[key] : "");
         const data = await LeadAndEnquiry.create(schemaData);
         console.log(data._id);
@@ -227,8 +234,8 @@ exports.UpdateEnquiry = asyncHandler(async (req, res) => {
 
         const { name, gender, mobile, email, date, assign_to, comment,
             alternate_number, status, source, courses, center, medium, city, isEnquiry, type, batch } = req.body;
-        let { gross_amount, committed_amount, bifuraction, fees } = req.body;
-        console.log(gross_amount, committed_amount, bifuraction, fees);
+        let { gross_amount, committed_amount, bifurcation, fees } = req.body;
+        console.log(gross_amount, committed_amount, bifurcation, fees);
         //validate email
         if (email && oldLeadAndEnquiry.email != email) {
             // let checkEmail = await findUniqueData(LeadAndEnquiry, { $or: [{ "enquiry_data.email": email, "isEnquiry": true }, { email, "isEnquiry": true }] });
@@ -239,7 +246,7 @@ exports.UpdateEnquiry = asyncHandler(async (req, res) => {
 
         //main and final body
         let schemaData = {
-            gross_amount, committed_amount, bifuraction, name, gender, mobile, email, isEnquiry, type, batch,
+            gross_amount, committed_amount, bifurcation, name, gender, mobile, email, isEnquiry, type, batch,
             date, assign_to, comment, alternate_number, status, source, courses, center, medium, city, fees
         };
         let updateData = {};
