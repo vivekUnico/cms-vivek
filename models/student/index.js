@@ -82,6 +82,17 @@ const student = new mongoose.Schema({
         type: String,
         enum: ["English", "Hindi", "Other"]
     },
+    batch : {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'batch'
+    },
+    telegram: {
+        type: String,
+        trim: true,
+    },
+    type: {
+        type: String,
+    },
     city: {
         type: String,
         trim: true

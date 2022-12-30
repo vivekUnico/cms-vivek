@@ -81,7 +81,7 @@ exports.GetAllLeadAndEnquiry = asyncHandler(async (req, res) => {
 //Create Single LeadAndEnquiry
 exports.CreateLeadAndEnquiry = asyncHandler(async (req, res) => {
     try {
-        const { name, gender, mobile, email, date, assign_to, comment, next_followup_date, type, batch,
+        const { name, gender, mobile, email, date, assign_to, comment, next_followup_date, type, batch, telegram,
             alternate_number, status, source, courses, center, medium, city, currentStatus } = req.body;
         let validation = validationImportent({ currentStatus, name, email, date, assign_to, status, source, center });
         if (!validation.status) {
@@ -99,7 +99,7 @@ exports.CreateLeadAndEnquiry = asyncHandler(async (req, res) => {
         //main and final body
         let schemaData = {
             currentStatus, name, gender, mobile, email, date, assign_to, comment,
-            alternate_number, status, source, courses, center, medium, city, type, batch
+            alternate_number, status, source, courses, center, medium, city, type, batch, telegram
         };
         if (currentStatus == "lead") {
             let leadSchema = { isLead: true };
@@ -202,7 +202,7 @@ exports.UpdateLead = asyncHandler(async (req, res) => {
         if (oldLeadAndEnquiry.currentStatus != "lead") throw new ErrorResponse(`You cannot update this lead.`, 400);
 
         const { name, gender, mobile, email, date, assign_to, comment, alternate_number,
-            status, source, courses, center, medium, city } = req.body;
+            status, source, courses, center, medium, city, batch, type, telegram } = req.body;
         //validate email
         if (oldLeadAndEnquiry.email != email) {
             let checkEmail = await findUniqueData(LeadAndEnquiry, { email });
@@ -210,7 +210,8 @@ exports.UpdateLead = asyncHandler(async (req, res) => {
         }
 
         //main and final body
-        let schemaData = { name, gender, mobile, email, date, assign_to, comment, alternate_number, status, source, courses, center, medium, city };
+        let schemaData = { name, gender, mobile, email, date, assign_to, comment, alternate_number, 
+                status, source, courses, center, medium, city, batch, type, telegram };
 
         const data = await LeadAndEnquiry.findOneAndUpdate({ _id: id }, schemaData, { returnOriginal: false });
         return res.status(201).json({ success: true, data });
@@ -232,7 +233,7 @@ exports.UpdateEnquiry = asyncHandler(async (req, res) => {
         if (oldLeadAndEnquiry.currentStatus != "enquiry")
             throw new ErrorResponse(`You cannot update this Enquiry.`, 400);
 
-        const { name, gender, mobile, email, date, assign_to, comment,
+        const { name, gender, mobile, email, date, assign_to, comment, telegram,
             alternate_number, status, source, courses, center, medium, city, isEnquiry, type, batch } = req.body;
         let { gross_amount, committed_amount, bifurcation, fees } = req.body;
         console.log(gross_amount, committed_amount, bifurcation, fees);
@@ -246,7 +247,7 @@ exports.UpdateEnquiry = asyncHandler(async (req, res) => {
 
         //main and final body
         let schemaData = {
-            gross_amount, committed_amount, bifurcation, name, gender, mobile, email, isEnquiry, type, batch,
+            gross_amount, committed_amount, bifurcation, name, gender, mobile, email, isEnquiry, type, batch, telegram,
             date, assign_to, comment, alternate_number, status, source, courses, center, medium, city, fees
         };
         let updateData = {};

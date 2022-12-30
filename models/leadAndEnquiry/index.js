@@ -70,7 +70,11 @@ let mainSchema = {
     type : {
         type: String,
         enum: ["Online", "Offline", "Blended"]
-    }
+    },
+    telegram: {
+        type: String,
+        trim: true,
+    },
 }
 
 const leadAndEnquiry = new mongoose.Schema({
