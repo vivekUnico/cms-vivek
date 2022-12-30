@@ -14,6 +14,10 @@ const student = new mongoose.Schema({
         type: String,
         trim: true
     },
+    isBlock: {
+        type: Boolean,
+        default: false
+    },
     email: {
         type: String,
         match: [

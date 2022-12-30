@@ -3,6 +3,7 @@ const asyncHandler = require('../../middleware/asyncHandler');
 const ErrorResponse = require('../../utils/ErrorResponse');
 const { validationCheck, findUniqueData } = require('../../middleware/validationCheck');
 const { createFilter } = require('../../utils/filter');
+const ObjectId = require('mongoose').Types.ObjectId;
 
 const { parseISO, sub, add } = require('date-fns');
 
@@ -29,7 +30,8 @@ exports.GetAllStaff = asyncHandler(async (req, res) => {
     }
     console.log(filter, filterDate)
     try {
-        const data = await Staff.find({ ...filter, ...filterDate, position : { $ne : 'student' } }).populate(populate?.split(",").map((item) => ({ path: item })));
+        const data = await Staff.find({ ...filter, ...filterDate, permission_id : { $ne : ObjectId("63ad8d66dfdb35306d3d37b1") } })
+            .populate(populate?.split(",").map((item) => ({ path: item })));
         return res.status(200).json({ success: true, data });
     } catch (error) {
         throw new ErrorResponse(`Server error :${error}`, 400);
@@ -111,8 +113,12 @@ exports.UpdateStaff = asyncHandler(async (req, res) => {
         const { id } = req.params;
         if (!id) throw new ErrorResponse(`Please provide a Staff _id `, 400);
 
-        const { initial, first_name, last_name, email, mobile, dob, center, staffCode, salary_type, loginId, role, department, position, grade, shift, qualification, manager, joining_date, job_type, gender, account_status, subjects } = req.body;
-        let schemaData = { initial, first_name, last_name, email, mobile, dob, center, staffCode, salary_type, loginId, role, department, position, grade, shift, qualification, manager, joining_date, job_type, gender, account_status, subjects };
+        const { initial, first_name, last_name, email, mobile, dob, center, staffCode, salary_type, 
+            loginId, role, department, position, grade, shift, qualification, manager, joining_date, 
+                job_type, gender, account_status, subjects, permission_id, isBlock } = req.body;
+        let schemaData = { initial, first_name, last_name, email, mobile, dob, center, staffCode, 
+            salary_type, loginId, role, department, position, grade, shift, qualification, manager, 
+            joining_date, job_type, gender, account_status, subjects, permission_id, isBlock };
 
         let oldStaff = await findUniqueData(Staff, { _id: id });
 
@@ -127,7 +133,8 @@ exports.UpdateStaff = asyncHandler(async (req, res) => {
             if (checkLoginId) throw new ErrorResponse(`loginId already exist`, 400);
         }
 
-        const data = await Staff.findOneAndUpdate({ _id: id }, schemaData, { returnOriginal: false });
+        const data = await Staff.findOneAndUpdate({ _id: id }, { $set : { ...schemaData }}, { returnOriginal: false });
+        console.log(data);
         if (!data) throw new ErrorResponse(`Staff id not found`, 400);
 
         return res.status(200).json({ success: true, data });

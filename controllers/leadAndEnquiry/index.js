@@ -70,7 +70,7 @@ exports.GetAllLeadAndEnquiry = asyncHandler(async (req, res) => {
             Arr.push({ created_by: ObjectId(created_by) });
         }
         if (Arr.length == 0) Arr.push({});
-        let data = await LeadAndEnquiry.find({ $and: [...filter, { $and: Arr }] })
+        let data = await LeadAndEnquiry.find({ $and: [...filter, { $or: Arr }] })
             .populate(populate?.split(",").map((item) => ({ path: item })));
         return res.status(200).json({ success: true, data });
     } catch (error) {

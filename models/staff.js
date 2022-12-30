@@ -124,6 +124,10 @@ const staffScheme = new mongoose.Schema({
         type: Date,
         // required: [true, "Please provide joining_date"]
     },
+    isBlock: {
+        type: Boolean,
+        default: false
+    },
     job_type: {
         type: String,
         enum: ["full time", "part time", "probation internship"],
