@@ -58,16 +58,16 @@ exports.UpdateStudent = asyncHandler(async (req, res) => {
 exports.CreateStudent = asyncHandler(async (req, res) => {
     try {
         const { name, gender, mobile, email, date, assign_to, comment, alternate_number, batch, type, telegram,
-                status, source, courses, center, medium, city, define_emi } = req.body;
+            status, source, courses, center, medium, city, define_emi } = req.body;
         let { gross_amount, committed_amount, bifurcation, fees, Emi_Id } = req.body;
-        
+
         let validation = await validationCheck({ name, mobile, date, courses });
         if (!validation.status) {
             throw new ErrorResponse(`Please provide a ${validation?.errorAt}`, 400);
         }
         if (email) {
             let checkEmail = await findUniqueData(Student, { email });
-            if (checkEmail) 
+            if (checkEmail)
                 throw new ErrorResponse(`email already exist`, 400);
         }
         //main and final body
