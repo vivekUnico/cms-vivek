@@ -12,12 +12,12 @@ const ObjectId = require('mongoose').Types.ObjectId;
 const { PermissionAuthenctication } = require('../../middleware/apiAuth');
 // Get LeadAndEnquiry by filter
 exports.GetLeadAndEnquiryByFilter = asyncHandler(async (req, res) => {
-    let str1 = (req.query.type == "lead") ? "leads_filter" : "enquiry_filter";
-    let permission = await PermissionAuthenctication(req.headers, str1);
-    if (!permission.success) {
-        throw new ErrorResponse(`You are not authorized to access this route`, 401);
-    }
     try {
+        let str1 = (req.query.type == "lead") ? "leads_filter" : "enquiry_filter";
+        let permission = await PermissionAuthenctication(req.headers, str1);
+        if (!permission.success) {
+            throw new ErrorResponse(`You are not authorized to access this route`, 401);
+        }
         const { populate, type } = req.query;
         let temp = [], Arr = [];
         for (let key in req.query) {
@@ -28,7 +28,9 @@ exports.GetLeadAndEnquiryByFilter = asyncHandler(async (req, res) => {
                     Arr.push({ courses: { $in: val } })
                 });
             } else {
-                temp.push({ [key]: req.query[key] });
+                if (key == "name" || key == "mobile") {
+                    temp.push({ [key]: { $regex: req.query[key] } });
+                } else  temp.push({ [key]: req.query[key] });
             }
         }
         if (type) {
@@ -49,12 +51,12 @@ exports.GetLeadAndEnquiryByFilter = asyncHandler(async (req, res) => {
 //Get All LeadAndEnquiry
 exports.GetAllLeadAndEnquiry = asyncHandler(async (req, res) => {
     let { populate, type, assign_to, created_by } = req.query;
-    let str1 = (type == "lead") ? "all_lead" : "all_enquiry";
-    let permission = await PermissionAuthenctication(req.headers, str1);
-    if (!permission.success) {
-        throw new ErrorResponse(`You are not authorized to access this route`, 401);
-    }
     try {
+        let str1 = (type == "lead") ? "all_lead" : "all_enquiry";
+        let permission = await PermissionAuthenctication(req.headers, str1);
+        if (!permission.success) {
+            throw new ErrorResponse(`You are not authorized to access this route`, 401);
+        }
         let filter = [], Arr = [];
         if (type) {
             if (type == "lead") {
@@ -138,7 +140,11 @@ exports.GetSingleLeadAndEnquiry = asyncHandler(async (req, res) => {
 
         let data = await LeadAndEnquiry.findOne({ _id: id })
             .populate(populate?.split(",").map((item) => ({ path: item })));
-        
+        let str1 = (data.isLead) ? "view_lead" : "view_enquiry";
+        let permission = await PermissionAuthenctication(req.headers, str1);
+        if (!permission.success) {
+            throw new ErrorResponse(`You are not authorized to access this route`, 401);
+        }
         if (!data) throw new ErrorResponse(`LeadAndEnquiry id not found`, 400);
         if (data.isEnquiry) {
             let result = await Emi.findOne({ enquiry_id: id });
@@ -162,7 +168,11 @@ exports.DeleteLeadAndEnquiry = asyncHandler(async (req, res) => {
         //remove LeadAndEnquiry from subject
         let oldLeadAndEnquiry = await LeadAndEnquiry.findOne({ _id: id });
         if (!oldLeadAndEnquiry) throw new ErrorResponse(`LeadAndEnquiry id not found`, 400);
-
+        let str1 = (oldLeadAndEnquiry.isLead) ? "delete_lead" : "delete_enquiry";
+        let permission = await PermissionAuthenctication(req.headers, str1);
+        if (!permission.success) {
+            throw new ErrorResponse(`You are not authorized to access this route`, 401);
+        }
         await Followup.findOneAndDelete({ connection_id: id });
         await oldLeadAndEnquiry.remove();
         return res.status(200).json({ success: true, data: "LeadAndEnquiry Deleted Successful" });
@@ -179,11 +189,11 @@ exports.MoveLeadToEnquiry = asyncHandler(async (req, res) => {
         let oldLeadAndEnquiry = await findUniqueData(LeadAndEnquiry, { _id: id });
         console.log("this...", oldLeadAndEnquiry);
         if (!oldLeadAndEnquiry) throw new ErrorResponse(`Lead not found`, 400);
-        if (oldLeadAndEnquiry.currentStatus != "lead" && oldLeadAndEnquiry.isLead == false) 
+        if (oldLeadAndEnquiry.currentStatus != "lead" && oldLeadAndEnquiry.isLead == false)
             throw new ErrorResponse(`This lead is already moved into Enquiry stage.`, 400);
 
-        const data = await LeadAndEnquiry.findOneAndUpdate({ _id: id }, 
-            { isEnquiry: true, currentStatus: "enquiry", isLead : false }, { returnOriginal: false });
+        const data = await LeadAndEnquiry.findOneAndUpdate({ _id: id },
+            { isEnquiry: true, currentStatus: "enquiry", isLead: false }, { returnOriginal: false });
         return res.status(201).json({ success: true, data });
     } catch (error) {
         throw new ErrorResponse(`Server error :${error}`, 400);
@@ -195,6 +205,10 @@ exports.MoveLeadToEnquiry = asyncHandler(async (req, res) => {
 //Update Single Lead
 exports.UpdateLead = asyncHandler(async (req, res) => {
     try {
+        let permission = await PermissionAuthenctication(req.headers, "edit_lead");
+        if (!permission.success) {
+            throw new ErrorResponse(`You are not authorized to access this route`, 401);
+        }
         const { id } = req.params;
         if (!id) throw new ErrorResponse(`Please provide a Lead id `, 400);
 
@@ -211,8 +225,10 @@ exports.UpdateLead = asyncHandler(async (req, res) => {
         }
 
         //main and final body
-        let schemaData = { name, gender, mobile, email, date, assign_to, comment, alternate_number, 
-                status, source, courses, center, medium, city, batch, type, telegram };
+        let schemaData = {
+            name, gender, mobile, email, date, assign_to, comment, alternate_number,
+            status, source, courses, center, medium, city, batch, type, telegram
+        };
 
         const data = await LeadAndEnquiry.findOneAndUpdate({ _id: id }, schemaData, { returnOriginal: false });
         return res.status(201).json({ success: true, data });
@@ -225,6 +241,10 @@ exports.UpdateLead = asyncHandler(async (req, res) => {
 //Update Single Enquiry
 exports.UpdateEnquiry = asyncHandler(async (req, res) => {
     try {
+        let permission = await PermissionAuthenctication(req.headers, "edit_enquiry");
+        if (!permission.success) {
+            throw new ErrorResponse(`You are not authorized to access this route`, 401);
+        }
         const { id } = req.params;
         if (!id) throw new ErrorResponse(`Please provide a Enquiry id `, 400);
 
@@ -254,7 +274,7 @@ exports.UpdateEnquiry = asyncHandler(async (req, res) => {
         let updateData = {};
         Object.entries(schemaData).map((item) => {
             if (item[1] == undefined)
-                return ;   
+                return;
             updateData[`enquiry_data.${item[0]}`] = item[1];
             updateData[`${item[0]}`] = item[1];
         });
