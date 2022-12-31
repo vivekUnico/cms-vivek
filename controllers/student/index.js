@@ -48,7 +48,7 @@ exports.GetAllStudent = asyncHandler(async (req, res) => {
 exports.UpdateStudent = asyncHandler(async (req, res) => {
     try {
         const { id } = req.params;
-        if (req.body.isBlock) {
+        if (req.body?.isBlock) {
             const { email } = req.body;
             await Staff.findOne({ email }).update({ $set: { isBlock: true } });
         }
