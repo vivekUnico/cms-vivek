@@ -15,6 +15,7 @@ const Student = require("../../models/student");
 const StudentScreening = require("../../models/student/studentScreening");
 
 const LeadAndEnquiry = require("../../models/leadAndEnquiry");
+const Staff = require("../../models/staff");
 
 //Get All Student
 exports.GetAllStudent = asyncHandler(async (req, res) => {
@@ -47,6 +48,10 @@ exports.GetAllStudent = asyncHandler(async (req, res) => {
 exports.UpdateStudent = asyncHandler(async (req, res) => {
     try {
         const { id } = req.params;
+        if (req.body.isBlock) {
+            const { email } = req.body;
+            await Staff.findOne({ email }).update({ $set: { isBlock: true } });
+        }
         const result = await Student.findByIdAndUpdate(id, { $set: { ...req.body } }, { new: true });
         return res.status(200).json({ success: true, data: result });
     } catch (error) {
