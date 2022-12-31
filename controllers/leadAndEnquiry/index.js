@@ -132,12 +132,13 @@ exports.CreateLeadAndEnquiry = asyncHandler(async (req, res) => {
 //Get Single LeadAndEnquiry
 exports.GetSingleLeadAndEnquiry = asyncHandler(async (req, res) => {
     let { populate } = req.query;
-    console.log("enquiry_id..........");
     try {
         const { id } = req.params;
         if (!id) throw new ErrorResponse(`Please provide a LeadAndEnquiry id `, 400);
 
-        let data = await LeadAndEnquiry.findOne({ _id: id }).populate(populate?.split(",").map((item) => ({ path: item })));;
+        let data = await LeadAndEnquiry.findOne({ _id: id })
+            .populate(populate?.split(",").map((item) => ({ path: item })));
+        
         if (!data) throw new ErrorResponse(`LeadAndEnquiry id not found`, 400);
         if (data.isEnquiry) {
             let result = await Emi.findOne({ enquiry_id: id });

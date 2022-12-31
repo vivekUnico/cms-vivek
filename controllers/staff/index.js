@@ -155,7 +155,7 @@ exports.loginUser = asyncHandler(async (req, res) => {
     }
 
     try {
-        const userData = await Staff.findOne({ email });
+        const userData = await Staff.findOne({ email }).populate('permission_id');
         if (!userData) {
             throw new ErrorResponse(`email provided doesn't exist`, 400);
         }
@@ -169,11 +169,11 @@ exports.loginUser = asyncHandler(async (req, res) => {
                     name: userData.name,
                     email: userData.email,
                     userid: userData._id,
-                    permission_id: userData.permission_id,
+                    permission_id: userData?.permission_id?._id,
                 },
                 process.env.JWT_SECRET, {
                 expiresIn: 60 * 60 * 24 * 30 // 30 days
-            }); // 60*60*24*7 is 7 days, here 60 means 60 seconds
+            });
             let date = new Date();
             date.setDate(date.getDate() + 6);
             delete userData.password;
