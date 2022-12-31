@@ -8,6 +8,7 @@ const { validationCheck, validationImportent } = require('../../middleware/valid
 const Followup = require("../../models/followup");
 const LeadAndEnquiry = require("../../models/leadAndEnquiry");
 const { PermissionAuthenctication } = require('../../middleware/apiAuth');
+const { parseISO, sub, add } = require('date-fns');
 
 exports.GetFollowupByFilter = asyncHandler(async (req, res) => {
     try {
@@ -17,18 +18,24 @@ exports.GetFollowupByFilter = asyncHandler(async (req, res) => {
         if ((!permission.success) && req.query["created_by"] == undefined) {
             throw new ErrorResponse(`You are not authorized to access this route`, 401);
         }
-        let temp = [], Arr = [];
+        let temp = [], Arr = [], Arr1 = [];
         for (let key in req.query) {
             if ((key == "created_by" || key == "followup_list.followup_by._id"))
-                Arr.push({[key] : ObjectId(req.query[key])});
+                Arr1.push({[key] : ObjectId(req.query[key])});
             else if (key.includes("courses")) {
                 (req.query[key].split(',')).map(val => {
                     Arr.push({ [key]: ObjectId(val) })
                 });
-            } else temp.push({[key] : { $regex : req.query[key]}});
+            } else if (key == "date") {
+                let date = parseISO(req.query[key]);
+                let date2 = add(date, { days: 1 });
+                temp.push({ "followup_list.addedTime": { $gte: date, $lt: date2 } });
+            }
+            else temp.push({[key] : { $regex : req.query[key]}});
         }
         if (Arr.length == 0) Arr.push({});
-        console.log(temp, Arr);
+        if (Arr1.length == 0) Arr1.push({});
+        console.log(temp);
         let data = await Followup.aggregate([
             { $addFields : { "followup_list_length" : { $size : "$followup_list" }}},
             { $unwind: { path: "$followup_list", preserveNullAndEmptyArrays: true }}, 
@@ -46,9 +53,10 @@ exports.GetFollowupByFilter = asyncHandler(async (req, res) => {
                 as: "connection_id"
             }},
             { $unwind: { path: "$connection_id", preserveNullAndEmptyArrays: true }},
-            { $match : { $and : [...temp, { $or : Arr}] } }
+            { $match : { $and : [...temp, { $or : Arr}, {$or : Arr1}] } }
 
         ]);
+        console.log(data);
         return res.status(200).json({ success: true, data  });
     }  catch (error) {
         throw new ErrorResponse(`Server error :${error}`, 500);
@@ -160,6 +168,7 @@ exports.GetSingleFollowup = asyncHandler(async (req, res) => {
 //Create Single Followup, Update Single Followup
 exports.CreateFollowup = asyncHandler(async (req, res) => {
     try {
+        console.log(req.body);
         const { followup_type, connection_id, created_by, followup_list } = req.body;
         let validation = await validationCheck({ followup_type, connection_id, created_by, followup_list });
         let str1 = (followup_type == "lead") ? "create_followup_lead" : "create_followup_enquiry";
@@ -173,9 +182,12 @@ exports.CreateFollowup = asyncHandler(async (req, res) => {
             throw new ErrorResponse(`Please provide followup_list`, 400);
         };
         
-        let check = await LeadAndEnquiry.findOne({ _id: connection_id })
+        let check = await LeadAndEnquiry.findById(connection_id);
         if (!check) throw new ErrorResponse(`connection_id not found`, 400);
-
+        if (followup_list[followup_list?.length - 1]?.status) {
+            check.status = followup_list[followup_list?.length - 1].status;
+            await check.save();
+        }
         for (let i = 0; i < followup_list?.length; i++) {
             const item = followup_list[i];
             let { date, followup_by, status, comment, completed_comment, completed } = item;

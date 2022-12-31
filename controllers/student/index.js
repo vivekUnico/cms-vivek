@@ -16,28 +16,27 @@ const StudentScreening = require("../../models/student/studentScreening");
 
 const LeadAndEnquiry = require("../../models/leadAndEnquiry");
 const Staff = require("../../models/staff");
+const ObjectId = require('mongoose').Types.ObjectId;
 
 //Get All Student
 exports.GetAllStudent = asyncHandler(async (req, res) => {
-    let { populate, assign_to, course, select, name, date } = req.query;
+    let { populate, select } = req.query;
 
     try {
         let filter = {};
-        if (assign_to) {
-            filter["assign_to"] = String(assign_to);
+        for (let key in req.query) {
+            if (["created_by", "assign_to", "center", "batch"].includes(key)) {
+                filter[key] = ObjectId(req.query[key]);
+            } else if (key == "courses") {
+                filter[key] = { "$in": req.query[key].split(",") };
+            } else if (key == "date") {
+                filter[key] = {
+                    "$gte": sub(parseISO(req.query[key]), { days: 1 }).toISOString(),
+                    "$lte": add(parseISO(req.query[key]), { days: 1 }).toISOString()
+                }
+            } else filter[key] = { $regex : req.query[key]};
         }
-        const filterData = createFilter([
-            { name: 'courses', value: course, type: 'array' },
-            { name: 'name', value: name, type: 'text' },
-        ])
-        let filterDate = [];
-        if (date) {
-            filterDate = createFilter([
-                { name: 'date', value: { dateFrom: `${sub(parseISO(date), { days: 1 }).toISOString()}`, dateTo: `${add(parseISO(date), { days: 1 }).toISOString()}` }, type: 'date' }
-            ])
-        }
-        // console.log(filterData)
-        const data = await Student.find({ ...filter, ...filterData, ...filterDate })
+        const data = await Student.find({ ...filter })
             .select(select).populate(populate?.split(",").map((item) => ({ path: item }))).populate("Emi_Id");
         return res.status(200).json({ success: true, data });
     } catch (error) {

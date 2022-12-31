@@ -19,19 +19,17 @@ const { PermissionAuthenctication } = require('../../middleware/apiAuth');
 //Get All Staff
 exports.GetAllStaff = asyncHandler(async (req, res) => {
     let { populate, subjects, name, createdAt } = req.query;
-    const filter = createFilter([
-        { name: 'subjects', value: subjects, type: 'array' },
-        { name: 'first_name', value: name, type: 'text' },
-    ])
-    let filterDate = [];
-    if (createdAt) {
-        filterDate = createFilter([
-            { name: 'createdAt', value: { dateFrom: `${sub(parseISO(createdAt), { days: 1 }).toISOString()}`, dateTo: `${add(parseISO(createdAt), { days: 1 }).toISOString()}` }, type: 'date' },
-        ])
+    let filter = {};
+    for (let key in req.query) {
+        if (key == "permission_id")
+            filter[key] = ObjectId(req.query[key]);
+        else filter[key] = { $regex: req.query[key], $options: "i" };
     }
-    console.log(filter, filterDate)
+    if (filter.permission_id == undefined) {
+        filter["permission_id"] = { $ne: ObjectId("63ad8d66dfdb35306d3d37b1") }
+    }
     try {
-        const data = await Staff.find({ ...filter, ...filterDate, permission_id: { $ne: ObjectId("63ad8d66dfdb35306d3d37b1") } })
+        const data = await Staff.find({ ...filter })
             .populate(populate?.split(",").map((item) => ({ path: item })));
         return res.status(200).json({ success: true, data });
     } catch (error) {
