@@ -31,8 +31,8 @@ exports.GetAllStudent = asyncHandler(async (req, res) => {
                 filter[key] = { "$in": req.query[key].split(",") };
             } else if (key == "date") {
                 filter[key] = {
-                    "$gte": sub(parseISO(req.query[key]), { days: 1 }).toISOString(),
-                    "$lte": add(parseISO(req.query[key]), { days: 1 }).toISOString()
+                    "$gte": req.query[key],
+                    "$lt": add(parseISO(req.query[key]), { days: 1 }).toISOString()
                 }
             } else filter[key] = { $regex : req.query[key]};
         }
