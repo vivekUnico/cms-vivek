@@ -29,7 +29,7 @@ exports.GetFollowupByFilter = asyncHandler(async (req, res) => {
             } else if (key == "date") {
                 let date = parseISO(req.query[key]);
                 let date2 = add(date, { days: 1 });
-                temp.push({ "followup_list.addedTime": { $gte: date, $lt: date2 } });
+                temp.push({ "followup_list.date": { $gte: date, $lt: date2 } });
             }
             else temp.push({[key] : { $regex : req.query[key]}});
         }
