@@ -144,11 +144,19 @@ const PermissionSchemma = new mongoose.Schema({
         type: Boolean,
         default: false
     },
+    view_staff: {
+        type: Boolean,
+        default: false
+    },
     edit_staff: {
         type: Boolean,
         default: false
     },
     delete_staff: {
+        type: Boolean,
+        default: false
+    },
+    update_staff: {
         type: Boolean,
         default: false
     },

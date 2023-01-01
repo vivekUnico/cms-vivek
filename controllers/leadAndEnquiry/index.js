@@ -8,16 +8,17 @@ const LeadAndEnquiry = require("../../models/leadAndEnquiry");
 const Followup = require("../../models/followup");
 const Emi = require('../../models/emi');
 const ObjectId = require('mongoose').Types.ObjectId;
+const { parseISO, sub, add } = require('date-fns');
 
 const { PermissionAuthenctication } = require('../../middleware/apiAuth');
 // Get LeadAndEnquiry by filter
 exports.GetLeadAndEnquiryByFilter = asyncHandler(async (req, res) => {
-    let str1 = (req.query.type == "lead") ? "leads_filter" : "enquiry_filter";
-    let permission = await PermissionAuthenctication(req.headers, str1);
-    if (!permission.success) {
-        throw new ErrorResponse(`You are not authorized to access this route`, 401);
-    }
     try {
+        let str1 = (req.query.type == "lead") ? "leads_filter" : "enquiry_filter";
+        let permission = await PermissionAuthenctication(req.headers, str1);
+        if (!permission.success) {
+            throw new ErrorResponse(`You are not authorized to access this route`, 401);
+        }
         const { populate, type } = req.query;
         let temp = [], Arr = [];
         for (let key in req.query) {
@@ -28,7 +29,16 @@ exports.GetLeadAndEnquiryByFilter = asyncHandler(async (req, res) => {
                     Arr.push({ courses: { $in: val } })
                 });
             } else {
-                temp.push({ [key]: req.query[key] });
+                if (key == "name" || key == "mobile" || key == "last_followup.comment") {
+                    temp.push({ [key]: { $regex: req.query[key] } });
+                } else if (key.includes("addedTime")) {
+                    let date = parseISO(req.query[key]);
+                    let date2 = add(date, { days: 1 });
+                    temp.push({ "last_followup.addedTime": { $gte: date, $lt: date2 } });
+                } else if (key == "followup_list_length") {
+                    temp.push({ [key] : Number(req.query[key]) });
+                }
+                else  temp.push({ [key]: req.query[key] });
             }
         }
         if (type) {
@@ -39,8 +49,46 @@ exports.GetLeadAndEnquiryByFilter = asyncHandler(async (req, res) => {
             }
         }
         if (Arr.length == 0) Arr.push({});
-        let data = await LeadAndEnquiry.find({ $and: [...temp, { $or: Arr }] })
-            .populate(populate?.split(",").map((item) => ({ path: item })));
+        console.log(req.query);
+        // let data = await LeadAndEnquiry.find({ $and: [...temp, { $or: Arr }] })
+        //     .populate(populate?.split(",").map((item) => ({ path: item })));
+        let data = await LeadAndEnquiry.aggregate([
+            { $lookup : {
+                from: "staffs",
+                localField: "assign_to",
+                foreignField: "_id",
+                as: "assign_to"
+            }},
+            { $unwind: { path: "$assign_to", preserveNullAndEmptyArrays: true }},
+            { $lookup : {
+                from: "centers",
+                localField: "center",
+                foreignField: "_id",
+                as: "center"
+            }},
+            { $unwind: { path: "$center", preserveNullAndEmptyArrays: true }},
+            { $lookup : {
+                from: "courses",
+                localField: "courses",
+                foreignField: "_id",
+                as: "courses"
+            }},
+            { $lookup : {
+                from: "followups",
+                localField: "_id",
+                foreignField: "connection_id",
+                as: "followups"
+            }},
+            { $unwind: { path: "$followups", preserveNullAndEmptyArrays: true }},
+            { $addFields : { 
+                "followup_list_length" : { $size : {
+                    $ifNull: [ "$followups.followup_list", [] ]
+                }},
+                "last_followup" : { $last : "$followups.followup_list" }
+            }},
+            { $match: { $and: [...temp, { $or: Arr }] } },
+        ])
+        console.log(data);
         return res.status(200).json({ success: true, data });
     } catch (error) {
         throw new ErrorResponse(`Server error :${error}`, 400);
@@ -49,12 +97,12 @@ exports.GetLeadAndEnquiryByFilter = asyncHandler(async (req, res) => {
 //Get All LeadAndEnquiry
 exports.GetAllLeadAndEnquiry = asyncHandler(async (req, res) => {
     let { populate, type, assign_to, created_by } = req.query;
-    let str1 = (type == "lead") ? "all_lead" : "all_enquiry";
-    let permission = await PermissionAuthenctication(req.headers, str1);
-    if (!permission.success) {
-        throw new ErrorResponse(`You are not authorized to access this route`, 401);
-    }
     try {
+        let str1 = (type == "lead") ? "all_lead" : "all_enquiry";
+        let permission = await PermissionAuthenctication(req.headers, str1);
+        if (!permission.success) {
+            throw new ErrorResponse(`You are not authorized to access this route`, 401);
+        }
         let filter = [], Arr = [];
         if (type) {
             if (type == "lead") {
@@ -132,12 +180,17 @@ exports.CreateLeadAndEnquiry = asyncHandler(async (req, res) => {
 //Get Single LeadAndEnquiry
 exports.GetSingleLeadAndEnquiry = asyncHandler(async (req, res) => {
     let { populate } = req.query;
-    console.log("enquiry_id..........");
     try {
         const { id } = req.params;
         if (!id) throw new ErrorResponse(`Please provide a LeadAndEnquiry id `, 400);
 
-        let data = await LeadAndEnquiry.findOne({ _id: id }).populate(populate?.split(",").map((item) => ({ path: item })));;
+        let data = await LeadAndEnquiry.findOne({ _id: id })
+            .populate(populate?.split(",").map((item) => ({ path: item })));
+        let str1 = (data.isLead) ? "view_lead" : "view_enquiry";
+        let permission = await PermissionAuthenctication(req.headers, str1);
+        if (!permission.success) {
+            throw new ErrorResponse(`You are not authorized to access this route`, 401);
+        }
         if (!data) throw new ErrorResponse(`LeadAndEnquiry id not found`, 400);
         if (data.isEnquiry) {
             let result = await Emi.findOne({ enquiry_id: id });
@@ -161,7 +214,11 @@ exports.DeleteLeadAndEnquiry = asyncHandler(async (req, res) => {
         //remove LeadAndEnquiry from subject
         let oldLeadAndEnquiry = await LeadAndEnquiry.findOne({ _id: id });
         if (!oldLeadAndEnquiry) throw new ErrorResponse(`LeadAndEnquiry id not found`, 400);
-
+        let str1 = (oldLeadAndEnquiry.isLead) ? "delete_lead" : "delete_enquiry";
+        let permission = await PermissionAuthenctication(req.headers, str1);
+        if (!permission.success) {
+            throw new ErrorResponse(`You are not authorized to access this route`, 401);
+        }
         await Followup.findOneAndDelete({ connection_id: id });
         await oldLeadAndEnquiry.remove();
         return res.status(200).json({ success: true, data: "LeadAndEnquiry Deleted Successful" });
@@ -178,11 +235,11 @@ exports.MoveLeadToEnquiry = asyncHandler(async (req, res) => {
         let oldLeadAndEnquiry = await findUniqueData(LeadAndEnquiry, { _id: id });
         console.log("this...", oldLeadAndEnquiry);
         if (!oldLeadAndEnquiry) throw new ErrorResponse(`Lead not found`, 400);
-        if (oldLeadAndEnquiry.currentStatus != "lead" && oldLeadAndEnquiry.isLead == false) 
+        if (oldLeadAndEnquiry.currentStatus != "lead" && oldLeadAndEnquiry.isLead == false)
             throw new ErrorResponse(`This lead is already moved into Enquiry stage.`, 400);
 
-        const data = await LeadAndEnquiry.findOneAndUpdate({ _id: id }, 
-            { isEnquiry: true, currentStatus: "enquiry", isLead : false }, { returnOriginal: false });
+        const data = await LeadAndEnquiry.findOneAndUpdate({ _id: id },
+            { isEnquiry: true, currentStatus: "enquiry", isLead: false }, { returnOriginal: false });
         return res.status(201).json({ success: true, data });
     } catch (error) {
         throw new ErrorResponse(`Server error :${error}`, 400);
@@ -194,6 +251,10 @@ exports.MoveLeadToEnquiry = asyncHandler(async (req, res) => {
 //Update Single Lead
 exports.UpdateLead = asyncHandler(async (req, res) => {
     try {
+        let permission = await PermissionAuthenctication(req.headers, "edit_lead");
+        if (!permission.success) {
+            throw new ErrorResponse(`You are not authorized to access this route`, 401);
+        }
         const { id } = req.params;
         if (!id) throw new ErrorResponse(`Please provide a Lead id `, 400);
 
@@ -203,15 +264,17 @@ exports.UpdateLead = asyncHandler(async (req, res) => {
 
         const { name, gender, mobile, email, date, assign_to, comment, alternate_number,
             status, source, courses, center, medium, city, batch, type, telegram } = req.body;
-        //validate email
+        console.log(oldLeadAndEnquiry.email, email);
         if (oldLeadAndEnquiry.email != email) {
             let checkEmail = await findUniqueData(LeadAndEnquiry, { email });
             if (checkEmail) throw new ErrorResponse(`email already exist`, 400);
         }
 
         //main and final body
-        let schemaData = { name, gender, mobile, email, date, assign_to, comment, alternate_number, 
-                status, source, courses, center, medium, city, batch, type, telegram };
+        let schemaData = {
+            name, gender, mobile, email, date, assign_to, comment, alternate_number,
+            status, source, courses, center, medium, city, batch, type, telegram
+        };
 
         const data = await LeadAndEnquiry.findOneAndUpdate({ _id: id }, schemaData, { returnOriginal: false });
         return res.status(201).json({ success: true, data });
@@ -224,6 +287,10 @@ exports.UpdateLead = asyncHandler(async (req, res) => {
 //Update Single Enquiry
 exports.UpdateEnquiry = asyncHandler(async (req, res) => {
     try {
+        let permission = await PermissionAuthenctication(req.headers, "edit_enquiry");
+        if (!permission.success) {
+            throw new ErrorResponse(`You are not authorized to access this route`, 401);
+        }
         const { id } = req.params;
         if (!id) throw new ErrorResponse(`Please provide a Enquiry id `, 400);
 
@@ -253,7 +320,7 @@ exports.UpdateEnquiry = asyncHandler(async (req, res) => {
         let updateData = {};
         Object.entries(schemaData).map((item) => {
             if (item[1] == undefined)
-                return ;   
+                return;
             updateData[`enquiry_data.${item[0]}`] = item[1];
             updateData[`${item[0]}`] = item[1];
         });

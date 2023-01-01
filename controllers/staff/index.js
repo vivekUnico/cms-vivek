@@ -13,24 +13,23 @@ const Staff = require("../../models/staff");
 const jwt = require("jsonwebtoken");
 const crypto = require('crypto')
 const { sendEmail } = require('../../utils/sendEmail');
-const { hashPassword, comparePassword } = require('../../utils/hashing')
+const { hashPassword, comparePassword } = require('../../utils/hashing');
+const { PermissionAuthenctication } = require('../../middleware/apiAuth');
 
 //Get All Staff
 exports.GetAllStaff = asyncHandler(async (req, res) => {
     let { populate, subjects, name, createdAt } = req.query;
-    const filter = createFilter([
-        { name: 'subjects', value: subjects, type: 'array' },
-        { name: 'first_name', value: name, type: 'text' },
-    ])
-    let filterDate = [];
-    if (createdAt) {
-        filterDate = createFilter([
-            { name: 'createdAt', value: { dateFrom: `${sub(parseISO(createdAt), { days: 1 }).toISOString()}`, dateTo: `${add(parseISO(createdAt), { days: 1 }).toISOString()}` }, type: 'date' },
-        ])
+    let filter = {};
+    for (let key in req.query) {
+        if (key == "permission_id")
+            filter[key] = ObjectId(req.query[key]);
+        else filter[key] = { $regex: req.query[key], $options: "i" };
     }
-    console.log(filter, filterDate)
+    if (filter.permission_id == undefined) {
+        filter["permission_id"] = { $ne: ObjectId("63ad8d66dfdb35306d3d37b1") }
+    }
     try {
-        const data = await Staff.find({ ...filter, ...filterDate, permission_id : { $ne : ObjectId("63ad8d66dfdb35306d3d37b1") } })
+        const data = await Staff.find({ ...filter })
             .populate(populate?.split(",").map((item) => ({ path: item })));
         return res.status(200).json({ success: true, data });
     } catch (error) {
@@ -41,13 +40,19 @@ exports.GetAllStaff = asyncHandler(async (req, res) => {
 //Create Single Staff
 exports.CreateStaff = asyncHandler(async (req, res) => {
     try {
+        let str1 = "add_staff";
+        let permission = await PermissionAuthenctication(req.headers, str1);
+        if (!permission.success) {
+            throw new ErrorResponse(`You are not authorized to access this route`, 401);
+        }
         console.log("staff data", req.body);
         const { initial, first_name, last_name, email, mobile, dob, center, staffCode, salary_type, loginId, role, department, password,
             position, grade, shift, qualification, manager, joining_date, job_type, gender, account_status, subjects, permission_id } = req.body;
 
         let validation = await validationCheck({
-            first_name, email, mobile, center, staffCode, 
-            gender, permission_id, password });
+            first_name, email, mobile, center, staffCode,
+            gender, permission_id, password
+        });
         if (!validation.status) {
             throw new ErrorResponse(`Please provide a ${validation?.errorAt}`, 400);
         }
@@ -75,9 +80,13 @@ exports.CreateStaff = asyncHandler(async (req, res) => {
 //Get Single Staff
 exports.GetSingleStaff = asyncHandler(async (req, res) => {
     let { populate } = req.query;
-
     try {
         const { id } = req.params;
+        let str1 = "view_staff";
+        let permission = await PermissionAuthenctication(req.headers, str1);
+        if (!permission.success) {
+            throw new ErrorResponse(`You are not authorized to access this route`, 401);
+        }
         if (!id) throw new ErrorResponse(`Please provide a Staff id `, 400);
 
         const data = await Staff.findOne({ _id: id }).populate(populate?.split(",").map((item) => ({ path: item })));;
@@ -93,6 +102,11 @@ exports.GetSingleStaff = asyncHandler(async (req, res) => {
 exports.DeleteStaff = asyncHandler(async (req, res) => {
     try {
         const { id } = req.params;
+        let str1 = "delete_staff";
+        let permission = await PermissionAuthenctication(req.headers, str1);
+        if (!permission.success) {
+            throw new ErrorResponse(`You are not authorized to access this route`, 401);
+        }
         if (!id) throw new ErrorResponse(`Please provide a Staff id `, 400);
 
         //remove Staff from subject
@@ -112,13 +126,19 @@ exports.UpdateStaff = asyncHandler(async (req, res) => {
     try {
         const { id } = req.params;
         if (!id) throw new ErrorResponse(`Please provide a Staff _id `, 400);
-
-        const { initial, first_name, last_name, email, mobile, dob, center, staffCode, salary_type, 
-            loginId, role, department, position, grade, shift, qualification, manager, joining_date, 
-                job_type, gender, account_status, subjects, permission_id, isBlock } = req.body;
-        let schemaData = { initial, first_name, last_name, email, mobile, dob, center, staffCode, 
-            salary_type, loginId, role, department, position, grade, shift, qualification, manager, 
-            joining_date, job_type, gender, account_status, subjects, permission_id, isBlock };
+        let str1 = "update_staff";
+        let permission = await PermissionAuthenctication(req.headers, str1);
+        if (!permission.success) {
+            throw new ErrorResponse(`You are not authorized to access this route`, 401);
+        }
+        const { initial, first_name, last_name, email, mobile, dob, center, staffCode, salary_type,
+            loginId, role, department, position, grade, shift, qualification, manager, joining_date,
+            job_type, gender, account_status, subjects, permission_id, isBlock } = req.body;
+        let schemaData = {
+            initial, first_name, last_name, email, mobile, dob, center, staffCode,
+            salary_type, loginId, role, department, position, grade, shift, qualification, manager,
+            joining_date, job_type, gender, account_status, subjects, permission_id, isBlock
+        };
 
         let oldStaff = await findUniqueData(Staff, { _id: id });
 
@@ -133,7 +153,7 @@ exports.UpdateStaff = asyncHandler(async (req, res) => {
             if (checkLoginId) throw new ErrorResponse(`loginId already exist`, 400);
         }
 
-        const data = await Staff.findOneAndUpdate({ _id: id }, { $set : { ...schemaData }}, { returnOriginal: false });
+        const data = await Staff.findOneAndUpdate({ _id: id }, { $set: { ...schemaData } }, { returnOriginal: false });
         console.log(data);
         if (!data) throw new ErrorResponse(`Staff id not found`, 400);
 
@@ -155,9 +175,9 @@ exports.loginUser = asyncHandler(async (req, res) => {
     }
 
     try {
-        const userData = await Staff.findOne({ email });
-        if (!userData) {
-            throw new ErrorResponse(`email provided doesn't exist`, 400);
+        const userData = await Staff.findOne({ email }).populate('permission_id');
+        if (!userData || userData.isBlock) {
+            throw new ErrorResponse(`you are not authenticated`, 400);
         }
 
         console.log('is Password ok -->', password, userData.password)
@@ -169,11 +189,11 @@ exports.loginUser = asyncHandler(async (req, res) => {
                     name: userData.name,
                     email: userData.email,
                     userid: userData._id,
-                    permission_id: userData.permission_id,
+                    permission_id: userData?.permission_id?._id,
                 },
                 process.env.JWT_SECRET, {
                 expiresIn: 60 * 60 * 24 * 30 // 30 days
-            }); // 60*60*24*7 is 7 days, here 60 means 60 seconds
+            });
             let date = new Date();
             date.setDate(date.getDate() + 6);
             delete userData.password;
