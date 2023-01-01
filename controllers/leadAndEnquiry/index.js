@@ -8,6 +8,7 @@ const LeadAndEnquiry = require("../../models/leadAndEnquiry");
 const Followup = require("../../models/followup");
 const Emi = require('../../models/emi');
 const ObjectId = require('mongoose').Types.ObjectId;
+const { parseISO, sub, add } = require('date-fns');
 
 const { PermissionAuthenctication } = require('../../middleware/apiAuth');
 // Get LeadAndEnquiry by filter
@@ -28,9 +29,16 @@ exports.GetLeadAndEnquiryByFilter = asyncHandler(async (req, res) => {
                     Arr.push({ courses: { $in: val } })
                 });
             } else {
-                if (key == "name" || key == "mobile") {
+                if (key == "name" || key == "mobile" || key == "last_followup.comment") {
                     temp.push({ [key]: { $regex: req.query[key] } });
-                } else  temp.push({ [key]: req.query[key] });
+                } else if (key.includes("addedTime")) {
+                    let date = parseISO(req.query[key]);
+                    let date2 = add(date, { days: 1 });
+                    temp.push({ "last_followup.addedTime": { $gte: date, $lt: date2 } });
+                } else if (key == "followup_list_length") {
+                    temp.push({ [key] : Number(req.query[key]) });
+                }
+                else  temp.push({ [key]: req.query[key] });
             }
         }
         if (type) {
@@ -41,8 +49,46 @@ exports.GetLeadAndEnquiryByFilter = asyncHandler(async (req, res) => {
             }
         }
         if (Arr.length == 0) Arr.push({});
-        let data = await LeadAndEnquiry.find({ $and: [...temp, { $or: Arr }] })
-            .populate(populate?.split(",").map((item) => ({ path: item })));
+        console.log(req.query);
+        // let data = await LeadAndEnquiry.find({ $and: [...temp, { $or: Arr }] })
+        //     .populate(populate?.split(",").map((item) => ({ path: item })));
+        let data = await LeadAndEnquiry.aggregate([
+            { $lookup : {
+                from: "staffs",
+                localField: "assign_to",
+                foreignField: "_id",
+                as: "assign_to"
+            }},
+            { $unwind: { path: "$assign_to", preserveNullAndEmptyArrays: true }},
+            { $lookup : {
+                from: "centers",
+                localField: "center",
+                foreignField: "_id",
+                as: "center"
+            }},
+            { $unwind: { path: "$center", preserveNullAndEmptyArrays: true }},
+            { $lookup : {
+                from: "courses",
+                localField: "courses",
+                foreignField: "_id",
+                as: "courses"
+            }},
+            { $lookup : {
+                from: "followups",
+                localField: "_id",
+                foreignField: "connection_id",
+                as: "followups"
+            }},
+            { $unwind: { path: "$followups", preserveNullAndEmptyArrays: true }},
+            { $addFields : { 
+                "followup_list_length" : { $size : {
+                    $ifNull: [ "$followups.followup_list", [] ]
+                }},
+                "last_followup" : { $last : "$followups.followup_list" }
+            }},
+            { $match: { $and: [...temp, { $or: Arr }] } },
+        ])
+        console.log(data);
         return res.status(200).json({ success: true, data });
     } catch (error) {
         throw new ErrorResponse(`Server error :${error}`, 400);
@@ -218,7 +264,7 @@ exports.UpdateLead = asyncHandler(async (req, res) => {
 
         const { name, gender, mobile, email, date, assign_to, comment, alternate_number,
             status, source, courses, center, medium, city, batch, type, telegram } = req.body;
-        //validate email
+        console.log(oldLeadAndEnquiry.email, email);
         if (oldLeadAndEnquiry.email != email) {
             let checkEmail = await findUniqueData(LeadAndEnquiry, { email });
             if (checkEmail) throw new ErrorResponse(`email already exist`, 400);
