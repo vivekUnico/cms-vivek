@@ -256,11 +256,11 @@ exports.loginUser = asyncHandler(async (req, res) => {
                 {
                     name: userData.name,
                     email: userData.email,
-                    userid: userData._id
+                    userid: userData._id,
                 },
                 process.env.JWT_SECRET, {
-                expiresIn: 60 * 60 * 24 * 7
-            }); // 60*60*24*7 is 7 days, here 60 means 60 seconds
+                expiresIn: 60 * 60 * 24 * 30
+            }); 
             let date = new Date();
             date.setDate(date.getDate() + 6);
             delete userData.password;
