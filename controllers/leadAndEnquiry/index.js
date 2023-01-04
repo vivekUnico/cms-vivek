@@ -22,7 +22,7 @@ exports.GetLeadAndEnquiryByFilter = asyncHandler(async (req, res) => {
         const { populate, type } = req.query;
         let temp = [], Arr = [];
         for (let key in req.query) {
-            if (key == "populate" || key == "created_by" || key == "type")
+            if (key == "populate" || key == "created_by" || key == "type" || key == "pageno" || key == "limit")
                 continue;
             if (key === "courses") {
                 (req.query[key].split(',')).map(val => {
@@ -87,6 +87,9 @@ exports.GetLeadAndEnquiryByFilter = asyncHandler(async (req, res) => {
                 "last_followup" : { $last : "$followups.followup_list" }
             }},
             { $match: { $and: [...temp, { $or: Arr }] } },
+            { $sort : { "createdAt" : -1 }},
+            { $skip : (parseInt(req.query.pageno) - 1) * parseInt(req.query.limit) },
+            { $limit : parseInt(req.query.limit) },
         ])
         console.log(data);
         return res.status(200).json({ success: true, data });
@@ -119,7 +122,8 @@ exports.GetAllLeadAndEnquiry = asyncHandler(async (req, res) => {
         }
         if (Arr.length == 0) Arr.push({});
         let data = await LeadAndEnquiry.find({ $and: [...filter, { $or: Arr }] })
-            .populate(populate?.split(",").map((item) => ({ path: item })));
+            .populate(populate?.split(",").map((item) => ({ path: item })))
+            .sort({ "createdAt" : -1 }).skip((parseInt(req.query.pageno) - 1) * parseInt(req.query.limit)).limit(parseInt(req.query.limit))
         console.log(data, Arr);
         return res.status(200).json({ success: true, data });
     } catch (error) {
@@ -238,8 +242,11 @@ exports.MoveLeadToEnquiry = asyncHandler(async (req, res) => {
         if (oldLeadAndEnquiry.currentStatus != "lead" && oldLeadAndEnquiry.isLead == false)
             throw new ErrorResponse(`This lead is already moved into Enquiry stage.`, 400);
 
-        const data = await LeadAndEnquiry.findOneAndUpdate({ _id: id },
-            { isEnquiry: true, currentStatus: "enquiry", isLead: false }, { returnOriginal: false });
+        // const data = await LeadAndEnquiry.findOneAndUpdate({ _id: id }, 
+        //     { isEnquiry: true, currentStatus: "enquiry", isLead: false }, { returnOriginal: false });
+        const data = await LeadAndEnquiry.findByIdAndUpdate(id, {
+            $set: { isEnquiry: true, currentStatus: "enquiry", isLead: false }}, { new : true });
+        await Followup.deleteMany({ connection_id: id });
         return res.status(201).json({ success: true, data });
     } catch (error) {
         throw new ErrorResponse(`Server error :${error}`, 400);

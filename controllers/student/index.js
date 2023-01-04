@@ -37,7 +37,8 @@ exports.GetAllStudent = asyncHandler(async (req, res) => {
             } else filter[key] = { $regex : req.query[key]};
         }
         const data = await Student.find({ ...filter })
-            .select(select).populate(populate?.split(",").map((item) => ({ path: item }))).populate("Emi_Id");
+            .select(select).populate(populate?.split(",").map((item) => ({ path: item }))).populate("Emi_Id")
+            .sort({"createdAt" : -1}).skip((parseInt(req.query.pageno) - 1) * parseInt(req.query.limit)).limit(parseInt(req.query.limit));
         return res.status(200).json({ success: true, data });
     } catch (error) {
         throw new ErrorResponse(`Server error :${error}`, 400);

@@ -83,7 +83,7 @@ exports.PermissionAuthenctication = async (headers, temp) => {
     try {
         let authHeader = headers['authorization'], user;
         const token = authHeader && authHeader.split(' ')[1];
-        if (token == null) {
+        if (token == null || temp.length == 0 || temp == undefined) {
             throw new ErrorResponse(`unauthorized, please provide a valid jwt token`, 401);
         }
         jwt.verify(token, process.env.JWT_SECRET, async (err, response) => {
@@ -93,7 +93,8 @@ exports.PermissionAuthenctication = async (headers, temp) => {
             user = response;
         });
         let { permission_id } = user;
-        let result = await Permissions.findOne({ _id: permission_id });
+        let result = await Permissions.findOne({ _id: permission_id }).select(temp);
+        console.log("dfgfdgd", result);
         if (!result[`${temp}`]) {
             return { success: false, message : "you have not permission to access this Route" };
         }
