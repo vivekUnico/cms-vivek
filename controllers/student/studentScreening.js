@@ -15,7 +15,8 @@ exports.GetAllStudentScreening = asyncHandler(async (req, res) => {
     try {
         let filter = {};
         for (let key in req.query) {
-            if (key === "populate") continue;
+            if (key === "populate" || key == "pageno" || key == "limit") 
+                continue;
             if (key == "createdAt") {
                 filter["createdAt"] = {
                     "$gte": parseISO(req.query[key]),
@@ -32,6 +33,9 @@ exports.GetAllStudentScreening = asyncHandler(async (req, res) => {
             }},
             { $unwind: "$student" },
             { $match: filter },
+            { $sort: { createdAt: -1 } },
+            { $skip : (parseInt(req.query.pageno) - 1) * parseInt(req.query.limit) },
+            { $limit : parseInt(req.query.limit) },
         ]);
         // const data = await StudentScreening.find({ ...filter }).populate(populate?.split(",").map((item) => ({ path: item })));
 

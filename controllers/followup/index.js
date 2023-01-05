@@ -20,6 +20,8 @@ exports.GetFollowupByFilter = asyncHandler(async (req, res) => {
         }
         let temp = [], Arr = [], Arr1 = [];
         for (let key in req.query) {
+            if (key.includes("pageno") || key == "limit") 
+                continue;
             if ((key == "created_by" || key == "followup_list.followup_by._id"))
                 Arr1.push({[key] : ObjectId(req.query[key])});
             else if (key.includes("courses")) {
@@ -35,7 +37,7 @@ exports.GetFollowupByFilter = asyncHandler(async (req, res) => {
         }
         if (Arr.length == 0) Arr.push({});
         if (Arr1.length == 0) Arr1.push({});
-        console.log(temp);
+        console.log(req.query);
         let data = await Followup.aggregate([
             { $addFields : { "followup_list_length" : { $size : "$followup_list" }}},
             { $unwind: { path: "$followup_list", preserveNullAndEmptyArrays: true }}, 
@@ -53,10 +55,12 @@ exports.GetFollowupByFilter = asyncHandler(async (req, res) => {
                 as: "connection_id"
             }},
             { $unwind: { path: "$connection_id", preserveNullAndEmptyArrays: true }},
-            { $match : { $and : [...temp, { $or : Arr}, {$or : Arr1}] } }
-
+            { $match : { $and : [...temp, { $or : Arr}, {$or : Arr1}] } },
+            { $sort : { "followup_list.addedTime" : -1 } },
+            { $skip : (parseInt(req.query.pageno) - 1) * parseInt(req.query.limit) },
+            { $limit : parseInt(req.query.limit) },
         ]);
-        console.log(data);
+        console.log(data.length);
         return res.status(200).json({ success: true, data  });
     }  catch (error) {
         throw new ErrorResponse(`Server error :${error}`, 500);
@@ -143,7 +147,7 @@ exports.GetAllFollowup = asyncHandler(async (req, res) => {
                 ];
             }
         }
-        let data = await Followup.find({ ...filter }).populate(populate?.split(",").map((item) => ({ path: item })));
+        let data = await Followup.find({ ...filter }).populate(populate?.split(",").map((item) => ({ path: item })))
         return res.status(200).json({ success: true, filter, data });
     } catch (error) {
         throw new ErrorResponse(`Server error :${error}`, 400);
