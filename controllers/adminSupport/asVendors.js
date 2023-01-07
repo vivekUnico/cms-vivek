@@ -26,13 +26,16 @@ exports.CreateVendors = asyncHandler(async (req, res) => {
 })
 
 exports.ReadVendors = asyncHandler(async (req, res) => {
-    const { select, populate, page, limit } = req.query;
-    const filter = createFilter([
-        // add content for filter
-    ])
-
+    console.log("i am in read vendors");
+    const filter = {}
+    for (const key in req.query) {
+        if (key !== 'limit' && key !== 'pageno') {
+            filter[key] = { $regex : req.query[key]}
+        }
+    }
     try {
-        const data = await modelName.find(filter).select(select?.split(",")).limit(Number(limit)).skip(Number(page) * Number(limit)).sort({ createdAt: -1 }).populate(populate?.split(","));
+        const data = await modelName.find(filter)
+        .sort({"createdAt" : -1}).skip((parseInt(req.query.pageno) - 1) * parseInt(req.query.limit)).limit(parseInt(req.query.limit));
         return res.status(200).json({ success: true, data });
     } catch (error) {
         throw new ErrorResponse(`Server error :${error}`, 400);

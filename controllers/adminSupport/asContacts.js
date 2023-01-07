@@ -28,9 +28,12 @@ exports.CreateContact = asyncHandler(async (req, res) => {
 exports.GetAllContacts = asyncHandler(async (req, res) => {
     console.log('contact get')
     let {select, populate, name, createdAt } = req.query;
-    const filter = createFilter([
-        // { name: 'first_name', value: name, type: 'text' },
-    ])
+    const filter = {};
+    for (let key in req.query) {
+        if (key == "limit" || key == "pageno" || key == "populate")
+            continue;
+        filter[key] = { $regex: req.query[key] };
+    }
     let filterDate = [];
     if (createdAt) {
         filterDate = createFilter([
@@ -38,7 +41,8 @@ exports.GetAllContacts = asyncHandler(async (req, res) => {
         ])
     }
     try {
-        const data = await modelName.find({ ...filter, ...filterDate }).select(select?.split(",")).populate(populate?.split(",").map((item) => ({ path: item })));
+        const data = await modelName.find({ ...filter, ...filterDate }).populate(populate?.split(",").map((item) => ({ path: item })))
+            .sort({"createdAt" : -1}).skip((parseInt(req.query.pageno) - 1) * parseInt(req.query.limit)).limit(parseInt(req.query.limit));
         return res.status(200).json({ success: true, data });
     } catch (error) {
         throw new ErrorResponse(`Server error :${error}`, 400);
