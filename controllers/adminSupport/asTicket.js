@@ -3,9 +3,11 @@ const asyncHandler = require('../../middleware/asyncHandler');
 const ErrorResponse = require('../../utils/ErrorResponse');
 const { validationCheck, findUniqueData } = require('../../middleware/validationCheck');
 const { createFilter } = require('../../utils/filter');
+const { parseISO, sub, add } = require('date-fns');
 
 //models
 const Ticket = require("../../models/adminSupport/asTicket");
+const { query } = require('express');
 let modelName = Ticket;
 
 exports.CreateTicket = asyncHandler(async (req, res) => {
@@ -25,13 +27,22 @@ exports.CreateTicket = asyncHandler(async (req, res) => {
 })
 
 exports.ReadTicket = asyncHandler(async (req, res) => {
-    const { priority, status, createdon, select, populate, page, limit } = req.query;
-    const filter = createFilter([
-        { name: 'priority', value: priority, type: 'array' },
-        { name: 'status', value: status, type: 'text' },
-    ])
+    console.log(req.query);
+    const { priority, status, createdon, populate } = req.query;
+    const filter = {};
+    for (let key in req.query) {
+        if (key == "populate" || key == "limit" || key == "pageno") 
+            continue;
+        if (key == "createdAt") {
+            filter[key] = {
+                $gte: parseISO(req.query[key]),
+                $lte: add(parseISO(req.query[key]), { days: 1 })
+            };
+        } else filter[key] = { $regex : req.query[key]};
+    }
     try {
-        const data = await modelName.find(filter).select(select?.split(",")).limit(Number(limit)).skip(Number(page) * Number(limit)).sort({ createdAt: -1 }).populate(populate?.split(","));
+        const data = await modelName.find(filter).populate(populate?.split(",").map((item) => ({ path: item })))
+            .sort({"createdAt" : -1}).skip((parseInt(req.query.pageno) - 1) * parseInt(req.query.limit)).limit(parseInt(req.query.limit));
         return res.status(200).json({ success: true, data });
     } catch (error) {
         throw new ErrorResponse(`Server error :${error}`, 400);

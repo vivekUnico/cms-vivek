@@ -26,12 +26,23 @@ exports.CreatePhysicalMaterials = asyncHandler(async (req, res) => {
 
 exports.ReadPhysicalMaterials = asyncHandler(async (req, res) => {
     const { select, populate, page, limit } = req.query;
-    const filter = createFilter([
-        // add content for filter
-    ])
-
+    console.log("i am called........");
+    const filter = {}
+    for (let key in req.query) {
+        if (key == "populate" || key == "limit" || key == "pageno") 
+            continue;
+        if (key == "createdAt") {
+            filter[key] = {
+                $gte: parseISO(req.query[key]),
+                $lte: add(parseISO(req.query[key]), { days: 1 })
+            };
+        } else if (key == "totalUsed" || key == "totalAvailable" || key == "totalRemaining" || key == "totalQty") 
+            filter[key] = Number(req.query[key]);
+        else filter[key] = { $regex : String(req.query[key])};
+    }
     try {
-        const data = await modelName.find(filter).select(select?.split(",")).limit(Number(limit)).skip(Number(page) * Number(limit)).sort({ createdAt: -1 }).populate(populate?.split(","));
+        const data = await modelName.find(filter).populate(populate?.split(",").map((item) => ({ path: item })))
+            .sort({ createdAt: -1 }).skip(parseInt(req.query.pageno - 1) * parseInt(req.query.limit)).limit(parseInt(req.query.limit))
         return res.status(200).json({ success: true, data });
     } catch (error) {
         throw new ErrorResponse(`Server error :${error}`, 400);

@@ -5,4 +5,3 @@ connectDB().then( async (db) => {
     await followup.deleteMany({});
     await leadAndEnquiry.deleteMany({});
 });
-// {createdAt:{$gte:ISODate(“2020-03-01”),$lt:ISODate(“2021-04-01”)}}
