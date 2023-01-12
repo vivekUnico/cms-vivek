@@ -31,7 +31,6 @@ const courseScheme = new mongoose.Schema(
         },
         course_id: {
             type: String,
-            unique: true,
             required: [true, "Please provide a course id"],
         },
         master_id: {
