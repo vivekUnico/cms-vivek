@@ -106,7 +106,11 @@ exports.CreateCourse = asyncHandler(async (req, res) => {
         let checkCourseID = await findUniqueData(Course, { course_id });
         if (checkCourseID) throw new ErrorResponse(`Course id already exist`, 400);
 
-        const data = await Course.create(schemaData);
+        const data = new Course({
+            ...schemaData,
+            year_version : [ "master" ]
+        });
+        await data.save();
         await subjects.map(async (sub) => {
             await Subject.findByIdAndUpdate(sub, { $push: { "courses": data._id } });
         });
@@ -131,42 +135,105 @@ exports.UpdateCourse = asyncHandler(async (req, res) => {
                 delete schemaData[key];
             }
         });
-        //remove course from subject
-        console.log("body", req.body);
-        console.log("schemaData", schemaData, req.params);
         let oldCourse = await Course.findOne({ _id: id }), addedSub = [], removedSub = [];
         if (subjects) {
-            // if updating subjects then do this 
-            await oldCourse?.subjects?.map(async (oldS) => {
-                if (!subjects?.includes(String(oldS))) {
-                    removedSub.push(oldS);
-                    await Subject.findByIdAndUpdate(oldS, { $pull: { courses: oldCourse._id } });
-                };
-            });
-            //add course from subject
-            await subjects.map(async (id) => {
-                if (!oldCourse?.subjects?.includes(String(id))) {
-                    addedSub.push(id);
-                    await Subject.findByIdAndUpdate(id, { $addToSet: { courses: oldCourse._id } });
-                }
-            });
+            if (oldCourse.academic_year == 'master') {
+                await oldCourse?.subjects?.map(async (oldS) => {
+                    if (!subjects?.includes(String(oldS))) {
+                        removedSub.push(oldS);
+                        await Subject.findByIdAndUpdate(oldS, { $pull: { courses: oldCourse._id } });
+                    };
+                });
+                //add course from subject
+                await subjects.map(async (id) => {
+                    if (!oldCourse?.subjects?.includes(String(id))) {
+                        addedSub.push(id);
+                        await Subject.findByIdAndUpdate(id, { $addToSet: { courses: oldCourse._id } });
+                    }
+                });
+            } else {
+                let curr = await Subject.find({ _id: { $in: subjects } })
+                let prev = await Subject.find({ _id: { $in: oldCourse?.subjects || [] } });
+                curr.map( async (item) => {
+                    if (prev.findIndex((val) => val.subject_id == item.subject_id) == -1) {
+                        let temp = await Subject.findOneAndUpdate({ $and : [{ academic_year : oldCourse.academic_year }, 
+                            { subject_id : item.subject_id }] }, { $addToSet : { courses : thisCourse._id }});
+                        if (temp == null) {
+                            temp = await Subject.create({
+                                name: item.name,
+                                topics: item.topics,
+                                description: item.description,
+                                subject_id: item.subject_id,
+                                master_id: item._id,
+                                academic_year : oldCourse.academic_year,
+                                courses: [ oldCourse._id ]
+                            });
+                        }
+                        await Course.findByIdAndUpdate(oldCourse._id, { $addToSet: { subjects: temp._id } });
+                        await Subject.updateMany({ $or : [{ master_id: item._id }, { _id: item._id } ]}, 
+                            { $addToSet : { year_version : [ oldCourse.academic_year, ...item?.year_version] } });
+                    }
+                });
+                prev.map( async (item) => {
+                    if (curr.findIndex((val) => val.subject_id == item.subject_id) == -1) {
+                        await Course.updateOne({_id : oldCourse._id}, {
+                            $pull : { subjects : item._id }
+                        });
+                        await Subject.findByIdAndUpdate(item._id, {
+                            $pull : { courses :  oldCourse._id }
+                        });
+                    }
+                });
+            }
         };
 
         const data = await Course.findOneAndUpdate({ _id: id }, {
             $set: schemaData
-        }, { returnOriginal: false });
+        }, { new: true });
 
         // if master then update all academic_years under this master.
         if (oldCourse.academic_year == 'master') {
             ["academic_year", "master_id", "subjects"].map(key => {
                 delete schemaData[key]
             });
+            addedSub = await Subject.find({ _id: { $in: addedSub } });
+            removedSub = await Subject.find({ _id: { $in: removedSub } });
+
             await Course.updateMany({ master_id: oldCourse._id }, { $set : schemaData })
-            if (removedSub.length) {
-                await Course.updateMany({ master_id: oldCourse._id }, { $pullAll : { subjects : removedSub } })
-            }
-            if (addedSub.length) {
-                await Course.updateMany({ master_id: oldCourse._id }, { $addToSet : { subjects: addedSub } })
+            let allCourses = await Course.find({ master_id: oldCourse._id }).populate("subjects");
+
+            for (let i = 0; i < allCourses.length; i++) {
+                let thisCourse = allCourses[i];
+                let thisCourseSubjects = thisCourse.subjects || [];
+
+                for (let j = 0; j < removedSub.length; j++) {
+                    let ind = thisCourseSubjects.findIndex(sub => sub.subject_id == removedSub[j].subject_id);
+                    if (ind > -1) {
+                        await Course.findByIdAndUpdate(thisCourse._id, { $pull: { subjects: thisCourseSubjects[ind]._id } });
+                        await Subject.findByIdAndUpdate(thisCourseSubjects[ind]._id, { $pull : { courses : thisCourse._id} });
+                    }
+                }
+                for (let j = 0; j < addedSub.length; j++) {
+                    let thissub = addedSub[j];
+                    if (thisCourseSubjects.findIndex(sub => sub.subject_id == thissub.subject_id) == -1) {
+                        let prev = await Subject.findOneAndUpdate({$and : [{subject_id : thissub.subject_id}, { 
+                            academic_year : thisCourse.academic_year }]}, { $addToSet : { courses : thisCourse._id }}, {new : true});
+                        if (prev == null) {
+                            prev = await Subject.create({
+                                name: thissub.name,
+                                topics: thissub.topics,
+                                description: thissub.description,
+                                subject_id: thissub.subject_id,
+                                master_id: thissub._id,
+                                academic_year : thisCourse.academic_year,
+                                courses: [ thisCourse._id ]
+                            });
+                        }
+                        await Course.findByIdAndUpdate(thisCourse._id, { $addToSet: { subjects: prev._id } });
+                        await Subject.updateMany({ $or : [{ master_id: thissub._id }, { _id: thissub._id } ]}, 
+                            { $addToSet : { year_version : [ thisCourse.academic_year, ...thissub?.year_version] } });
+                    }
+                }
             }
         }
         if (!data) throw new ErrorResponse(`Course id not found`, 400);
@@ -185,39 +252,17 @@ exports.AddCoursesInAY = asyncHandler(async (req, res) => {
         if (!validation.status) {
             throw new ErrorResponse(`Please provide a ${validation?.errorAt}`, 400);
         }
+
         let SubjectThisAy = [];
         let CourseThisAy = [];
 
         for (let i = 0; i < courses.length; i++) {
             let thisCourseSubject = [];
 
-            const CourseMasterData = await Course.findOne({ _id: courses[i] });
-
-            for (let j = 0; j < CourseMasterData?.subjects?.length; j++) {
-                let item = CourseMasterData?.subjects[j];
-                const SubjectMasterData = await Subject.findOne({ _id: item });
-                // check condifgrtion to avoid repeat
-                let searchForMaster = SubjectThisAy.find(itm => itm.master_subject_id == SubjectMasterData._id);
-
-                if (searchForMaster) {
-                    SubjectThisAy.push({ ay_subject_id: searchForMaster?.ay_subject_id, master_course_id: courses[i], master_subject_id: String(SubjectMasterData._id) });
-                    thisCourseSubject.push(searchForMaster?.ay_subject_id);
-                } else {
-                    const NewAySubject = await Subject.create({
-                        name: SubjectMasterData.name,
-                        topics: SubjectMasterData.topics,
-                        description: SubjectMasterData.description,
-                        subject_id: SubjectMasterData.subject_id,
-                        master_id: SubjectMasterData._id,
-                        academic_year,
-                        courses: []
-                    })
-                    SubjectThisAy.push({ ay_subject_id: NewAySubject._id, master_course_id: courses[i], master_subject_id: String(SubjectMasterData._id) });
-                    thisCourseSubject.push(NewAySubject._id);
-                }
-            }
-
-            const NewAyCourse = await Course.create({
+            const CourseMasterData = await Course.findByIdAndUpdate({ _id: courses[i] }, {
+                $addToSet : { year_version : academic_year }
+            }, {new: true});
+            const NewAyCourse = new Course({
                 academic_year,
                 master_id: courses[i],
                 name: CourseMasterData.name,
@@ -227,7 +272,49 @@ exports.AddCoursesInAY = asyncHandler(async (req, res) => {
                 description: CourseMasterData.description,
                 course_id: CourseMasterData.course_id,
             })
-            CourseThisAy.push({ ay_course_id: NewAyCourse._id, master_course_id: courses[i] })
+            for (let j = 0; j < CourseMasterData?.subjects?.length; j++) {
+                let item = CourseMasterData?.subjects[j];
+                const SubjectMasterData = await Subject.findOne({ _id: item }); 
+                // check condifgrtion to avoid repeat
+                let searchForMaster = SubjectThisAy.find(itm => itm.master_subject_id == SubjectMasterData._id);
+                if (searchForMaster) {
+                    await Subject.findByIdAndUpdate(searchForMaster?.ay_subject_id, {
+                        $addToSet : { courses : NewAyCourse._id }
+                    });
+                    SubjectThisAy.push({ 
+                        ay_subject_id: searchForMaster?.ay_subject_id, 
+                        master_course_id: courses[i], 
+                        master_subject_id: String(SubjectMasterData._id) 
+                    });
+                    thisCourseSubject.push(searchForMaster?.ay_subject_id);
+                } else {
+                    const NewAySubject = await Subject.create({
+                        name: SubjectMasterData.name,
+                        topics: SubjectMasterData.topics,
+                        description: SubjectMasterData.description,
+                        subject_id: SubjectMasterData.subject_id,
+                        master_id: SubjectMasterData._id,
+                        academic_year,
+                        courses: [ NewAyCourse._id ]
+                    })
+                    SubjectThisAy.push({ 
+                        ay_subject_id: NewAySubject._id, 
+                        master_course_id: courses[i], 
+                        master_subject_id: String(SubjectMasterData._id) 
+                    });
+                    thisCourseSubject.push(NewAySubject._id);
+                }
+                await Subject.updateMany( { $or : [{ master_id: SubjectMasterData._id }, { _id: SubjectMasterData._id }] },
+                    { $addToSet : { year_version : [ academic_year, ...SubjectMasterData?.year_version] } });
+            }
+            NewAyCourse.subjects = thisCourseSubject;
+            await NewAyCourse.save();
+            await Course.updateMany({ master_id: courses[i] }, 
+                    { $addToSet : { year_version : CourseMasterData.year_version } });
+            CourseThisAy.push({ 
+                ay_course_id: NewAyCourse._id,
+                master_course_id: courses[i] 
+            });
         }
 
         SubjectThisAy.map(async itm => {
