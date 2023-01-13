@@ -193,7 +193,7 @@ exports.loginUser = asyncHandler(async (req, res) => {
                     permission_id: userData?.permission_id?._id,
                 },
                 process.env.JWT_SECRET, {
-                expiresIn: 60 * 60 * 24 * 30 // 30 days
+                expiresIn: 60 * 60 * 24 * 30  
             });
             let date = new Date();
             date.setDate(date.getDate() + 6);

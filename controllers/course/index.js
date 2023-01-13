@@ -34,10 +34,7 @@ exports.GetAllCourse = asyncHandler(async (req, res) => {
             dateTo.setDate(dateTo.getDate() + 1);
             dateTo = dateTo.toISOString()
 
-            filter['createdAt'] = {
-                $gte: dateFrom,
-                $lte: dateTo
-            };
+            filter['createdAt'] = { $gte: dateFrom, $lte: dateTo };
         }
 
 
@@ -72,9 +69,22 @@ exports.GetSingleCourse = asyncHandler(async (req, res) => {
         const { id } = req.params;
         if (!id) throw new ErrorResponse(`Please provide a Course id `, 400);
 
-        const data = await Course.findOne({ [mastersearch == 'true' ? 'master_id' : '_id']: id, ...filter }).populate(populate?.split(",").map((item) => ({ path: item })));;
-        // if (!data) throw new ErrorResponse(`Course id not found`, 400);
-
+        let data = await Course.findOne({ [mastersearch == 'true' ? 'master_id' : '_id']: id, ...filter })
+            .populate(populate?.split(",").map((item) => ({ path: item })));
+        if (data == null) {
+            const master = await Course.findOne({ _id : id });
+            data = await Course.create({
+                name: master.name,
+                price: master.price,
+                centers: master.centers,
+                subjects: master.subjects,
+                description: master.description,
+                course_id: master.course_id,
+                master_id: master._id,
+                academic_year: academic_year,
+            });
+            console.log("new course created", data._id);
+        }
         return res.status(200).json({ success: true, data });
     } catch (error) {
         throw new ErrorResponse(`Server error :${error}`, 400);
@@ -114,35 +124,51 @@ exports.UpdateCourse = asyncHandler(async (req, res) => {
         if (!id) throw new ErrorResponse(`Please provide a Course id `, 400);
 
         const { name, price, centers, subjects, description, course_id, master_id, academic_year } = req.body;
-        if (centers?.length == 0) throw new ErrorResponse(`Please provide centers`, 400);
-        else if (subjects?.length == 0) throw new ErrorResponse(`Please provide subjects`, 400);
-        let schemaData = { name, price, centers, subjects, description, course_id, master_id, academic_year };
 
+        let schemaData = { name, price, centers, subjects, description, course_id, master_id, academic_year };
+        Object.keys(schemaData).map((key) => {
+            if (schemaData[key] == undefined || schemaData[key].length == 0) {
+                delete schemaData[key];
+            }
+        });
         //remove course from subject
-        let oldCourse = await Course.findOne({ _id: id });
+        console.log("body", req.body);
+        console.log("schemaData", schemaData, req.params);
+        let oldCourse = await Course.findOne({ _id: id }), addedSub = [], removedSub = [];
         if (subjects) {
             // if updating subjects then do this 
             await oldCourse?.subjects?.map(async (oldS) => {
                 if (!subjects?.includes(String(oldS))) {
+                    removedSub.push(oldS);
                     await Subject.findByIdAndUpdate(oldS, { $pull: { courses: oldCourse._id } });
                 };
             });
             //add course from subject
             await subjects.map(async (id) => {
-                await Subject.findByIdAndUpdate(id, { $addToSet: { courses: oldCourse._id } });
+                if (!oldCourse?.subjects?.includes(String(id))) {
+                    addedSub.push(id);
+                    await Subject.findByIdAndUpdate(id, { $addToSet: { courses: oldCourse._id } });
+                }
             });
         };
 
-        const data = await Course.findOneAndUpdate({ _id: id }, schemaData, { returnOriginal: false });
+        const data = await Course.findOneAndUpdate({ _id: id }, {
+            $set: schemaData
+        }, { returnOriginal: false });
 
         // if master then update all academic_years under this master.
         if (oldCourse.academic_year == 'master') {
-            delete schemaData.academic_year;
-            delete schemaData.master_id;
-            await Course.updateMany({ master_id: oldCourse._id }, schemaData)
+            ["academic_year", "master_id", "subjects"].map(key => {
+                delete schemaData[key]
+            });
+            await Course.updateMany({ master_id: oldCourse._id }, { $set : schemaData })
+            if (removedSub.length) {
+                await Course.updateMany({ master_id: oldCourse._id }, { $pullAll : { subjects : removedSub } })
+            }
+            if (addedSub.length) {
+                await Course.updateMany({ master_id: oldCourse._id }, { $addToSet : { subjects: addedSub } })
+            }
         }
-
-
         if (!data) throw new ErrorResponse(`Course id not found`, 400);
 
         return res.status(200).json({ success: true, data });
