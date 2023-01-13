@@ -34,7 +34,6 @@ const subjectScheme = new mongoose.Schema(
         },
         subject_id: {
             type: String,
-            unique: true,
             required: [true, "Please provide a subject id"],
         },
         master_id: {

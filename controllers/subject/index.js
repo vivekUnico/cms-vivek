@@ -60,9 +60,22 @@ exports.GetSingleSubject = asyncHandler(async (req, res) => {
         const { id } = req.params;
         if (!id) throw new ErrorResponse(`Please provide a subject id `, 400);
         // id is master id
-        const data = await Subject.findOne({ [mastersearch == 'true' ? 'master_id' : '_id']: id, ...filter }).populate(populate?.split(",").map((item) => ({ path: item })));;
-        // if (!data) throw new ErrorResponse(`Subject not found`, 400);
-
+        let data = await Subject.findOne({ [mastersearch == 'true' ? 'master_id' : '_id']: id, ...filter }).populate(populate?.split(",").map((item) => ({ path: item })));;
+        if (data == null) {
+            let master = await Subject.findById(id)
+            await Subject.create({
+                name: master.name,
+                topics: master.topics,
+                description: master.description,
+                subject_id: master.subject_id,
+                master_id: master._id,
+                academic_year: academic_year,
+                courses: master.courses
+            });
+            data = await Subject.findOne({ [mastersearch == 'true' ? 'master_id' : '_id']: id, ...filter })
+                .populate(populate?.split(",").map((item) => ({ path: item })));
+            console.log(data);
+        }
         return res.status(200).json({ success: true, data });
     } catch (error) {
         throw new ErrorResponse(`Server error :${error}`, 400);
@@ -97,27 +110,30 @@ exports.CreateSubject = asyncHandler(async (req, res) => {
 //Update Single Subject
 exports.UpdateSubject = asyncHandler(async (req, res) => {
     try {
+        console.log(req.body);
         const { id } = req.params;
         if (!id) throw new ErrorResponse(`Please provide a subject id `, 400);
         const { name, topics, description, subject_id, master_id, academic_year } = req.body;
 
-        if (req.body.topics?.length == 0) {
-            throw new ErrorResponse(`Please provide Topics`, 400);
-        };
         let schemaData = { name, topics, description, subject_id, master_id, academic_year };
-
+        Object.keys(schemaData).map((key) => {
+            if (schemaData[key] == undefined || schemaData[key].length == 0) {
+                delete schemaData[key];
+            }
+        });
         let oldSubject = await findUniqueData(Subject, { _id: id });
-        if (oldSubject.subject_id != subject_id) {
+
+        if (oldSubject.subject_id != subject_id && subject_id) {
             let checkSubjectId = await findUniqueData(Subject, { subject_id });
             if (checkSubjectId) throw new ErrorResponse(`subject id already exist`, 400);
         };
 
-        const data = await Subject.findOneAndUpdate({ _id: id }, schemaData, { returnOriginal: false });
+        const data = await Subject.findOneAndUpdate({ _id: id }, {
+            $set: schemaData
+        }, { returnOriginal: false });
         // if master then update all academic_years under this master.
         if (oldSubject.academic_year == 'master') {
-            delete schemaData.academic_year;
-            delete schemaData.master_id;
-            await Subject.updateMany({ master_id: oldSubject._id }, schemaData)
+            await Subject.updateMany({ master_id: oldSubject._id }, { $set : schemaData})
         }
 
         if (!data) throw new ErrorResponse(`Subject id not found`, 400);
