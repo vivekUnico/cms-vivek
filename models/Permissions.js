@@ -164,6 +164,22 @@ const PermissionSchemma = new mongoose.Schema({
         type: Boolean,
         default: false
     },
+    add_lead : {
+        type: Boolean,
+        default: false
+    },
+    add_enquiry : {
+        type: Boolean,
+        default: false
+    },
+    all_student: {
+        type: Boolean,
+        default: false
+    },
+    block_staff : {
+        type: Boolean,
+        default: false
+    }
 });
 
 module.exports = mongoose.model("permission", PermissionSchemma);
