@@ -112,7 +112,7 @@ exports.CreateCourse = asyncHandler(async (req, res) => {
         });
         await data.save();
         await subjects.map(async (sub) => {
-            await Subject.findByIdAndUpdate(sub, { $push: { "courses": data._id } });
+            await Subject.findByIdAndUpdate(sub, { $addToSet: { "courses": data._id } });
         });
 
         return res.status(201).json({ success: true, data });
@@ -277,16 +277,17 @@ exports.AddCoursesInAY = asyncHandler(async (req, res) => {
                 const SubjectMasterData = await Subject.findOne({ _id: item }); 
                 // check condifgrtion to avoid repeat
                 let searchForMaster = SubjectThisAy.find(itm => itm.master_subject_id == SubjectMasterData._id);
-                if (searchForMaster) {
-                    await Subject.findByIdAndUpdate(searchForMaster?.ay_subject_id, {
+                let subjectForThisYear = await Subject.findOne({ $and : [{ subject_id : SubjectMasterData.subject_id }, { academic_year }] });
+                if (subjectForThisYear) {
+                    await Subject.findByIdAndUpdate(subjectForThisYear?._id, {
                         $addToSet : { courses : NewAyCourse._id }
                     });
                     SubjectThisAy.push({ 
-                        ay_subject_id: searchForMaster?.ay_subject_id, 
+                        ay_subject_id: subjectForThisYear?._id, 
                         master_course_id: courses[i], 
                         master_subject_id: String(SubjectMasterData._id) 
                     });
-                    thisCourseSubject.push(searchForMaster?.ay_subject_id);
+                    thisCourseSubject.push(subjectForThisYear?._id);
                 } else {
                     const NewAySubject = await Subject.create({
                         name: SubjectMasterData.name,
@@ -316,7 +317,7 @@ exports.AddCoursesInAY = asyncHandler(async (req, res) => {
                 master_course_id: courses[i] 
             });
         }
-
+        
         SubjectThisAy.map(async itm => {
             let newCourseArrOfSubject = [];
             CourseThisAy.map(item => {
@@ -325,7 +326,7 @@ exports.AddCoursesInAY = asyncHandler(async (req, res) => {
                 }
             })
             // console.log(itm?.master_course_id, item?.master_course_id)
-            await Subject.findByIdAndUpdate(itm.ay_subject_id, { $push: { courses: newCourseArrOfSubject } });
+            await Subject.findByIdAndUpdate(itm.ay_subject_id, { $addToSet: { courses: newCourseArrOfSubject } });
         })
         // console.log('SubjectThisAy - ', SubjectThisAy)
         // console.log('CourseThisAy - ', CourseThisAy)

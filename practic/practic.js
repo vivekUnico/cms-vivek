@@ -5,7 +5,6 @@ const Permission = require('../models/Permissions.js');
 const subject = require('../models/subject.js');
 const course = require('../models/course.js');
 connectDB().then( async (db) => {
-    let result = await subject.find({ academic_year: 'master' }).sort({ createdAt: -1 })
-        .skip((parseInt(1) - 1) * parseInt(10)).limit(parseInt(10));
-    console.log(result);
+    await subject.deleteMany({ $or : [ {subject_id : "001"}, {subject_id : "002"}  ] });
+    await course.deleteMany({ $or : [ {course_id : "001"}, {course_id : "002"}  ] });
 });
