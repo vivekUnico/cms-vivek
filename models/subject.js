@@ -45,6 +45,10 @@ const subjectScheme = new mongoose.Schema(
             trim: true,
             default: "master"
         },
+        year_version : {
+            type : [String],
+            default : []
+        }
     },
     { timestamps: true }
 );

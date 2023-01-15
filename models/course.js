@@ -42,6 +42,10 @@ const courseScheme = new mongoose.Schema(
             trim: true,
             default: "master"
         },
+        year_version : {
+            type : Array,
+            default : []
+        }
     },
     { timestamps: true }
 );

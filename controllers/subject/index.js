@@ -20,9 +20,8 @@ exports.GetAllSubject = asyncHandler(async (req, res) => {
             filter["courses"] = courseFilter.length > 1 ? courseFilter : courses;
         } if (name) {
             filter['name'] = { '$regex': name, '$options': 'i' };
-        } if (academic_year) {
-            filter['$or'] = acArr;
-        } if (dateFrom && dateTo) {
+        }  
+        if (dateFrom && dateTo) {
             dateFrom = new Date(dateFrom)
             dateFrom = dateFrom.toISOString()
 
@@ -36,7 +35,8 @@ exports.GetAllSubject = asyncHandler(async (req, res) => {
             };
         }
 
-        const data = await Subject.find({ ...filter }).select(select).populate(populate?.split(",").map((item) => ({ path: item })))
+        const data = await Subject.find({ ...filter, academic_year : academic_year })
+            .select(select).populate(populate?.split(",").map((item) => ({ path: item })))
             .sort({ "createdAt" : -1 }).skip((parseInt(req.query.pageno) - 1) * parseInt(req.query.limit)).limit(parseInt(req.query.limit))
         return res.status(200).json({ success: true, data });
     } catch (error) {
@@ -60,7 +60,8 @@ exports.GetSingleSubject = asyncHandler(async (req, res) => {
         const { id } = req.params;
         if (!id) throw new ErrorResponse(`Please provide a subject id `, 400);
         // id is master id
-        let data = await Subject.findOne({ [mastersearch == 'true' ? 'master_id' : '_id']: id, ...filter }).populate(populate?.split(",").map((item) => ({ path: item })));;
+        let data = await Subject.findOne({ [mastersearch == 'true' ? 'master_id' : '_id']: id, ...filter })
+            .populate(populate?.split(",").map((item) => ({ path: item })));;
         if (data == null) {
             let master = await Subject.findById(id)
             await Subject.create({
@@ -99,7 +100,11 @@ exports.CreateSubject = asyncHandler(async (req, res) => {
         let checkSubjectID = await findUniqueData(Subject, { subject_id });
         if (checkSubjectID) throw new ErrorResponse(`subject id already exist`, 400);
 
-        const data = await Subject.create(schemaData);
+        const data = new Subject({
+            ...schemaData,
+            year_version : ["master"]
+        });
+        await data.save();
         return res.status(201).json({ success: true, data });
 
     } catch (error) {
@@ -117,7 +122,7 @@ exports.UpdateSubject = asyncHandler(async (req, res) => {
 
         let schemaData = { name, topics, description, subject_id, master_id, academic_year };
         Object.keys(schemaData).map((key) => {
-            if (schemaData[key] == undefined || schemaData[key].length == 0) {
+            if (schemaData[key] == undefined || schemaData[key].length <= 0) {
                 delete schemaData[key];
             }
         });
