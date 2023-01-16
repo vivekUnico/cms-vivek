@@ -76,32 +76,20 @@ exports.GetSingleBatch = asyncHandler(async (req, res) => {
 //Create Single Batch
 exports.CreateBatch = asyncHandler(async (req, res) => {
     try {
-        const { name, center, courses, description, batch_id, batch_date } = req.body;
-        let validation = await validationCheck({ name, center, courses, description, batch_id, batch_date });
+        console.log(req.body);
+        const { name, center, courses, description, batch_id, batch_date, academic_year } = req.body;
+        let validation = await validationCheck({ name, center, courses, description, batch_id, batch_date, academic_year });
         if (!validation.status) {
             throw new ErrorResponse(`Please provide a ${validation?.errorAt}`, 400);
         } else if (courses?.length == 0) throw new ErrorResponse(`Please provide courses`, 400);
 
-        //
-        let ayCoursesArr = [];
-        let ac = (new Date(batch_date.start_date)).getFullYear();
-        for (let i = 0; i < courses.length; i++) {
-            let dataCourseAy = await Course.findOne({ master_id: courses[i], academic_year: ac });
-            if (dataCourseAy) {
-                ayCoursesArr.push(dataCourseAy._id)
-            } else {
-                throw new ErrorResponse(`One of the courses selected doesn't have academic year ${ac}`, 400);
-            }
-        }
-
-        let schemaData = { name, center, courses: ayCoursesArr, description, batch_id, batch_date };
+        let schemaData = { name, center, courses, description, batch_id, batch_date, academic_year };
 
         let checkBatchID = await findUniqueData(Batch, { batch_id });
         if (checkBatchID) throw new ErrorResponse(`Batch id already exist`, 400);
 
         const data = await Batch.create(schemaData);
         return res.status(201).json({ success: true, data });
-
     } catch (error) {
         throw new ErrorResponse(`Server error :${error}`, 400);
     }
@@ -113,10 +101,9 @@ exports.UpdateBatch = asyncHandler(async (req, res) => {
         const { id } = req.params;
         if (!id) throw new ErrorResponse(`Please provide a Batch id `, 400);
 
-        const { name, center, courses, description, batch_id, batch_date } = req.body;
-        if (courses?.length == 0) throw new ErrorResponse(`Please provide courses`, 400);
+        const { name, center, courses, description, batch_id, batch_date, academic_year } = req.body;
 
-        let schemaData = { name, center, courses, description, batch_id, batch_date };
+        let schemaData = { name, center, courses, description, batch_id, batch_date, academic_year };
 
         const data = await Batch.findOneAndUpdate({ _id: id }, schemaData, { returnOriginal: false });
         if (!data) throw new ErrorResponse(`Batch id not found`, 400);

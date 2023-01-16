@@ -36,6 +36,11 @@ const batchScheme = new mongoose.Schema(
                 required: [true,"Please provide a start date"]
             },
             end_date: Date
+        },
+        academic_year : {
+            type : String,
+            trim : true,
+            default : "master"
         }
     },
     { timestamps: true }
