@@ -8,9 +8,9 @@ const contactScheme = new mongoose.Schema(
             required: [true, "Please provide contactName"]
         },
         center: {
-            type: String,
-            trim: true,
-            required: [true, "Please provide center"]
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'center',
+            required: [true, "Please provide center"],
         },
         email: {
             type: String,

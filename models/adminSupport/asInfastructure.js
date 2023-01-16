@@ -12,6 +12,10 @@ const infastructureScheme = new mongoose.Schema(
             ref: 'center',
             required: [true, "Please provide center"],
         },
+        dept: {
+            type: Array,
+            default: []
+        },
         assignedTo: {
             type: mongoose.Schema.Types.ObjectId,
             ref: 'staff',
@@ -24,15 +28,15 @@ const infastructureScheme = new mongoose.Schema(
         liabilities: {
             type: String,
             trim: true,
-            required: [true, "Please provide liabilities"]
+            // required: [true, "Please provide liabilities"]
         },
         tc: {
             type: String,
-            required: [true, "Please provide terms & condition"]
+            // required: [true, "Please provide terms & condition"]
         },
-        files: [{
+        invoice: {
             type: String,
-        }]
+        }
     },
     { timestamps: true }
 );

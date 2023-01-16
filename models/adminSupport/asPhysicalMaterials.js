@@ -32,11 +32,6 @@ const physicalMaterialScehme = new mongoose.Schema(
             ref: 'center',
             required: [true, "Please provide center"],
         },
-        course: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'course',
-            required: [true, "Please provide course"],
-        },
         purpose: {
             type: String,
             trim: true,

@@ -9,8 +9,8 @@ const PhysicalMaterial = require("../../models/adminSupport/asPhysicalMaterials"
 let modelName = PhysicalMaterial;
 
 exports.CreatePhysicalMaterials = asyncHandler(async (req, res) => {
-    const { materialName, totalQty, totalAvailable, totalRemaining, totalUsed, center, course, purpose } = req.body;
-    const schemaData = { materialName, totalQty, totalAvailable, totalRemaining, totalUsed, center, course, purpose };
+    const { materialName, totalQty, totalAvailable, totalRemaining, totalUsed, center, purpose } = req.body;
+    const schemaData = { materialName, totalQty, totalAvailable, totalRemaining, totalUsed, center, purpose };
     let validation = validationCheck(schemaData);
     if (!validation.status) {
         throw new ErrorResponse(`Please provide a ${validation?.errorAt}`, 400);
@@ -29,16 +29,16 @@ exports.ReadPhysicalMaterials = asyncHandler(async (req, res) => {
     console.log("i am called........");
     const filter = {}
     for (let key in req.query) {
-        if (key == "populate" || key == "limit" || key == "pageno") 
+        if (key == "populate" || key == "limit" || key == "pageno")
             continue;
         if (key == "createdAt") {
             filter[key] = {
                 $gte: parseISO(req.query[key]),
                 $lte: add(parseISO(req.query[key]), { days: 1 })
             };
-        } else if (key == "totalUsed" || key == "totalAvailable" || key == "totalRemaining" || key == "totalQty") 
+        } else if (key == "totalUsed" || key == "totalAvailable" || key == "totalRemaining" || key == "totalQty")
             filter[key] = Number(req.query[key]);
-        else filter[key] = { $regex : String(req.query[key])};
+        else filter[key] = { $regex: String(req.query[key]) };
     }
     try {
         const data = await modelName.find(filter).populate(populate?.split(",").map((item) => ({ path: item })))
@@ -63,15 +63,15 @@ exports.ReadSinglePhysicalMaterials = asyncHandler(async (req, res) => {
 
 exports.UpdatePhysicalMaterials = asyncHandler(async (req, res) => {
     const { id } = req.params;
-    const { materialName, totalQty, totalAvailable, totalRemaining, totalUsed, center, course, purpose } = req.body;
-    const schemaData = { materialName, totalQty, totalAvailable, totalRemaining, totalUsed, center, course, purpose };
+    const { materialName, totalQty, totalAvailable, totalRemaining, totalUsed, center, purpose } = req.body;
+    const schemaData = { materialName, totalQty, totalAvailable, totalRemaining, totalUsed, center, purpose };
     // let validation = validationCheck(schemaData);
     // if (!validation.status) {
     //     throw new ErrorResponse(`Please provide a ${validation?.errorAt}`, 400);
     // }
 
     try {
-        const data = await modelName.findOneAndUpdate({ _id: id }, { materialName, totalQty, totalAvailable, totalRemaining, totalUsed, center, course, purpose }, { returnOriginal: false });
+        const data = await modelName.findOneAndUpdate({ _id: id }, { materialName, totalQty, totalAvailable, totalRemaining, totalUsed, center, purpose }, { returnOriginal: false });
         return res.status(201).json({ success: true, data });
     } catch (error) {
         throw new ErrorResponse(`Server error :${error}`, 400);
