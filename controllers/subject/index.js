@@ -38,7 +38,7 @@ exports.GetAllSubject = asyncHandler(async (req, res) => {
         console.log("filter", filter);
         const data = await Subject.find({ ...filter, academic_year : academic_year })
             .select(select).populate(populate?.split(",").map((item) => ({ path: item })))
-            // .sort({ "createdAt" : -1 }).skip((parseInt(req.query.pageno) - 1) * parseInt(req.query.limit)).limit(parseInt(req.query.limit))
+            .sort({ "createdAt" : -1 }).skip((parseInt(req.query.pageno) - 1) * parseInt(req.query.limit)).limit(parseInt(req.query.limit))
         return res.status(200).json({ success: true, data });
     } catch (error) {
         throw new ErrorResponse(`Server error :${error}`, 400);
