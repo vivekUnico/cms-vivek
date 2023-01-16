@@ -1,7 +1,8 @@
 const express = require("express");
 const router = express.Router();
 
-const { CreateDateDetails, GetAllDateDetails, UpdateDateDetails, GetSingleDateDetails, DeleteSingleDateDetails, AddLecture, UpdateLecture, DeleteLecture, AddActuals } = require("../../../controllers/timetable/datedetails");
+const { CreateDateDetails, GetAllDateDetails, UpdateDateDetails, GetSingleDateDetails, DeleteSingleDateDetails, GetDateDetailsBySubject,
+    AddLecture, UpdateLecture, DeleteLecture, AddActuals } = require("../../../controllers/timetable/datedetails");
 
 router.route('/:timetable').get(GetAllDateDetails)
 
@@ -16,5 +17,6 @@ router.route('/lecture/:id').put(UpdateLecture);
 router.route('/lecture/:id').delete(DeleteLecture);
 
 router.route('/actuals/:dateid').post(AddActuals);
+router.route('/actuals/subject/:subjectId').get(GetDateDetailsBySubject);
 
 module.exports = router;
