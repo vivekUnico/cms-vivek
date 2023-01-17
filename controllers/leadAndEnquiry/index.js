@@ -77,14 +77,14 @@ exports.GetLeadAndEnquiryByFilter = asyncHandler(async (req, res) => {
                 from: "followups",
                 localField: "_id",
                 foreignField: "connection_id",
-                as: "followups"
+                as: "followup"
             }},
-            { $unwind: { path: "$followups", preserveNullAndEmptyArrays: true }},
+            { $unwind: { path: "$followup", preserveNullAndEmptyArrays: true }},
             { $addFields : { 
                 "followup_list_length" : { $size : {
-                    $ifNull: [ "$followups.followup_list", [] ]
+                    $ifNull: [ "$followup.followup_list", [] ]
                 }},
-                "last_followup" : { $last : "$followups.followup_list" }
+                "last_followup" : { $last : "$followup.followup_list" }
             }},
             { $match: { $and: [...temp, { $or: Arr }] } },
             { $sort : { "createdAt" : -1 }},

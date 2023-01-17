@@ -6,18 +6,19 @@ const { validationCheck, findUniqueData } = require('../../middleware/validation
 //models
 const Subject = require("../../models/subject");
 const Course = require("../../models/course");
+const { ObjectId } = require('mongoose').Types;
 
 
 //Get All Subject
 exports.GetAllSubject = asyncHandler(async (req, res) => {
     let { populate, courses, name, dateFrom, dateTo, academic_year, select } = req.query;
-    let acArr = [];
-    academic_year?.split(',').map(itm => acArr.push({ academic_year: itm }));
+    if (academic_year == undefined || academic_year.length <= 0)
+        academic_year = "master"
     try {
         let filter = {};
-        if (courses) {
-            let courseFilter = String(courses).split(",");
-            filter["courses"] = courseFilter.length > 1 ? courseFilter : courses;
+        if (courses?.length) {
+            let courseFilter = String(courses).split(",").map((item) => ObjectId(item.trim()));
+            filter["courses"] = { $in: courseFilter };
         } if (name) {
             filter['name'] = { '$regex': name, '$options': 'i' };
         }  
@@ -34,7 +35,7 @@ exports.GetAllSubject = asyncHandler(async (req, res) => {
                 $lte: dateTo
             };
         }
-
+        console.log("filter", filter);
         const data = await Subject.find({ ...filter, academic_year : academic_year })
             .select(select).populate(populate?.split(",").map((item) => ({ path: item })))
             .sort({ "createdAt" : -1 }).skip((parseInt(req.query.pageno) - 1) * parseInt(req.query.limit)).limit(parseInt(req.query.limit))

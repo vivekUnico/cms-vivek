@@ -7,7 +7,9 @@ const { createZoomMeeting } = require('../../utils/zoom')
 //models
 const DateDetails = require("../../models/timetable/datedetails");
 const Subject = require("../../models/subject");
+const Batch = require("../../models/batch");
 const moment = require('moment');
+const { ObjectId } = require('mongoose').Types;
 
 //Get All DateDetails
 exports.GetAllDateDetails = asyncHandler(async (req, res) => {
@@ -23,6 +25,44 @@ exports.GetAllDateDetails = asyncHandler(async (req, res) => {
     }
 });
 
+exports.GetDateDetailsBySubject = asyncHandler(async (req, res) => {
+    try {
+        const { subjectId } = req.params;
+        if (!subjectId) 
+            throw new ErrorResponse(`Please provide a subject _id `, 400);
+        const result2 = await DateDetails.aggregate([
+            { $lookup: { 
+                from: "timetables", 
+                localField: "timetable", 
+                foreignField: "_id", 
+                as: "timetable" }},
+            { $unwind: { path: "$timetable", preserveNullAndEmptyArrays: true }},
+            { $lookup: {
+                from: "batches",
+                localField: "timetable.batch",
+                foreignField: "_id",
+                as: "batch"
+            }},
+            { $unwind: { path: "$batch", preserveNullAndEmptyArrays: false }},
+            { $unwind: { path: "$actuals_details", preserveNullAndEmptyArrays: false }},
+            { $match: { "actuals_details.subject": ObjectId(subjectId) }},
+            { $unset: ["timetable", "time_details", "lecture_type" , "date_type", "date", "__v", "updatedAt", "createdAt"] }
+        ]);
+        const result1 = await Batch.aggregate([
+            { $lookup: {
+                from : "courses",
+                localField : "courses",
+                foreignField : "_id",
+                as : "courses"
+            }},
+            { $unwind: { path: "$courses", preserveNullAndEmptyArrays: true }},
+            { $match: { "courses.subjects": ObjectId(subjectId) }},
+        ]);
+        return res.status(200).json({ success: true, data1: result1, data2: result2 });
+    } catch (error) {
+        throw new ErrorResponse(`Server error :${error}`, 400);
+    }
+});
 
 //Get Single DateDetails
 exports.GetSingleDateDetails = asyncHandler(async (req, res) => {
@@ -237,10 +277,12 @@ exports.AddActuals = asyncHandler(async (req, res) => {
 
         for (let i = 0; i < actuals_details.length; i++) {
             const item = actuals_details[i];
-            const { timedetailId, start_time, end_time, subject, topics, completed_topics, partially_completed_topics, teacher } = item;
+            const { timedetailId, start_time, end_time, subject, topics, completed_topics, 
+                partially_completed_topics, teacher } = item;
 
             let validation = await validationCheck({ timedetailId, start_time, end_time, subject, topics, teacher });
-            if (!validation.status) throw new ErrorResponse(`Please provide a ${validation?.errorAt} in actuals_details at ${i}`, 400);
+            if (!validation.status) 
+                throw new ErrorResponse(`Please provide a ${validation?.errorAt} in actuals_details at ${i}`, 400);
         }
 
         const data = await DateDetails.findOneAndUpdate({ _id: dateid }, { actuals_details }, { returnOriginal: false });
