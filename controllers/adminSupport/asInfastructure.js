@@ -9,15 +9,15 @@ const asInfastructure = require("../../models/adminSupport/asInfastructure");
 let modelName = asInfastructure;
 
 exports.CreateInfastructure = asyncHandler(async (req, res) => {
-    const { assetName, center, assignedTo, assignedOn, liabilities, tc, files } = req.body;
-    const schemaData = { assetName, center, assignedTo, assignedOn, liabilities, tc, files };
+    const { assetName, center, assignedTo, assignedOn } = req.body;
+    const schemaData = { assetName, center, assignedTo, assignedOn };
     let validation = validationCheck(schemaData);
     if (!validation.status) {
         throw new ErrorResponse(`Please provide a ${validation?.errorAt}`, 400);
     }
 
     try {
-        const data = await modelName.create(schemaData);
+        const data = await modelName.create(req.body);
         return res.status(201).json({ success: true, data });
     } catch (error) {
         throw new ErrorResponse(`Server error :${error}`, 400);
@@ -31,7 +31,7 @@ exports.ReadInfastructure = asyncHandler(async (req, res) => {
         // add content for filter
     ])
     try {
-        const data = await modelName.find(filter).select(select?.split(",")).limit(Number(limit)).skip(Number(page) * Number(limit)).sort({ createdAt: -1 }).populate(populate?.split(","));;
+        const data = await modelName.find(filter).select(select?.split(",")).limit(Number(limit)).skip(Number(page) * Number(limit)).sort({ createdAt: -1 }).populate("center").populate("assignedTo");;
         return res.status(200).json({ success: true, data });
     } catch (error) {
         throw new ErrorResponse(`Server error :${error}`, 400);
@@ -52,15 +52,15 @@ exports.ReadSingleInfastructure = asyncHandler(async (req, res) => {
 
 exports.UpdateInfastructure = asyncHandler(async (req, res) => {
     const { id } = req.params;
-    const { assetName, center, assignedTo, assignedOn, liabilities, tc, files } = req.body;
-    const schemaData = { assetName, center, assignedTo, assignedOn, liabilities, tc, files };
+    // const { assetName, center, assignedTo, assignedOn, liabilities, tc, invoice } = req.body;
+    // const schemaData = { assetName, center, assignedTo, assignedOn, liabilities, tc, invoice };
     // let validation = validationCheck(schemaData);
     // if (!validation.status) {
     //     throw new ErrorResponse(`Please provide a ${validation?.errorAt}`, 400);
     // }
 
     try {
-        const data = await modelName.findOneAndUpdate({ _id: id }, { assetName, center, assignedTo, assignedOn, liabilities, tc, files }, { returnOriginal: false });
+        const data = await modelName.findOneAndUpdate({ _id: id }, { $set: req.body }, { returnOriginal: false });
         return res.status(201).json({ success: true, data });
     } catch (error) {
         throw new ErrorResponse(`Server error :${error}`, 400);

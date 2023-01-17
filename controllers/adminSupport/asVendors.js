@@ -30,12 +30,12 @@ exports.ReadVendors = asyncHandler(async (req, res) => {
     const filter = {}
     for (const key in req.query) {
         if (key !== 'limit' && key !== 'pageno') {
-            filter[key] = { $regex : req.query[key]}
+            filter[key] = { $regex: req.query[key] }
         }
     }
     try {
         const data = await modelName.find(filter)
-        .sort({"createdAt" : -1}).skip((parseInt(req.query.pageno) - 1) * parseInt(req.query.limit)).limit(parseInt(req.query.limit));
+            .sort({ "createdAt": -1 }).skip((parseInt(req.query.pageno) - 1) * parseInt(req.query.limit)).limit(parseInt(req.query.limit));
         return res.status(200).json({ success: true, data });
     } catch (error) {
         throw new ErrorResponse(`Server error :${error}`, 400);
@@ -56,15 +56,15 @@ exports.ReadSingleVendors = asyncHandler(async (req, res) => {
 
 exports.UpdateVendors = asyncHandler(async (req, res) => {
     const { id } = req.params;
-    const { vendorName, kpc, email, phone, websiteURL, typeOfVendor, RegisteredOn } = req.body;
-    const schemaData = { vendorName, kpc, email, phone, websiteURL, typeOfVendor, RegisteredOn };
+    // const { vendorName, kpc, email, phone, websiteURL, typeOfVendor, RegisteredOn } = req.body;
+    // const schemaData = { vendorName, kpc, email, phone, websiteURL, typeOfVendor, RegisteredOn };
     // let validation = validationCheck(schemaData);
     // if (!validation.status) {
     //     throw new ErrorResponse(`Please provide a ${validation?.errorAt}`, 400);
     // }
 
     try {
-        const data = await modelName.findOneAndUpdate({ _id: id }, { vendorName, kpc, email, phone, websiteURL, typeOfVendor, RegisteredOn }, { returnOriginal: false });
+        const data = await modelName.findOneAndUpdate({ _id: id }, { $set: req.body }, { returnOriginal: false });
         return res.status(201).json({ success: true, data });
     } catch (error) {
         throw new ErrorResponse(`Server error :${error}`, 400);
