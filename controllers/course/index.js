@@ -14,6 +14,8 @@ const { findByIdAndUpdate } = require('../../models/course');
 exports.GetAllCourse = asyncHandler(async (req, res) => {
     let { populate, centers, name, dateFrom, dateTo, academic_year, select } = req.query;
     let acArr = [];
+    if (!academic_year || academic_year.length == 0)
+        academic_year = "master";
     academic_year?.split(',').map(itm => acArr.push({ academic_year: itm }));
     try {
         let filter = {};
