@@ -24,6 +24,10 @@ const manualEmiScheme = new mongoose.Schema({
         ]
     },
     branchName: String,
+    Emi_Id : {
+        type : mongoose.Schema.Types.ObjectId,
+        ref: "emi",
+    },
     cheque: String,
     city: String,
     category: String,
