@@ -6,7 +6,7 @@ const ManualEmi = require('../../models/emi/manualEmi.js');
 exports.GetManualEmi = asyncHandler(async (req, res) => {
     try {
         const { id } = req.params;
-        const data = await ManualEmi.findOne({ _id : id });
+        const data = await ManualEmi.findOne({ _id : id }).populate("Emi_Id");
         return res.status(200).json({ success: true, data });
     } catch (error) {
         throw new ErrorResponse(`Server error :${error}`, 400);
