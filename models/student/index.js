@@ -134,8 +134,8 @@ const student = new mongoose.Schema({
         ],
 
         fees: {
-            type : mongoose.Schema.Types.ObjectId,
-            ref : "manual-emi"
+            type: [ String ],
+            default: []
         }
     }
 },

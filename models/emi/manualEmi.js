@@ -11,11 +11,23 @@ const manualEmiScheme = new mongoose.Schema({
     },
     NIPay: Number,
     banckName: String,
+    paymentId : {
+        type: String,
+        required: [true, "Please add a paymentId"],
+    },
+    courses: {
+        type : [
+            {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: "course",
+            },
+        ]
+    },
     branchName: String,
     cheque: String,
     city: String,
     category: String,
-    committed: Number, // 1
+    committed: Number,
     date: Date,
     payment_mode: {
         type: String,

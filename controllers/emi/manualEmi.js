@@ -15,6 +15,7 @@ exports.GetManualEmi = asyncHandler(async (req, res) => {
 
 exports.CreateManualEmi = asyncHandler(async (req, res) => {
     try {
+        console.log("craeting new manual emi", req.body);
         let result = await ManualEmi.create(req.body);
         return res.status(201).json({ success: true, data: result });
     } catch (error) {
