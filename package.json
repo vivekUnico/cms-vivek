@@ -27,6 +27,7 @@
     "mongoose": "^6.0.4",
     "morgan": "^1.10.0",
     "nodemon": "^2.0.12",
-    "socket.io": "^2.1.1"
+    "socket.io": "^2.1.1",
+    "uuid": "^9.0.0"
   }
 }

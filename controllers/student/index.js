@@ -15,9 +15,12 @@ const Student = require("../../models/student");
 const StudentScreening = require("../../models/student/studentScreening");
 
 const LeadAndEnquiry = require("../../models/leadAndEnquiry");
+const ManualEmi = require('../../models/emi/manualEmi.js');
 const Staff = require("../../models/staff");
 const ObjectId = require('mongoose').Types.ObjectId;
-
+const { v4: uuidv4 } = require('uuid');
+const { log } = require('console');
+const Courses = require('../../models/course');
 //Get All Student
 exports.GetAllStudent = asyncHandler(async (req, res) => {
     let { populate, select } = req.query;
@@ -48,9 +51,37 @@ exports.GetAllStudent = asyncHandler(async (req, res) => {
 exports.UpdateStudent = asyncHandler(async (req, res) => {
     try {
         const { id } = req.params;
-        if (req.body?.isBlock) {
-            const { email } = req.body;
-            await Staff.findOne({ email }).update({ $set: { isBlock: true } });
+        let { courses, payment_related } = req.body, temp = false;
+        let oldstudent = await Student.findById(id), newAddedCourses = [];
+        courses.map((item) => {
+            if (!oldstudent?.courses?.includes(item)) {
+                temp = true;
+                newAddedCourses.push(item);
+            }
+        });
+        let newbifurcation = payment_related?.bifurcation
+        if (temp) {
+            newAddedCourses = await Courses.find({ _id: { $in: newAddedCourses } });
+            let obj = {
+                committed : newbifurcation?.reduce((acc, curr) => {
+                    let ind = newAddedCourses.findIndex((item) => item.name == curr.name);
+                    if (ind != -1) {
+                        acc += Number(curr.net_fees);
+                    }
+                    return acc;
+                }, 0),
+                remaining : newbifurcation?.reduce((acc, curr) => {
+                    let ind = newAddedCourses.findIndex((item) => item.name == curr.name);
+                    if (ind != -1) {
+                        acc += Number(curr.net_fees);
+                    }
+                    return acc;
+                }, 0),
+                courses : newAddedCourses.map((item) => item?._id || item),
+                paymentId : uuidv4(),
+            }
+            let result = await ManualEmi.create(obj);
+            req.body.payment_related.fees = [...req.body?.payment_related?.fees, result.paymentId];
         }
         const result = await Student.findByIdAndUpdate(id, { $set: { ...req.body } }, { new: true });
         return res.status(200).json({ success: true, data: result });
@@ -62,8 +93,8 @@ exports.UpdateStudent = asyncHandler(async (req, res) => {
 //Create Single Student
 exports.CreateStudent = asyncHandler(async (req, res) => {
     try {
-        const { name, gender, mobile, email, date, assign_to, comment, alternate_number, batch, type, telegram,
-            status, source, courses, center, medium, city, define_emi } = req.body;
+        const { name, gender, mobile, email, date, assign_to, comment, alternate_number, 
+            batch, type, telegram, status, source, courses, center, medium, city, define_emi } = req.body;
         let { gross_amount, committed_amount, bifurcation, fees, Emi_Id } = req.body;
 
         let validation = await validationCheck({ name, mobile, date, courses });
@@ -104,8 +135,25 @@ exports.GetSingleStudent = asyncHandler(async (req, res) => {
 
         const data = await Student.findOne({ _id: id }).populate(populate?.split(",").map((item) => ({ path: item })));;
         if (!data) throw new ErrorResponse(`Student id not found`, 400);
-
-        return res.status(200).json({ success: true, data });
+        let temp = data?.payment_related?.fees || [], temp1 = {};
+        let result = await ManualEmi.aggregate([
+            { $match: { paymentId: { $in: temp } } },
+            { $lookup: { from: "courses", localField: "courses", foreignField: "_id", as: "courses" } },
+            { $sort: { _id : -1 } },
+        ])
+        result.map((item) => {
+            if (temp1[item.paymentId]) temp1[item.paymentId].push(item);
+            else temp1[item.paymentId] = [item];
+        });
+        temp1 = Object.keys(temp1).map((key) => temp1[key]);
+        console.log("this is temp1", temp1);
+        return res.status(200).json({ success: true, data : {
+            ...data,
+            payment_related : {
+                ...data?.payment_related,
+                fees : temp1,
+            }
+        }});
     } catch (error) {
         throw new ErrorResponse(`Server error :${error}`, 400);
     }
@@ -131,11 +179,13 @@ exports.DeleteStudent = asyncHandler(async (req, res) => {
 
 //enquiry to student
 exports.MoveEnquiryToStudent = asyncHandler(async (req, res) => {
+    console.log("good......");
     try {
         const { id } = req.params;
         if (!id) throw new ErrorResponse(`Please provide a Enquiry id `, 400);
 
         const { fees } = req.body;
+        // console.log("this is complete body", req.body);
 
         let oldEnquiry = await findUniqueData(LeadAndEnquiry, { _id: id });
         if (!oldEnquiry) throw new ErrorResponse(`Enquiry not found`, 400);
