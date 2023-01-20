@@ -38,34 +38,21 @@ exports.GetAllStudent = asyncHandler(async (req, res) => {
                     "$gte": req.query[key],
                     "$lt": add(parseISO(req.query[key]), { days: 1 }).toISOString()
                 }
-            } else filter[key] = { $regex : req.query[key]};
+            } else filter[key] = { $regex: req.query[key] };
         }
         let feedata = [];
         const data = await Student.find({ ...filter })
-            .populate(populate?.split(",").map((item) => ({ path: item }))).populate("Emi_Id")
-            .sort({"createdAt" : -1}).skip((parseInt(req.query.pageno) - 1) * parseInt(req.query.limit)).limit(parseInt(req.query.limit));
-        if (good) {
-            for (let i = 0; i < data.length; i++) {
-                let fees = data[i]?.payment_related?.fees, obj = {};
-                let temp = await ManualEmi.aggregate([
-                    { $match: { paymentId: { $in: fees || [] } } },
-                    { $sort: { _id : 1 } },
-                    { $lookup: { from: "courses", localField: "courses", foreignField: "_id", as: "courses" } },
-                ]);
-                temp.map((item) => {
-                    obj[item.paymentId] = item;
-                });
-                feedata.push(Object.values(obj));
-            }
-        }
-        console.log("data", feedata);
-        return res.status(200).json({ success: true, data, feedata });
+            .select(select).populate(populate?.split(",").map((item) => ({ path: item }))).populate("Emi_Id")
+            .sort({ "createdAt": -1 }).skip((parseInt(req.query.pageno) - 1) * parseInt(req.query.limit)).limit(parseInt(req.query.limit));
+        return res.status(200).json({ success: true, data });
     } catch (error) {
         throw new ErrorResponse(`Server error :${error}`, 400);
     }
 });
 
 exports.UpdateStudent = asyncHandler(async (req, res) => {
+    console.log("bodyStudent", req.body)
+
     try {
         const { id } = req.params;
         let { courses, payment_related } = req.body, temp = false;
@@ -80,22 +67,22 @@ exports.UpdateStudent = asyncHandler(async (req, res) => {
         if (temp) {
             newAddedCourses = await Courses.find({ _id: { $in: newAddedCourses } });
             let obj = {
-                committed : newbifurcation?.reduce((acc, curr) => {
+                committed: newbifurcation?.reduce((acc, curr) => {
                     let ind = newAddedCourses.findIndex((item) => item.name == curr.name);
                     if (ind != -1) {
                         acc += Number(curr.net_fees);
                     }
                     return acc;
                 }, 0),
-                remaining : newbifurcation?.reduce((acc, curr) => {
+                remaining: newbifurcation?.reduce((acc, curr) => {
                     let ind = newAddedCourses.findIndex((item) => item.name == curr.name);
                     if (ind != -1) {
                         acc += Number(curr.net_fees);
                     }
                     return acc;
                 }, 0),
-                courses : newAddedCourses.map((item) => item?._id || item),
-                paymentId : uuidv4(),
+                courses: newAddedCourses.map((item) => item?._id || item),
+                paymentId: uuidv4(),
             }
             let result = await ManualEmi.create(obj);
             req.body.payment_related.fees = [...req.body?.payment_related?.fees, result.paymentId];
@@ -110,7 +97,7 @@ exports.UpdateStudent = asyncHandler(async (req, res) => {
 //Create Single Student
 exports.CreateStudent = asyncHandler(async (req, res) => {
     try {
-        const { name, gender, mobile, email, date, assign_to, comment, alternate_number, 
+        const { name, gender, mobile, email, date, assign_to, comment, alternate_number,
             batch, type, telegram, status, source, courses, center, medium, city, define_emi } = req.body;
         let { gross_amount, committed_amount, bifurcation, fees, Emi_Id } = req.body;
 
@@ -156,7 +143,7 @@ exports.GetSingleStudent = asyncHandler(async (req, res) => {
         let result = await ManualEmi.aggregate([
             { $match: { paymentId: { $in: temp } } },
             { $lookup: { from: "courses", localField: "courses", foreignField: "_id", as: "courses" } },
-            { $sort: { _id : -1 } },
+            { $sort: { _id: -1 } },
         ])
         result.map((item) => {
             if (temp1[item.paymentId]) temp1[item.paymentId].push(item);
@@ -164,13 +151,15 @@ exports.GetSingleStudent = asyncHandler(async (req, res) => {
         });
         temp1 = Object.keys(temp1).map((key) => temp1[key]);
         console.log("this is temp1", temp1);
-        return res.status(200).json({ success: true, data : {
-            ...data,
-            payment_related : {
-                ...data?.payment_related,
-                fees : temp1,
+        return res.status(200).json({
+            success: true, data: {
+                ...data,
+                payment_related: {
+                    ...data?.payment_related,
+                    fees: temp1,
+                }
             }
-        }});
+        });
     } catch (error) {
         throw new ErrorResponse(`Server error :${error}`, 400);
     }
@@ -328,7 +317,7 @@ exports.loginUser = asyncHandler(async (req, res) => {
                 },
                 process.env.JWT_SECRET, {
                 expiresIn: 60 * 60 * 24 * 30
-            }); 
+            });
             let date = new Date();
             date.setDate(date.getDate() + 6);
             delete userData.password;
