@@ -83,6 +83,7 @@ exports.UpdateStudent = asyncHandler(async (req, res) => {
                 }, 0),
                 courses: newAddedCourses.map((item) => item?._id || item),
                 paymentId: uuidv4(),
+                date: (new Date()).toISOString(),
             }
             let result = await ManualEmi.create(obj);
             req.body.payment_related.fees = [...req.body?.payment_related?.fees, result.paymentId];
