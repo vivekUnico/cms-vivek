@@ -23,11 +23,12 @@ const { log } = require('console');
 const Courses = require('../../models/course');
 //Get All Student
 exports.GetAllStudent = asyncHandler(async (req, res) => {
-    let { populate, select } = req.query;
+    let { populate, select, good } = req.query;
 
     try {
         let filter = {};
         for (let key in req.query) {
+            if (key == "good") continue;
             if (["created_by", "assign_to", "center", "batch"].includes(key)) {
                 filter[key] = ObjectId(req.query[key]);
             } else if (key == "courses") {
@@ -39,10 +40,26 @@ exports.GetAllStudent = asyncHandler(async (req, res) => {
                 }
             } else filter[key] = { $regex : req.query[key]};
         }
+        let feedata = [];
         const data = await Student.find({ ...filter })
-            .select(select).populate(populate?.split(",").map((item) => ({ path: item }))).populate("Emi_Id")
+            .populate(populate?.split(",").map((item) => ({ path: item }))).populate("Emi_Id")
             .sort({"createdAt" : -1}).skip((parseInt(req.query.pageno) - 1) * parseInt(req.query.limit)).limit(parseInt(req.query.limit));
-        return res.status(200).json({ success: true, data });
+        if (good) {
+            for (let i = 0; i < data.length; i++) {
+                let fees = data[i]?.payment_related?.fees, obj = {};
+                let temp = await ManualEmi.aggregate([
+                    { $match: { paymentId: { $in: fees || [] } } },
+                    { $sort: { _id : 1 } },
+                    { $lookup: { from: "courses", localField: "courses", foreignField: "_id", as: "courses" } },
+                ]);
+                temp.map((item) => {
+                    obj[item.paymentId] = item;
+                });
+                feedata.push(Object.values(obj));
+            }
+        }
+        console.log("data", feedata);
+        return res.status(200).json({ success: true, data, feedata });
     } catch (error) {
         throw new ErrorResponse(`Server error :${error}`, 400);
     }
@@ -53,7 +70,7 @@ exports.UpdateStudent = asyncHandler(async (req, res) => {
         const { id } = req.params;
         let { courses, payment_related } = req.body, temp = false;
         let oldstudent = await Student.findById(id), newAddedCourses = [];
-        courses.map((item) => {
+        courses?.map((item) => {
             if (!oldstudent?.courses?.includes(item)) {
                 temp = true;
                 newAddedCourses.push(item);
