@@ -42,9 +42,24 @@ exports.GetAllStudent = asyncHandler(async (req, res) => {
         }
         let feedata = [];
         const data = await Student.find({ ...filter })
-            .select(select).populate(populate?.split(",").map((item) => ({ path: item }))).populate("Emi_Id")
+            .populate(populate?.split(",").map((item) => ({ path: item }))).populate("Emi_Id")
             .sort({ "createdAt": -1 }).skip((parseInt(req.query.pageno) - 1) * parseInt(req.query.limit)).limit(parseInt(req.query.limit));
-        return res.status(200).json({ success: true, data });
+        if (good) {
+            for (let i = 0; i < data.length; i++) {
+                let fees = data[i]?.payment_related?.fees, obj = {};
+                let temp = await ManualEmi.aggregate([
+                    { $match: { paymentId: { $in: fees || [] } } },
+                    { $sort: { _id: 1 } },
+                    // { $lookup: { from: "courses", localField: "courses", foreignField: "_id", as: "courses" } },
+                ]);
+                temp.map((item) => {
+                    obj[item.paymentId] = item;
+                });
+                feedata.push(Object.values(obj));
+            }
+        }
+        console.log("data", feedata);
+        return res.status(200).json({ success: true, data, feedata });
     } catch (error) {
         throw new ErrorResponse(`Server error :${error}`, 400);
     }
