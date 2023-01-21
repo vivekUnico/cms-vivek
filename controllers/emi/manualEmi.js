@@ -23,6 +23,20 @@ exports.CreateManualEmi = asyncHandler(async (req, res) => {
     }
 });
 
+exports.UpdateManualEmi = asyncHandler(async (req, res) => {
+    try {
+        const { id } = req.params;
+        await ManualEmi.updateMany({ paymentId}, {
+            $set: {
+                ...req.body
+            }
+        });
+        return res.send({ success : true });
+    } catch (error) {
+        throw new ErrorResponse(`Server error :${error}`, 400);
+    }
+});
+
 exports.deleteManualEmi = asyncHandler(async (req, res) => {
     try {
         const { id } = req.params;
