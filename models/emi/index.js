@@ -21,7 +21,7 @@ const emiScheme = new mongoose.Schema(
         },
         type: {
             type: String,
-            required: [true, "Please provide a emi type"],
+            // required: [true, "Please provide a emi type"],
         },
         total_emi: {
             type: Number,

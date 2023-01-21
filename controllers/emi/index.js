@@ -40,12 +40,12 @@ exports.CreateEmi = asyncHandler(async (req, res) => {
         if (!validation.status) {
             throw new ErrorResponse(`Please provide a ${validation?.errorAt}`, 400);
         } else if (emi_list?.length == 0) throw new ErrorResponse(`Please provide a emi_list`, 400);
-        if ((!enquiry_id) && (!student_id))
-            throw new ErrorResponse(`Please provide a enquiry_id or student_id`, 400);
-        if (enquiry_id && await Emi.findOne({ enquiry_id }))
-            throw new ErrorResponse(`Enquiry id already exist`, 400);
-        if (student_id && await Emi.findOne({ student_id }))
-            throw new ErrorResponse(`Enquiry id already exist`, 400);
+        // if ((!enquiry_id) && (!student_id))
+        //     throw new ErrorResponse(`Please provide a enquiry_id or student_id`, 400);
+        // if (enquiry_id && await Emi.findOne({ enquiry_id }))
+        //     throw new ErrorResponse(`Enquiry id already exist`, 400);
+        // if (student_id && await Emi.findOne({ student_id }))
+        //     throw new ErrorResponse(`Enquiry id already exist`, 400);
         await emi_list.map(async (emi, index) => {
             let { amount, date } = emi;
             validation = await validationCheck({ amount, date });
@@ -67,12 +67,7 @@ exports.UpdateEmi = asyncHandler(async (req, res) => {
     try {
         const { id } = req.params;
         if (!id) throw new ErrorResponse(`Please provide a Emi id `, 400);
-
-        const { applied_from, repeat, type, total_emi, total_amount } = req.body;
-
-        let schemaData = { applied_from, repeat, type, total_emi, total_amount };
-
-        const data = await Emi.findByIdAndUpdate(id, schemaData, { returnOriginal: false });
+        const data = await Emi.findByIdAndUpdate(id, { $set: req.body }, { returnOriginal: false });
         if (!data) throw new ErrorResponse(`Emi id not found`, 400);
 
         return res.status(201).json({ success: true, data });
@@ -107,7 +102,7 @@ exports.Update_emi_list = asyncHandler(async (req, res) => {
 
         let { amount, date, payment_mode, paid } = req.body;
         let schemaData = { amount, date, payment_mode, paid };
-        
+
         let updateData = {};
         Object.entries(schemaData).map((item) => {
             updateData[`emi_list.$.${item[0]}`] = item[1];
@@ -116,7 +111,7 @@ exports.Update_emi_list = asyncHandler(async (req, res) => {
         const data = await Emi.findOneAndUpdate({ "emi_list._id": id }, { $set: { ...updateData } }, { returnOriginal: false });
         if (!data) throw new ErrorResponse(`emi_list id not found`, 400);
 
-        return res.status(201).json({ success: true, data,updateData });
+        return res.status(201).json({ success: true, data, updateData });
     } catch (error) {
         throw new ErrorResponse(`Server error :${error}`, 400);
     }
