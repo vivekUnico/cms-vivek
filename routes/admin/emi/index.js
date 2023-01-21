@@ -21,7 +21,7 @@ router.route('/emi_list/:id').put(Update_emi_list);
 router.route('/emi_list/:id').delete(RemoveEMI);
 
 router.route('/manual/:id').get(GetManualEmi).delete(deleteManualEmi);
-router.route('/manual').post(CreateManualEmi).put(UpdateManualEmi);
+router.route('/manual/:id').post(CreateManualEmi).put(UpdateManualEmi);
 
 
 module.exports = router;

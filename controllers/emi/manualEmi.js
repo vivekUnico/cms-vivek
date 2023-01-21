@@ -26,7 +26,7 @@ exports.CreateManualEmi = asyncHandler(async (req, res) => {
 exports.UpdateManualEmi = asyncHandler(async (req, res) => {
     try {
         const { id } = req.params;
-        await ManualEmi.updateMany({ paymentId}, {
+        await ManualEmi.updateMany({ id }, {
             $set: {
                 ...req.body
             }
