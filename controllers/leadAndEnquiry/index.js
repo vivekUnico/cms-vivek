@@ -8,6 +8,7 @@ const LeadAndEnquiry = require("../../models/leadAndEnquiry");
 const Followup = require("../../models/followup");
 const Emi = require('../../models/emi');
 const ObjectId = require('mongoose').Types.ObjectId;
+const { EmailNoteficationForLeadAndEnquiry, AssignToEmailNotefication } = require('../../middleware/EmailNotefication');
 const { parseISO, sub, add } = require('date-fns');
 
 const { PermissionAuthenctication } = require('../../middleware/apiAuth');
@@ -49,7 +50,6 @@ exports.GetLeadAndEnquiryByFilter = asyncHandler(async (req, res) => {
             }
         }
         if (Arr.length == 0) Arr.push({});
-        console.log(req.query);
         // let data = await LeadAndEnquiry.find({ $and: [...temp, { $or: Arr }] })
         //     .populate(populate?.split(",").map((item) => ({ path: item })));
         let data = await LeadAndEnquiry.aggregate([
@@ -91,7 +91,6 @@ exports.GetLeadAndEnquiryByFilter = asyncHandler(async (req, res) => {
             { $skip : (parseInt(req.query.pageno) - 1) * parseInt(req.query.limit) },
             { $limit : parseInt(req.query.limit) },
         ])
-        console.log(data);
         return res.status(200).json({ success: true, data });
     } catch (error) {
         throw new ErrorResponse(`Server error :${error}`, 400);
@@ -124,7 +123,6 @@ exports.GetAllLeadAndEnquiry = asyncHandler(async (req, res) => {
         let data = await LeadAndEnquiry.find({ $and: [...filter, { $or: Arr }] })
             .populate(populate?.split(",").map((item) => ({ path: item })))
             .sort({ "createdAt" : -1 }).skip((parseInt(req.query.pageno) - 1) * parseInt(req.query.limit)).limit(parseInt(req.query.limit))
-        console.log(data, Arr);
         return res.status(200).json({ success: true, data });
     } catch (error) {
         throw new ErrorResponse(`Server error :${error}`, 400);
@@ -135,7 +133,9 @@ exports.GetAllLeadAndEnquiry = asyncHandler(async (req, res) => {
 exports.CreateLeadAndEnquiry = asyncHandler(async (req, res) => {
     try {
         const { name, gender, mobile, email, date, assign_to, comment, next_followup_date, type, batch, telegram, created_by,
-            alternate_number, status, source, courses, center, medium, city, currentStatus } = req.body;
+            alternate_number, status, source, courses, center, medium, city, currentStatus, sendMail } = req.body;
+        console.log(`new ${currentStatus}`, assign_to);
+        let temp1 = courses?.map((item) => item?.name).join(", "), temp2 = assign_to.email;
         let validation = validationImportent({ currentStatus, name, email, date, assign_to, status, source, center });
         if (!validation.status) {
             throw new ErrorResponse(`Please provide a ${validation?.errorAt}`, 400);
@@ -174,7 +174,18 @@ exports.CreateLeadAndEnquiry = asyncHandler(async (req, res) => {
         };
         Object.keys(schemaData).forEach((key) => (Arr.includes(schemaData[key])) && delete schemaData[key]);
         const data = await LeadAndEnquiry.create(schemaData);
-        console.log(data._id);
+        if (sendMail && email) {
+            await EmailNoteficationForLeadAndEnquiry({
+                name, email, mobile, type : currentStatus, courses : temp1,
+                message : "Thank you for showing interest in our courses. We will get back to you shortly."
+            })
+        }
+        if (temp2) {
+            await AssignToEmailNotefication({
+                name, email : temp2, mobile, type : currentStatus, 
+                message : "You have been assigned a new lead/enquiry. Please check your dashboard for more details."
+            });
+        }
         return res.status(201).json({ success: true, data });
     } catch (error) {
         throw new ErrorResponse(`Server error :${error}`, 400);
@@ -198,7 +209,6 @@ exports.GetSingleLeadAndEnquiry = asyncHandler(async (req, res) => {
         if (!data) throw new ErrorResponse(`LeadAndEnquiry id not found`, 400);
         if (data.isEnquiry) {
             let result = await Emi.findOne({ enquiry_id: id });
-            console.log("result aa gaya", result);
             if (result) {
                 data = { ...data._doc, Emi_Id: { ...result._doc } };
             }
@@ -237,7 +247,6 @@ exports.MoveLeadToEnquiry = asyncHandler(async (req, res) => {
         const { id } = req.params;
         if (!id) throw new ErrorResponse(`Please provide a Lead id `, 400);
         let oldLeadAndEnquiry = await findUniqueData(LeadAndEnquiry, { _id: id });
-        console.log("this...", oldLeadAndEnquiry);
         if (!oldLeadAndEnquiry) throw new ErrorResponse(`Lead not found`, 400);
         if (oldLeadAndEnquiry.currentStatus != "lead" && oldLeadAndEnquiry.isLead == false)
             throw new ErrorResponse(`This lead is already moved into Enquiry stage.`, 400);
@@ -271,7 +280,6 @@ exports.UpdateLead = asyncHandler(async (req, res) => {
 
         const { name, gender, mobile, email, date, assign_to, comment, alternate_number,
             status, source, courses, center, medium, city, batch, type, telegram } = req.body;
-        console.log(oldLeadAndEnquiry.email, email);
         if (oldLeadAndEnquiry.email != email) {
             let checkEmail = await findUniqueData(LeadAndEnquiry, { email });
             if (checkEmail) throw new ErrorResponse(`email already exist`, 400);
@@ -310,7 +318,6 @@ exports.UpdateEnquiry = asyncHandler(async (req, res) => {
         const { name, gender, mobile, email, date, assign_to, comment, telegram,
             alternate_number, status, source, courses, center, medium, city, isEnquiry, type, batch } = req.body;
         let { gross_amount, committed_amount, bifurcation, fees } = req.body;
-        console.log(gross_amount, committed_amount, bifurcation, fees);
         //validate email
         if (email && oldLeadAndEnquiry.email != email) {
             // let checkEmail = await findUniqueData(LeadAndEnquiry, { $or: [{ "enquiry_data.email": email, "isEnquiry": true }, { email, "isEnquiry": true }] });

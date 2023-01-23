@@ -3,12 +3,14 @@ const asyncHandler = require('../../middleware/asyncHandler');
 const ObjectId = require('mongoose').Types.ObjectId;
 const ErrorResponse = require('../../utils/ErrorResponse');
 const { validationCheck, validationImportent } = require('../../middleware/validationCheck');
-
+const { EmailNoteficationForLeadAndEnquiry, AssignToEmailNotefication } = require('../../middleware/EmailNotefication');
 //models
 const Followup = require("../../models/followup");
+const Staff = require("../../models/staff");
 const LeadAndEnquiry = require("../../models/leadAndEnquiry");
 const { PermissionAuthenctication } = require('../../middleware/apiAuth');
 const { parseISO, sub, add } = require('date-fns');
+const leadAndEnquiry = require('../../models/leadAndEnquiry');
 
 exports.GetFollowupByFilter = asyncHandler(async (req, res) => {
     try {
@@ -172,8 +174,8 @@ exports.GetSingleFollowup = asyncHandler(async (req, res) => {
 //Create Single Followup, Update Single Followup
 exports.CreateFollowup = asyncHandler(async (req, res) => {
     try {
-        console.log(req.body);
-        const { followup_type, connection_id, created_by, followup_list } = req.body;
+        console.log("followup", req.body);
+        const { followup_type, connection_id, created_by, followup_list, followupName } = req.body;
         let validation = await validationCheck({ followup_type, connection_id, created_by, followup_list });
         let str1 = (followup_type == "lead") ? "create_followup_lead" : "create_followup_enquiry";
         let permission = await PermissionAuthenctication(req.headers, str1);
@@ -186,12 +188,14 @@ exports.CreateFollowup = asyncHandler(async (req, res) => {
             throw new ErrorResponse(`Please provide followup_list`, 400);
         };
         
-        let check = await LeadAndEnquiry.findById(connection_id);
+        let check = await LeadAndEnquiry.findById(connection_id), temp1 = "";
         if (!check) throw new ErrorResponse(`connection_id not found`, 400);
         if (followup_list[followup_list?.length - 1]?.status) {
             check.status = followup_list[followup_list?.length - 1].status;
+            temp1 = followup_list[followup_list?.length - 1].followup_by;
             await check.save();
         }
+
         for (let i = 0; i < followup_list?.length; i++) {
             const item = followup_list[i];
             let { date, followup_by, status, comment, completed_comment, completed } = item;
@@ -203,15 +207,24 @@ exports.CreateFollowup = asyncHandler(async (req, res) => {
         if (followup_list?.length && followup_list[followup_list?.length - 1]["addedTime"] == undefined)
             followup_list[followup_list?.length - 1]["addedTime"] = new Date().toISOString();
         let schemaData = { followup_type, connection_id, created_by, followup_list };
-        console.log(schemaData);
         let checkFollowupID = await Followup.findOne({ connection_id });
         if (checkFollowupID) {
             checkFollowupID["followup_list"] = followup_list;
             await checkFollowupID.save();
             return res.status(200).json({ success: true, data: checkFollowupID });
         }
-
         const data = await Followup.create(schemaData);
+        if (temp1) {
+            temp1 = await Staff.findById(temp1).select("email");
+            let temp2 = await leadAndEnquiry.findById(connection_id).select("name mobile email");
+            await AssignToEmailNotefication({
+                name : temp2?.name,
+                mobile : temp2?.mobile,
+                email : temp1?.email,
+                type : ` in ${followup_type} followup`, 
+                message : "You have been assigned a new lead/enquiry. Please check your dashboard for more details."
+            });
+        }
         return res.status(201).json({ success: true, data });
     } catch (error) {
         throw new ErrorResponse(`Server error :${error}`, 400);

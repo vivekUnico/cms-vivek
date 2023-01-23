@@ -2,6 +2,7 @@ const asyncHandler = require('../../middleware/asyncHandler');
 const ErrorResponse = require('../../utils/ErrorResponse');
 const { validationCheck } = require('../../middleware/validationCheck');
 const ManualEmi = require('../../models/emi/manualEmi.js');
+const Emi = require('../../models/emi/index.js');
 
 exports.GetManualEmi = asyncHandler(async (req, res) => {
     try {
@@ -15,8 +16,18 @@ exports.GetManualEmi = asyncHandler(async (req, res) => {
 
 exports.CreateManualEmi = asyncHandler(async (req, res) => {
     try {
-        console.log("craeting new manual emi", req.body);
         let result = await ManualEmi.create(req.body);
+        if (req.body.Emi_Id) {
+            let DefinedEmi = await Emi.findById(req.body.Emi_Id);
+            let emi_list = DefinedEmi.emi_list;
+            let ind = emi_list.findIndex(emi => emi.paid == false);
+            if (ind != -1) {
+                emi_list[ind].paid = true;
+                await Emi.findByIdAndUpdate(req.body.Emi_Id, {
+                    $set: { emi_list }
+                }, { new: true });
+            }
+        }
         return res.status(201).json({ success: true, data: result });
     } catch (error) {
         throw new ErrorResponse(`Server error :${error}`, 400);

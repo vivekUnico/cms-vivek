@@ -8,6 +8,7 @@ const jwt = require("jsonwebtoken");
 const crypto = require('crypto')
 const { sendEmail } = require('../../utils/sendEmail');
 const { hashPassword, comparePassword } = require('../../utils/hashing')
+const { EmailNoteficationForLeadAndEnquiry } = require('../../middleware/EmailNotefication');
 const { parseISO, sub, add } = require('date-fns');
 
 //models
@@ -113,8 +114,9 @@ exports.UpdateStudent = asyncHandler(async (req, res) => {
 //Create Single Student
 exports.CreateStudent = asyncHandler(async (req, res) => {
     try {
-        const { name, gender, mobile, email, date, assign_to, comment, alternate_number,
+        const { name, gender, mobile, email, date, assign_to, comment, alternate_number, sendMail,
             batch, type, telegram, status, source, courses, center, medium, city, define_emi } = req.body;
+        let temp1 = courses?.map((item) => item?.name).join(", ");
         let { gross_amount, committed_amount, bifurcation, fees, Emi_Id } = req.body;
 
         let validation = await validationCheck({ name, mobile, date, courses });
@@ -139,6 +141,13 @@ exports.CreateStudent = asyncHandler(async (req, res) => {
 
         const data = await Student.create(schemaData);
         await StudentScreening.create({ student: data._id, courses });
+        if (sendMail) {
+            await EmailNoteficationForLeadAndEnquiry({
+                name, mobile, email, type : "Student",
+                courses : temp1,
+                message : `New Student ${name} has been added`
+            })
+        }
         return res.status(201).json({ success: true, data });
     } catch (error) {
         throw new ErrorResponse(`Server error :${error}`, 400);
