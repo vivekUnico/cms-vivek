@@ -37,10 +37,10 @@ exports.CreateManualEmi = asyncHandler(async (req, res) => {
 exports.UpdateManualEmi = asyncHandler(async (req, res) => {
     try {
         const { id } = req.params;
-        await ManualEmi.updateMany({ id }, {
-            $set: {
-                ...req.body
-            }
+        let obj = { ...req.body };
+        Object.keys(obj).forEach(key => (!obj[key]) && delete obj[key]);
+        await ManualEmi.updateOne({ _id : id }, {
+            $set: obj
         });
         return res.send({ success : true });
     } catch (error) {
