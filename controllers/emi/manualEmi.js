@@ -21,7 +21,7 @@ exports.CreateManualEmi = asyncHandler(async (req, res) => {
             let DefinedEmi = await Emi.findById(req.body.Emi_Id);
             let emi_list = DefinedEmi.emi_list;
             let ind = emi_list.findIndex(emi => emi.paid == false);
-            if (ind != -1) {
+            if (ind != -1 && emi_list[ind].amount == req.body.paid_amount) {
                 emi_list[ind].paid = true;
                 await Emi.findByIdAndUpdate(req.body.Emi_Id, {
                     $set: { emi_list }
