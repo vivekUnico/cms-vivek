@@ -221,7 +221,7 @@ exports.CreateFollowup = asyncHandler(async (req, res) => {
                 name : temp2?.name,
                 mobile : temp2?.mobile,
                 email : temp1?.email,
-                type : ` in ${followup_type} followup`, 
+                type : ` an ${followup_type} followup`, 
                 message : "You have been assigned a new lead/enquiry. Please check your dashboard for more details."
             });
         }
