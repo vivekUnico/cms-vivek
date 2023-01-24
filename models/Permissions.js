@@ -179,7 +179,147 @@ const PermissionSchemma = new mongoose.Schema({
     block_staff : {
         type: Boolean,
         default: false
-    }
+    },
+    all_tickets_admin : {
+        type: Boolean,
+        default: false
+    },
+    all_tickets_filters_admin : {
+        type: Boolean,
+        default: false
+    },
+    view_ticket_admin : {
+        type: Boolean,
+        default: false
+    },
+    create_ticket_admin : {
+        type: Boolean,
+        default: false
+    },
+    edit_ticket_admin : {
+        type: Boolean,
+        default: false
+    },
+    delete_ticket_admin : {
+        type: Boolean,
+        default: false
+    },
+    change_assigned_admin : {
+        type: Boolean,
+        default: false
+    },
+    change_status_admin : {
+        type: Boolean,
+        default: false
+    },
+    all_infrastructure_admin : {
+        type: Boolean,
+        default: false
+    },
+    all_infrastructure_filter_admin : {
+        type: Boolean,
+        default: false
+    },
+    create_infrastructure_admin : {
+        type: Boolean,
+        default: false
+    },
+    edit_infrastructure_admin : {
+        type: Boolean,
+        default: false
+    },
+    delete_infrastructure_admin : {
+        type: Boolean,
+        default: false
+    },
+    all_vendors_admin : {
+        type: Boolean,
+        default: false
+    },
+    all_vendors_filter_admin : {
+        type: Boolean,
+        default: false
+    },
+    create_vendors_admin : {
+        type: Boolean,
+        default: false
+    },
+    edit_vendors_admin : {
+        type: Boolean,
+        default: false
+    },
+    delete_vendors_admin : {
+        type: Boolean,
+        default: false
+    },
+    view_vendors_admin : {
+        type: Boolean,
+        default: false
+    },
+    all_vendors_order_admin : {
+        type: Boolean,
+        default: false
+    },
+    all_vendors_order_filter_admin : {
+        type: Boolean,
+        default: false
+    },
+    create_vendors_order_admin : {
+        type: Boolean,
+        default: false
+    },
+    edit_vendors_order_admin : {
+        type: Boolean,
+        default: false
+    },
+    delete_vendors_order_admin : {
+        type: Boolean,
+        default: false
+    },
+    view_vendors_order_admin : {
+        type: Boolean,
+        default: false
+    },
+    all_physical_materials_admin : {
+        type: Boolean,
+        default: false
+    },
+    all_physical_materials_filter_admin : {
+        type: Boolean,
+        default: false
+    },
+    create_physical_materials_admin : {
+        type: Boolean,
+        default: false
+    },
+    edit_physical_materials_admin : {
+        type: Boolean,
+        default: false
+    },
+    delete_physical_materials_admin : {
+        type: Boolean,
+        default: false
+    },
+    all_contacts_admin : {
+        type: Boolean,
+        default: false
+    },
+    all_contacts_filter_admin : {
+        type: Boolean,
+        default: false
+    },
+    create_contacts_admin : {
+        type: Boolean,
+        default: false
+    },
+    edit_contacts_admin : {
+        type: Boolean,
+        default: false
+    },
+    delete_contacts_admin : {
+        type: Boolean,
+        default: false
+    },
 });
 
 module.exports = mongoose.model("permission", PermissionSchemma);
