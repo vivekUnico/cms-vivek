@@ -320,6 +320,146 @@ const PermissionSchemma = new mongoose.Schema({
         type: Boolean,
         default: false
     },
+    all_subjects_curriculum : {
+        type: Boolean,
+        default: false
+    },
+    all_subjects_curriculum_filter : {
+        type: Boolean,
+        default: false
+    },
+    create_subjects_curriculum : {
+        type: Boolean,
+        default: false
+    },
+    edit_subjects_curriculum : {
+        type: Boolean,
+        default: false
+    },
+    delete_subjects_curriculum : {
+        type: Boolean,
+        default: false
+    },
+    view_subjects_curriculum : {
+        type: Boolean,
+        default: false
+    },
+    edit_topics_curriculum : {
+        type: Boolean,
+        default: false
+    },
+    delete_topics_curriculum : {
+        type: Boolean,
+        default: false
+    },
+    all_courses_curriculum : {
+        type: Boolean,
+        default: false
+    },
+    all_courses_curriculum_filter : {
+        type: Boolean,
+        default: false
+    },
+    create_courses_curriculum : {
+        type: Boolean,
+        default: false
+    },
+    edit_courses_curriculum : {
+        type: Boolean,
+        default: false
+    },
+    delete_courses_curriculum : {
+        type: Boolean,
+        default: false
+    },
+    view_courses_curriculum : {
+        type: Boolean,
+        default: false
+    },
+    all_batches_curriculum : {
+        type: Boolean,
+        default: false
+    },
+    all_batches_curriculum_filter : {
+        type: Boolean,
+        default: false
+    },
+    create_batches_curriculum : {
+        type: Boolean,
+        default: false
+    },
+    edit_batches_curriculum : {
+        type: Boolean,
+        default: false
+    },
+    delete_batches_curriculum : {
+        type: Boolean,
+        default: false
+    },
+    view_batches_curriculum : {
+        type: Boolean,
+        default: false
+    },
+    all_timetable : {
+        type: Boolean,
+        default: false
+    },
+    all_timetable_filter : {
+        type: Boolean,
+        default: false
+    },
+    create_timetable_lectures : {
+        type: Boolean,
+        default: false
+    },
+    edit_timetable_lectures : {
+        type: Boolean,
+        default: false
+    },
+    delete_timetable_lectures : {
+        type: Boolean,
+        default: false
+    },
+    view_timetable_lectures : {
+        type: Boolean,
+        default: false
+    },
+    add_actuals_timetable : {
+        type: Boolean,
+        default: false
+    },
+    add_assignment_timetable : {
+        type: Boolean,
+        default: false
+    },
+    add_feedback_timetable : {
+        type: Boolean,
+        default: false
+    },
+    add_attendance_timetable : {
+        type: Boolean,
+        default: false
+    },
+    edit_attendance_timetable : {
+        type: Boolean,
+        default: false
+    },
+    view_actuals_timetable : {
+        type: Boolean,
+        default: false
+    },
+    view_assignment_in_lecture_timetable : {
+        type: Boolean,
+        default: false
+    },
+    view_feedback_in_lecture_timetable : {
+        type: Boolean,
+        default: false
+    },
+    view_attendance_in_lecture_timetable : {
+        type: Boolean,
+        default: false
+    },
 });
 
 module.exports = mongoose.model("permission", PermissionSchemma);
