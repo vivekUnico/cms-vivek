@@ -111,8 +111,6 @@ exports.GetAllDateAndTimetable = asyncHandler(async (req, res) => {
             { $unwind: { path: "$time_details.subject", preserveNullAndEmptyArrays: true }},
             { $sort : { "date" : 1} },
             
-            // { $lookup: { from: "timetables", localField: "timetable", foreignField: "_id", as: "timetable" } },
-            // { $lookup: { from: "timetables", localField: "timetable", foreignField: "_id", as: "timetable" } },
             { $skip : (parseInt(req.query.pageno) - 1) * parseInt(req.query.limit) },
             { $limit : parseInt(req.query.limit) },
             { $lookup : { 
