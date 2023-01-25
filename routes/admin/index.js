@@ -9,6 +9,7 @@ const subject = require("./subject");
 const course = require("./course");
 
 const timetable = require("./timetable/timetable");
+const SubjectTimeDetails = require('./timetable/SubjectTimeDetails.js');
 const staff = require("./staff/staff");
 const student = require("./student");
 const studentScreening = require("./student/studentScreening");
@@ -37,7 +38,7 @@ const leavesRouter = require("./leave");
 const adminSupportRouter = require("./adminsupport");
 const communityRouter = require("./community");
 const permissionRouter = require("./permission.js");
-
+router.use("/SubjectTimeDetails", SubjectTimeDetails);
 router.use('/center', center);
 
 router.use('/batch', batch);
