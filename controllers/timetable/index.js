@@ -81,6 +81,53 @@ exports.GetAllTimetable = asyncHandler(async (req, res) => {
     }
 });
 
+exports.GetAllDateAndTimetable = asyncHandler(async (req, res) => {
+    try {
+        const {  } = req.query
+        const data = await DateDetails.aggregate([
+            { $lookup: { from: "timetables", localField: "timetable", foreignField: "_id", as: "timetable" } },
+            { $unwind: { path: "$timetable", preserveNullAndEmptyArrays: true }},
+            { $unwind: { path: "$time_details", preserveNullAndEmptyArrays: true }},
+            { $lookup: { 
+                from: "centers", 
+                localField: "timetable.center", 
+                foreignField: "_id", 
+                as: "timetable.center" 
+            } },
+            { $lookup: { 
+                from: "batches", 
+                localField: "timetable.batch", 
+                foreignField: "_id", 
+                as: "timetable.batch" 
+            } },
+            { $lookup: { 
+                from: "subjects", 
+                localField: "time_details.subject", 
+                foreignField: "_id", 
+                as: "time_details.subject" 
+            } },
+            { $unwind: { path: "$timetable.center", preserveNullAndEmptyArrays: true }},
+            { $unwind: { path: "$timetable.batch", preserveNullAndEmptyArrays: true }},
+            { $unwind: { path: "$time_details.subject", preserveNullAndEmptyArrays: true }},
+            { $sort : { "date" : 1} },
+            
+            // { $lookup: { from: "timetables", localField: "timetable", foreignField: "_id", as: "timetable" } },
+            // { $lookup: { from: "timetables", localField: "timetable", foreignField: "_id", as: "timetable" } },
+            { $skip : (parseInt(req.query.pageno) - 1) * parseInt(req.query.limit) },
+            { $limit : parseInt(req.query.limit) },
+            { $lookup : { 
+                from : "staffs",
+                localField : "time_details.teacher",
+                foreignField : "_id",
+                as : "time_details.teacher"
+            } },
+            { $unwind: { path: "$time_details.teacher", preserveNullAndEmptyArrays: true }},
+        ]);
+        return res.status(200).json({ success: true, data });
+    } catch (error) {
+        throw new ErrorResponse(`Server error :${error}`, 400);
+    }
+});
 
 //Get Single Timetable
 exports.GetSingleTimetable = asyncHandler(async (req, res) => {
