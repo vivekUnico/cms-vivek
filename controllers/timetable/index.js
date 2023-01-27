@@ -108,7 +108,7 @@ exports.GetAllDateAndTimetable = asyncHandler(async (req, res) => {
             } },
             { $unwind: { path: "$timetable.center", preserveNullAndEmptyArrays: true }},
             { $unwind: { path: "$timetable.batch", preserveNullAndEmptyArrays: true }},
-            { $unwind: { path: "$time_details.subject", preserveNullAndEmptyArrays: true }},
+            { $unwind: { path: "$time_details.subject", preserveNullAndEmptyArrays: false }},
             { $sort : { "date" : 1} },
             
             { $skip : (parseInt(req.query.pageno) - 1) * parseInt(req.query.limit) },

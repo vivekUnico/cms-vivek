@@ -23,13 +23,27 @@ const subjectTimeDetailScheme = new mongoose.Schema({
         type : mongoose.Schema.Types.ObjectId,
         ref : 'subject'
     },
+    actual_subject: {
+        type : mongoose.Schema.Types.ObjectId,
+        ref : 'subject'
+    },
     topics: [],
+    actual_topics: [],
     teacher: {
         type : mongoose.Schema.Types.ObjectId,
         ref : 'staff'
     },
     zoom_link: String,
     zoom_password: String,
+    lecture_type: {
+        type: String,
+        enum: ["online", "offline"],
+        default: "online",
+    },
+    date_type: {
+        type: String,
+        enum: ["holiday", "lecture", "exam"],
+    },
     ActualStatus : {
         type : Boolean,
         default : false

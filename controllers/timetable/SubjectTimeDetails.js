@@ -1,6 +1,7 @@
 const SubjectTimeDetail = require('../../models/timetable/SubjectTimeDetails.js');
 const asyncHandler = require('../../middleware/asyncHandler');
 const ErrorResponse = require('../../utils/ErrorResponse');
+const { createZoomMeeting } = require('../../utils/zoom.js');
 
 exports.CreateSubjectTimeTable = asyncHandler(async (req, res) => {
     try {
@@ -19,6 +20,17 @@ exports.CreateSubjectTimeTable = asyncHandler(async (req, res) => {
             }).select("_id");
             if (result != null)
                 throw new ErrorResponse(`please correct your Time interval`, 400);
+            if (DataArr[i]?.lecture_type == "Online") {
+                let zoomconfig = {
+                    start_time : DataArr[i]?.start_time,
+                    hostemail : "chandan7666h@gmail.com" || DataArr[i]?.hostEmail,
+                    topic : DataArr[i]?.subjectName,
+                    duration : ((new Date(DataArr[i]?.end_time) - new Date(DataArr[i]?.start_time)) / (1000 * 60)),
+                    agenda: 'Online Lecture',
+                }
+                const zoomData = await createZoomMeeting(zoomconfig);
+                DataArr[i].zoom_link = zoomData?.start_url;
+            }
         }
         await SubjectTimeDetail.insertMany(DataArr || []);
         return res.status(200).json({ success: true });
