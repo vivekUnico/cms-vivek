@@ -6,9 +6,9 @@ const { createZoomMeeting } = require('../../utils/zoom.js');
 exports.CreateSubjectTimeTable = asyncHandler(async (req, res) => {
     try {
         let { DataArr } = req.body;
-        if (DataArr?.length || DataArr?.length == 0)
+        if (!DataArr?.length)
             throw new ErrorResponse(`Array can not be empty`, 400);
-        for (let ind = 0; ind < DataArr?.length; ind += 1) {
+        for (let i = 0; i < DataArr?.length; i += 1) {
             if (DataArr[i]?.start_time == undefined || DataArr[i]?.end_time == undefined)
                 throw new ErrorResponse(`data Missing in Array`, 400);
             let result = await SubjectTimeDetail.findOne({
@@ -20,12 +20,12 @@ exports.CreateSubjectTimeTable = asyncHandler(async (req, res) => {
             }).select("_id");
             if (result != null)
                 throw new ErrorResponse(`please correct your Time interval`, 400);
-            if (DataArr[i]?.lecture_type == "Online") {
+            if (DataArr[i]?.lecture_type == "online") {
                 let zoomconfig = {
                     start_time : DataArr[i]?.start_time,
                     hostemail : "chandan7666h@gmail.com" || DataArr[i]?.hostEmail,
                     topic : DataArr[i]?.subjectName,
-                    duration : ((new Date(DataArr[i]?.end_time) - new Date(DataArr[i]?.start_time)) / (1000 * 60)),
+                    duration : 60 || ((new Date(DataArr[i]?.end_time) - new Date(DataArr[i]?.start_time)) / (1000 * 60)),
                     agenda: 'Online Lecture',
                 }
                 const zoomData = await createZoomMeeting(zoomconfig);

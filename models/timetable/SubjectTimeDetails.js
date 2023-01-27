@@ -19,6 +19,10 @@ const subjectTimeDetailScheme = new mongoose.Schema({
         type : mongoose.Schema.Types.ObjectId,
         ref : "batch"
     },
+    course : {
+        type : mongoose.Schema.Types.ObjectId,
+        ref : "course"
+    },
     subject: {
         type : mongoose.Schema.Types.ObjectId,
         ref : 'subject'
@@ -47,6 +51,7 @@ const subjectTimeDetailScheme = new mongoose.Schema({
     date_type: {
         type: String,
         enum: ["holiday", "lecture", "exam"],
+        default : "lecture"
     },
     ActualStatus : {
         type : Boolean,
