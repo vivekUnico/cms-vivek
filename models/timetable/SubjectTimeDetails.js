@@ -37,6 +37,8 @@ const subjectTimeDetailScheme = new mongoose.Schema({
         type : mongoose.Schema.Types.ObjectId,
         ref : 'staff'
     },
+    completed_topics: [],
+    partially_completed_topics: [],
     zoom_link: String,
     zoom_password: String,
     lecture_type: {
