@@ -27,6 +27,12 @@ const subjectScheme = new mongoose.Schema(
                 }
             }
         ],
+        Teachers: [
+            {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: 'staff'
+            }
+        ],
         description: {
             type: String,
             require: [true, "Please provide description name"],
