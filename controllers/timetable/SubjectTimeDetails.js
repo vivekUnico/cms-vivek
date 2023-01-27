@@ -2,6 +2,8 @@ const SubjectTimeDetail = require('../../models/timetable/SubjectTimeDetails.js'
 const asyncHandler = require('../../middleware/asyncHandler');
 const ErrorResponse = require('../../utils/ErrorResponse');
 const { createZoomMeeting } = require('../../utils/zoom.js');
+const Batch = require('../../models/batch.js');
+const ObjectId = require('mongoose').Types.ObjectId;
 
 exports.CreateSubjectTimeTable = asyncHandler(async (req, res) => {
     try {
@@ -112,3 +114,46 @@ exports.DeleteSubjectTimeTable = asyncHandler(async (req, res) => {
     }
 });
 
+
+exports.GetTimeTableBySubjectId = asyncHandler(async (req, res) => {
+    try {
+        const { subjectId } = req.params;
+        let data2 = await SubjectTimeDetail.aggregate([
+            { $match : { actual_subject : ObjectId(subjectId) } },
+            // { $group : { _id : "$batch", samosa : { $push : "$$ROOT" } } },
+            // { $group : { 
+            //     _id : "$batch",
+            //     "$group" : { 
+            //         actual_subject : "$actual_subject",
+            //         completed_topics : { $addToSet : "$completed_topics" },
+            //     }
+            // }, },
+            { $lookup : {
+                from : "batches",
+                localField : "batch",
+                foreignField : "_id",
+                as : "batch"
+            } },
+            { $unwind: { path: "$batch", preserveNullAndEmptyArrays: false }},
+            { $unwind: { path: "$completed_topics", preserveNullAndEmptyArrays: false }},
+            { $group : { 
+                _id : "$batch._id",
+                batch_name : { $first : "$batch.name" },
+                completed_topics : { $addToSet : "$completed_topics" },
+            }, },
+        ]);
+        const data1 = await Batch.aggregate([
+            { $lookup: {
+                from : "courses",
+                localField : "courses",
+                foreignField : "_id",
+                as : "courses"
+            }},
+            { $unwind: { path: "$courses", preserveNullAndEmptyArrays: true }},
+            { $match: { "courses.subjects": ObjectId(subjectId) }},
+        ]);
+        return res.status(200).json({ success: true, data2, data1 });
+    } catch (error) {
+        throw new ErrorResponse(`Server error :${error}`, 500);
+    }
+});
