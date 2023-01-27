@@ -6,6 +6,7 @@ const { createFilter } = require('../../utils/filter');
 const ObjectId = require('mongoose').Types.ObjectId;
 
 const { parseISO, sub, add } = require('date-fns');
+const Subject = require('../../models/subject.js');
 
 //models
 const Staff = require("../../models/staff");
@@ -51,8 +52,7 @@ exports.CreateStaff = asyncHandler(async (req, res) => {
             position, grade, shift, qualification, manager, joining_date, job_type, gender, account_status, subjects, permission_id } = req.body;
 
         let validation = await validationCheck({
-            first_name, email, mobile, center, staffCode,
-            gender, permission_id, password
+            first_name, email, mobile, center, staffCode, gender, permission_id, password
         });
         if (!validation.status) {
             throw new ErrorResponse(`Please provide a ${validation?.errorAt}`, 400);
@@ -70,8 +70,10 @@ exports.CreateStaff = asyncHandler(async (req, res) => {
 
         let checkStaffCode = await findUniqueData(Staff, { staffCode });
         if (checkStaffCode) throw new ErrorResponse(`staffCode already exist`, 400);
-
         const data = await Staff.create(schemaData);
+        await Subject.updateMany({_id : { $in : subjects }}, {
+            $addToSet : { Teachers : data?._id }
+        });
         return res.status(200).json({ success: true, data });
     } catch (error) {
         throw new ErrorResponse(`Server error :${error}`, 400);
