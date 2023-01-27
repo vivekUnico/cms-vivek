@@ -33,6 +33,10 @@ const subjectTimeDetailScheme = new mongoose.Schema({
         type : mongoose.Schema.Types.ObjectId,
         ref : 'staff'
     },
+    actual_teacher: {
+        type : mongoose.Schema.Types.ObjectId,
+        ref : 'staff'
+    },
     zoom_link: String,
     zoom_password: String,
     lecture_type: {
