@@ -19,10 +19,6 @@ const subjectTimeDetailScheme = new mongoose.Schema({
         type : mongoose.Schema.Types.ObjectId,
         ref : "batch"
     },
-    course : {
-        type : mongoose.Schema.Types.ObjectId,
-        ref : "course"
-    },
     subject: {
         type : mongoose.Schema.Types.ObjectId,
         ref : 'subject'
