@@ -128,17 +128,9 @@ exports.GetTimeTableBySubjectId = asyncHandler(async (req, res) => {
             //         completed_topics : { $addToSet : "$completed_topics" },
             //     }
             // }, },
-            { $lookup : {
-                from : "batches",
-                localField : "batch",
-                foreignField : "_id",
-                as : "batch"
-            } },
-            { $unwind: { path: "$batch", preserveNullAndEmptyArrays: false }},
             { $unwind: { path: "$completed_topics", preserveNullAndEmptyArrays: false }},
             { $group : { 
-                _id : "$batch._id",
-                batch_name : { $first : "$batch.name" },
+                _id : "$batch",
                 completed_topics : { $addToSet : "$completed_topics" },
             }, },
         ]);
