@@ -15,6 +15,21 @@
 
 // 1EYt2ZxDQc6obqv5glD-Iw - key
 
-let date1 = new Date("2023-01-25T22:24:33.822Z");
-let date2 = new Date();
-console.log(date2 - date1);
+// let date1 = new Date("2023-01-25T22:24:33.822Z");
+// let date2 = new Date();
+// console.log(date2 - date1);
+
+const Config = require("../config/db");
+const staff = require("../models/staff");
+Config().then( async (result) => {
+    await staff.findByIdAndUpdate("63c4d2fc2e51061da90d83a5", {
+        $push: {
+            subjects: "63c58f5b8ad8a6917f1b499d"
+        }
+    })
+    await staff.findByIdAndUpdate("6392d78ad41fd249b71e8429", {
+        $push: {
+            subjects: "63c58f788ad8a6917f1b49c6"
+        }
+    })
+}).catch(err => console.log("got an error", err));
