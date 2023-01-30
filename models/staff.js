@@ -55,7 +55,7 @@ const staffScheme = new mongoose.Schema({
     },
     subjects: [{
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'course',
+        ref: 'subject',
     }],
     total_leave: {
         type: Number,

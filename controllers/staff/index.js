@@ -71,7 +71,7 @@ exports.CreateStaff = asyncHandler(async (req, res) => {
         let checkStaffCode = await findUniqueData(Staff, { staffCode });
         if (checkStaffCode) throw new ErrorResponse(`staffCode already exist`, 400);
         const data = await Staff.create(schemaData);
-        await Subject.updateMany({_id : { $in : subjects }}, {
+        await Subject.updateMany({_id : { $in : subjects || [] }}, {
             $addToSet : { Teachers : data?._id }
         });
         return res.status(200).json({ success: true, data });
