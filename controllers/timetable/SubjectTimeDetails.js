@@ -43,8 +43,9 @@ exports.CreateSubjectTimeTable = asyncHandler(async (req, res) => {
 
 exports.GetSingleSubjectTimeTable = asyncHandler(async (req, res) => {
     try {
-        const { id } = req.params;
-        let data = await SubjectTimeDetail.findById(id).populate("center batch subject teacher");
+        const { id } = req.params, populate = ["center", "batch", "subject", "teacher", "actual_teacher", "actual_subject"];
+        let data = await SubjectTimeDetail.findById(id)
+            .populate(populate?.map((item) => ({ path: item })));
         return res.status(200).json({ success: true, data });
     } catch (error) {
         throw new ErrorResponse(`Server error :${error}`, 500);

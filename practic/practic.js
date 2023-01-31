@@ -21,15 +21,7 @@
 
 const Config = require("../config/db");
 const staff = require("../models/staff");
+const course = require("../models/course");
 Config().then( async (result) => {
-    await staff.findByIdAndUpdate("63c4d2fc2e51061da90d83a5", {
-        $push: {
-            subjects: "63c58f5b8ad8a6917f1b499d"
-        }
-    })
-    await staff.findByIdAndUpdate("6392d78ad41fd249b71e8429", {
-        $push: {
-            subjects: "63c58f788ad8a6917f1b49c6"
-        }
-    })
+    
 }).catch(err => console.log("got an error", err));

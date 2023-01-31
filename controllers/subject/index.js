@@ -12,7 +12,7 @@ const { ObjectId } = require('mongoose').Types;
 //Get All Subject
 exports.GetAllSubject = asyncHandler(async (req, res) => {
     let { populate, courses, name, dateFrom, dateTo, academic_year, select } = req.query;
-    if (academic_year == undefined || academic_year.length <= 0 || academic_year == "undefined")
+    if (academic_year == undefined || academic_year.length <= 0 || academic_year == "undefined" || academic_year == "NaN")
         academic_year = "master"
     try {
         let filter = {};
