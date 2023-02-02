@@ -34,7 +34,6 @@ exports.GetAllStaff = asyncHandler(async (req, res) => {
         const data = await Staff.find({ ...filter })
             .populate(populate?.split(",").map((item) => ({ path: item })))
             .sort({ createdAt: -1 }).skip((parseInt(req.query.pageno) - 1) * parseInt(req.query.limit)).limit(parseInt(req.query.limit));
-        console.log("data", data);
             return res.status(200).json({ success: true, data });
         } catch (error) {
         throw new ErrorResponse(`Server error :${error}`, 400);

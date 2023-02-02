@@ -54,6 +54,22 @@ exports.GetSingleSubjectTimeTable = asyncHandler(async (req, res) => {
 
 exports.GetAllSubjectTimeTable = asyncHandler(async (req, res) => {
     try {
+        let Filter = [], temp = [] ;
+        for (let key in req.query) {
+            if (key == "pageno" || key == "limit")
+                continue;
+            if (key == "ActualStatus") {
+                Filter.push({ [key] : (req.query[key] == "true") ? true : false  });
+            } else if (key == "start_time") {
+                Filter.push({ start_time : { $gte : req.query[key] } });
+            } else if (key == "end_time") {
+                Filter.push({ start_time : { $lte : req.query[key] } });
+            } else if (key == "topic") {
+                temp = req.query[key]?.split(",").map((item) => ({ "topic" : ObjectId(item)}));
+            } else Filter.push({ [key] : { $regex : req.query[key] } });
+        }
+        if (temp?.length == 0) temp.push({});
+        if (Filter?.length == 0) Filter.push({});
         let data = await SubjectTimeDetail.aggregate([
             { $lookup : { 
                 from : "centers", 
@@ -98,6 +114,7 @@ exports.GetAllSubjectTimeTable = asyncHandler(async (req, res) => {
             { $unwind: { path: "$actual_subject", preserveNullAndEmptyArrays: true }},
             { $unwind: { path: "$actual_teacher", preserveNullAndEmptyArrays: true }},
             { $sort : { start_time : 1 } },
+            { $match : { $and : [ ...Filter, { $or : temp } ] } },
             { $skip : (parseInt(req.query.pageno) - 1) * parseInt(req.query.limit) },
             { $limit : parseInt(req.query.limit) },
         ]);
