@@ -22,6 +22,11 @@
 const Config = require("../config/db");
 const staff = require("../models/staff");
 const course = require("../models/course");
+const subjectTimeTable = require('../models/timetable/SubjectTimeDetails.js')
 Config().then( async (result) => {
-    
+    await subjectTimeTable.updateMany({}, {
+        $set : {
+            lectureStatus : "ontime"
+        }
+    })
 }).catch(err => console.log("got an error", err));

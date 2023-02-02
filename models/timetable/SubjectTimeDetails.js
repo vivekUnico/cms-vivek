@@ -54,6 +54,11 @@ const subjectTimeDetailScheme = new mongoose.Schema({
     ActualStatus : {
         type : Boolean,
         default : false
+    },
+    lectureStatus : {
+        type : String,
+        enum : ["cancelled", "postponed", "ontime", "preponed"],
+        default : "ontime"
     }
 }, { timestamps: true });
 

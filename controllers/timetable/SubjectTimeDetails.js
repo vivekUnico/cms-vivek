@@ -1,7 +1,7 @@
 const SubjectTimeDetail = require('../../models/timetable/SubjectTimeDetails.js');
 const asyncHandler = require('../../middleware/asyncHandler');
 const ErrorResponse = require('../../utils/ErrorResponse');
-const { createZoomMeeting } = require('../../utils/zoom.js');
+const { createZoomMeeting, updateMeeting } = require('../../utils/zoom.js');
 const Batch = require('../../models/batch.js');
 const ObjectId = require('mongoose').Types.ObjectId;
 
@@ -95,10 +95,22 @@ exports.GetAllSubjectTimeTable = asyncHandler(async (req, res) => {
 
 exports.UpdateSubjectTimeTable = asyncHandler(async (req, res) => {
     try {
-        const { id } = req.params;
-        let data = await SubjectTimeDetail.findByIdAndUpdate(id, {
-            $set : { ...req.body }
-        }, { new : true });
+        const { id } = req.params, { lecture_type } = req.body;
+        const obj = {
+            ...req.body
+        };
+        if ( lecture_type == "online") {
+            let zoomconfig = {
+                start_time : obj?.start_time,
+                hostemail : "chandan7666h@gmail.com" || obj?.hostEmail,
+                topic : obj?.subjectName || "v1 subject",
+                duration : 60 || ((new Date(obj?.end_time) - new Date(obj?.start_time)) / (1000 * 60)),
+                agenda: 'Online Lecture',
+            }
+            const zoomData = await createZoomMeeting(zoomconfig);
+            obj.zoom_link = zoomData?.start_url;
+        }
+        let data = await SubjectTimeDetail.findByIdAndUpdate(id, { $set : obj }, { new : true });
         return res.status(200).json({ success: true, data });
     } catch (error) {
         throw new ErrorResponse(`Server error :${error}`, 500);
