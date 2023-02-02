@@ -79,10 +79,24 @@ exports.GetAllSubjectTimeTable = asyncHandler(async (req, res) => {
                 foreignField : "_id", 
                 as : "teacher" 
             }},
+            { $lookup : { 
+                from : "subjects", 
+                localField : "actual_subject", 
+                foreignField : "_id", 
+                as : "actual_subject" 
+            } },
+            { $lookup : { 
+                from : "staffs", 
+                localField : "actual_teacher", 
+                foreignField : "_id", 
+                as : "actual_teacher" 
+            }},
             { $unwind: { path: "$center", preserveNullAndEmptyArrays: true }},
             { $unwind: { path: "$batch", preserveNullAndEmptyArrays: true }},
             { $unwind: { path: "$subject", preserveNullAndEmptyArrays: true }},
             { $unwind: { path: "$teacher", preserveNullAndEmptyArrays: true }},
+            { $unwind: { path: "$actual_subject", preserveNullAndEmptyArrays: true }},
+            { $unwind: { path: "$actual_teacher", preserveNullAndEmptyArrays: true }},
             { $sort : { start_time : 1 } },
             { $skip : (parseInt(req.query.pageno) - 1) * parseInt(req.query.limit) },
             { $limit : parseInt(req.query.limit) },
