@@ -4,6 +4,7 @@ const ErrorResponse = require('../../utils/ErrorResponse');
 const { createZoomMeeting, updateMeeting } = require('../../utils/zoom.js');
 const Batch = require('../../models/batch.js');
 const ObjectId = require('mongoose').Types.ObjectId;
+const { parseISO, sub, add } = require('date-fns');
 
 exports.CreateSubjectTimeTable = asyncHandler(async (req, res) => {
     try {
@@ -55,21 +56,23 @@ exports.GetSingleSubjectTimeTable = asyncHandler(async (req, res) => {
 exports.GetAllSubjectTimeTable = asyncHandler(async (req, res) => {
     try {
         let Filter = [], temp = [] ;
+        Filter = [{ ntime : { $gte : req.query["atime"] } }, { ntime : { $lte : req.query["etime"] } }]
         for (let key in req.query) {
-            if (key == "pageno" || key == "limit")
+            if (key == "pageno" || key == "limit" || key == "atime" || key == "etime")
                 continue;
-            if (key == "ActualStatus") {
-                Filter.push({ [key] : (req.query[key] == "true") ? true : false  });
-            } else if (key == "start_time") {
-                Filter.push({ start_time : { $gte : req.query[key] } });
+            if (["batch._id", "center._id", "teacher._id"].includes(key))
+                Filter.push({ [key] : ObjectId(req.query[key]) });
+            else if (key == "start_time") {
+                Filter.push({ start_time : { $gte : parseISO(req.query[key]) } });
             } else if (key == "end_time") {
-                Filter.push({ start_time : { $lte : req.query[key] } });
-            } else if (key == "topic") {
-                temp = req.query[key]?.split(",").map((item) => ({ "topic" : ObjectId(item)}));
+                Filter.push({ start_time : { $lt : add(parseISO(req.query[key]), { days: 1 }) } });
+            } else if (key == "topics") {
+                temp = req.query[key]?.split(",").map((item) => ({ "topics" : item}));
+            } else if (key == "ActualStatus") {
+                Filter.push({ [key] : (req.query[key] == "true") ? true : false  });
             } else Filter.push({ [key] : { $regex : req.query[key] } });
         }
         if (temp?.length == 0) temp.push({});
-        if (Filter?.length == 0) Filter.push({});
         let data = await SubjectTimeDetail.aggregate([
             { $lookup : { 
                 from : "centers", 
@@ -113,8 +116,17 @@ exports.GetAllSubjectTimeTable = asyncHandler(async (req, res) => {
             { $unwind: { path: "$teacher", preserveNullAndEmptyArrays: true }},
             { $unwind: { path: "$actual_subject", preserveNullAndEmptyArrays: true }},
             { $unwind: { path: "$actual_teacher", preserveNullAndEmptyArrays: true }},
-            { $sort : { start_time : 1 } },
+            { $addFields : {
+                ntime : {
+                    $dateToString : {
+                        format : "%H:%M",
+                        date : "$start_time",
+                        timezone : "Asia/Kolkata"
+                    }
+                }
+            }},
             { $match : { $and : [ ...Filter, { $or : temp } ] } },
+            { $sort : { start_time : 1 } },
             { $skip : (parseInt(req.query.pageno) - 1) * parseInt(req.query.limit) },
             { $limit : parseInt(req.query.limit) },
         ]);
