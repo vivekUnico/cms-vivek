@@ -22,7 +22,7 @@ exports.CreateSubjectTimeTable = asyncHandler(async (req, res) => {
 				batch: DataArr[i]?.batch
 			}).select("_id");
 			if (result != null)
-				throw new ErrorResponse(`please correct your Time interval`, 400);
+				throw new ErrorResponse(`A lecture is already created for this particular batch in the selected timeslot. Please choose a different timeslot`, 400);
 			if (DataArr[i]?.lecture_type == "online") {
 				let zoomconfig = {
 					start_time: DataArr[i]?.start_time,
