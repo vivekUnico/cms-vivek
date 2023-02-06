@@ -15,6 +15,17 @@
 
 // 1EYt2ZxDQc6obqv5glD-Iw - key
 
-async function pulseRate() {
-    
-}
+// let date1 = new Date("2023-01-25T22:24:33.822Z");
+// let date2 = new Date();
+// console.log(date2 - date1);
+
+const Config = require("../config/db");
+const staff = require("../models/staff");
+const course = require("../models/course");
+const subjectTimeTable = require('../models/timetable/SubjectTimeDetails.js')
+const LeadAndEnquiry = require("../models/leadAndEnquiry");
+const { default: axios } = require("axios");
+const Feedback = require("../models/feedback");
+Config().then( async (result) => {
+    await Feedback.deleteMany({});
+}).catch(err => console.log("got an error", err));

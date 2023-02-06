@@ -59,7 +59,8 @@ const subjectTimeDetailScheme = new mongoose.Schema({
         type : String,
         enum : ["cancelled", "postponed", "ontime", "preponed"],
         default : "ontime"
-    }
+    },
+    student_count : Number,
 }, { timestamps: true });
 
 module.exports = mongoose.model("subjectTimeDetail", subjectTimeDetailScheme);
