@@ -56,7 +56,7 @@ exports.GetSingleSubjectTimeTable = asyncHandler(async (req, res) => {
 exports.GetAllSubjectTimeTable = asyncHandler(async (req, res) => {
     try {
         let Filter = [], temp = [] ;
-        Filter = [{ ntime : { $gte : req.query["atime"] } }, { ntime : { $lte : req.query["etime"] } }]
+        Filter = [{ ntime : { $gte : req.query["atime"] || "00:00" } }, { ntime : { $lte : req.query["etime"] || "23:59" } }]
         for (let key in req.query) {
             if (key == "pageno" || key == "limit" || key == "atime" || key == "etime")
                 continue;
