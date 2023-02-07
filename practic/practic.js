@@ -26,6 +26,7 @@ const subjectTimeTable = require('../models/timetable/SubjectTimeDetails.js')
 const LeadAndEnquiry = require("../models/leadAndEnquiry");
 const { default: axios } = require("axios");
 const Feedback = require("../models/feedback");
+const Attendance = require("../models/attendance");
 Config().then( async (result) => {
-    await Feedback.deleteMany({});
+   await Attendance.deleteMany({});
 }).catch(err => console.log("got an error", err));
