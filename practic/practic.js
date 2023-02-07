@@ -27,6 +27,7 @@ const LeadAndEnquiry = require("../models/leadAndEnquiry");
 const { default: axios } = require("axios");
 const Feedback = require("../models/feedback");
 const Attendance = require("../models/attendance");
+const Assignment = require("../models/testsAssignment/assignment.js");
 Config().then( async (result) => {
-   await Attendance.deleteMany({});
+   await Assignment.deleteMany({});
 }).catch(err => console.log("got an error", err));
