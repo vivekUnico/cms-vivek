@@ -5,6 +5,7 @@ const { createZoomMeeting, updateMeeting } = require('../../utils/zoom.js');
 const Batch = require('../../models/batch.js');
 const ObjectId = require('mongoose').Types.ObjectId;
 const { parseISO, sub, add } = require('date-fns');
+const Feedback = require('../../models/feedback.js');
 
 exports.CreateSubjectTimeTable = asyncHandler(async (req, res) => {
 	try {
@@ -58,7 +59,7 @@ exports.GetAllSubjectTimeTable = asyncHandler(async (req, res) => {
 		let Filter = [], temp = [];
 		Filter = [{ ntime: { $gte: req.query["atime"] || "00:00" } }, { ntime: { $lte: req.query["etime"] || "23:59" } }]
 		for (let key in req.query) {
-			if (key == "pageno" || key == "limit" || key == "atime" || key == "etime")
+			if (key == "pageno" || key == "limit" || key == "atime" || key == "etime" || key == "stdcont")
 				continue;
 			if (["batch._id", "center._id", "teacher._id"].includes(key))
 				Filter.push({ [key]: ObjectId(req.query[key]) });
@@ -144,7 +145,23 @@ exports.GetAllSubjectTimeTable = asyncHandler(async (req, res) => {
 			{ $skip: (parseInt(req.query.pageno) - 1) * parseInt(req.query.limit) },
 			{ $limit: parseInt(req.query.limit) },
 		]);
-		return res.status(200).json({ success: true, data });
+		let data1 = [];
+		if (req.query.stdcont == "true") {
+			for (let i = 0; i < data.length; i++) {
+				let temp = await Feedback.aggregate([
+					{ $match: { subjectTimeDetails : ObjectId(data[i]._id) } },
+					{
+						$group: {
+							_id: "$subjectTimeDetail",
+							avg: { $avg: "$score" },
+						}
+					},
+				]);
+				data1.push(temp[0]?.avg || 0);
+			}
+		}
+		console.log(data1);
+		return res.status(200).json({ success: true, data, avgFeed : data1 });
 	} catch (error) {
 		throw new ErrorResponse(`Server error :${error}`, 500);
 	}

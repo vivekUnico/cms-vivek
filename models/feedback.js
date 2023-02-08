@@ -51,7 +51,7 @@ const feedbackScheme = new mongoose.Schema(
         },
         subjectTimeDetails : {
             type : mongoose.Schema.Types.ObjectId,
-            ref : "subjectTimeDetails"
+            ref : "subjectTimeDetail"
         },
         score : Number,
         feedback_type: {

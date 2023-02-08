@@ -19,15 +19,16 @@
 // let date2 = new Date();
 // console.log(date2 - date1);
 
-const Config = require("../config/db");
-const staff = require("../models/staff");
-const course = require("../models/course");
-const subjectTimeTable = require('../models/timetable/SubjectTimeDetails.js')
-const LeadAndEnquiry = require("../models/leadAndEnquiry");
-const { default: axios } = require("axios");
+// const Config = require("../config/db");
+// const staff = require("../models/staff");
+// const course = require("../models/course");
+// const subjectTimeTable = require('../models/timetable/SubjectTimeDetails.js')
+// const LeadAndEnquiry = require("../models/leadAndEnquiry");
+// const { default: axios } = require("axios");
 const Feedback = require("../models/feedback");
-const Attendance = require("../models/attendance");
-const Assignment = require("../models/testsAssignment/assignment.js");
+// const Attendance = require("../models/attendance");
+// const Assignment = require("../models/testsAssignment/assignment.js");
 Config().then( async (result) => {
    await Assignment.deleteMany({});
 }).catch(err => console.log("got an error", err));
+
