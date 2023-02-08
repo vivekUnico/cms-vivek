@@ -150,7 +150,7 @@ exports.GetAllSubjectTimeTable = asyncHandler(async (req, res) => {
 		let data1 = [], data2 = [];
 		if (req.query?.stdcont == "true") {
 			for (let i = 0; i < data.length; i++) {
-				let temp = await Feedback.aggregate([
+				let a = Feedback.aggregate([
 					{ $match: { subjectTimeDetails : ObjectId(data[i]._id) } },
 					{
 						$group: {
@@ -159,14 +159,11 @@ exports.GetAllSubjectTimeTable = asyncHandler(async (req, res) => {
 						}
 					},
 				]);
-				data1.push(temp[0]?.avg || 0);
-				let obj = {};
-				temp = await Student.aggregate([
+				let b = Student.aggregate([
 					{ $match: { batch: ObjectId(data[i].batch._id) } },
 					{ $count: "count" }
 				]);
-				obj.total = temp[0]?.count || 0;
-				temp = await Attendance.aggregate([
+				let c = Attendance.aggregate([
 					{ $match: { subjectTimeDetails: ObjectId(data[i]._id) } },
 					{
 						$group: {
@@ -175,11 +172,14 @@ exports.GetAllSubjectTimeTable = asyncHandler(async (req, res) => {
 						}
 					},
 				]);
-				obj.present = temp[0]?.value.filter((e) => e == "present").length || 0;
-				data2.push(obj);
+				await Promise.all([a, b, c]);
+				data1.push(a[0]?.avg || 0);
+				data2.push({
+					total : b[0]?.count || 0,
+					present : c[0]?.value.filter((e) => e == "present").length || 0,
+				});
 			}
 		}
-		console.log(data1);
 		return res.status(200).json({ success: true, data, avgFeed : data1, data2 });
 	} catch (error) {
 		throw new ErrorResponse(`Server error :${error}`, 500);
