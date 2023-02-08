@@ -6,6 +6,8 @@ const Batch = require('../../models/batch.js');
 const ObjectId = require('mongoose').Types.ObjectId;
 const { parseISO, sub, add } = require('date-fns');
 const Feedback = require('../../models/feedback.js');
+const Student = require('../../models/student/index.js');
+const Attendance = require("../../models/attendance");
 
 exports.CreateSubjectTimeTable = asyncHandler(async (req, res) => {
 	try {
@@ -145,8 +147,8 @@ exports.GetAllSubjectTimeTable = asyncHandler(async (req, res) => {
 			{ $skip: (parseInt(req.query.pageno) - 1) * parseInt(req.query.limit) },
 			{ $limit: parseInt(req.query.limit) },
 		]);
-		let data1 = [];
-		if (req.query.stdcont == "true") {
+		let data1 = [], data2 = [];
+		if (req.query?.stdcont == "true") {
 			for (let i = 0; i < data.length; i++) {
 				let temp = await Feedback.aggregate([
 					{ $match: { subjectTimeDetails : ObjectId(data[i]._id) } },
@@ -158,10 +160,27 @@ exports.GetAllSubjectTimeTable = asyncHandler(async (req, res) => {
 					},
 				]);
 				data1.push(temp[0]?.avg || 0);
+				let obj = {};
+				temp = await Student.aggregate([
+					{ $match: { batch: ObjectId(data[i].batch._id) } },
+					{ $count: "count" }
+				]);
+				obj.total = temp[0]?.count || 0;
+				temp = await Attendance.aggregate([
+					{ $match: { subjectTimeDetails: ObjectId(data[i]._id) } },
+					{
+						$group: {
+							_id: "$subjectTimeDetails",
+							value : { $push: "$present" },
+						}
+					},
+				]);
+				obj.present = temp[0]?.value.filter((e) => e == "present").length || 0;
+				data2.push(obj);
 			}
 		}
 		console.log(data1);
-		return res.status(200).json({ success: true, data, avgFeed : data1 });
+		return res.status(200).json({ success: true, data, avgFeed : data1, data2 });
 	} catch (error) {
 		throw new ErrorResponse(`Server error :${error}`, 500);
 	}

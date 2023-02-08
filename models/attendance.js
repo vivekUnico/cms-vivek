@@ -40,7 +40,7 @@ const attendanceScheme = new mongoose.Schema(
         },
         subjectTimeDetails : {
             type : mongoose.Schema.Types.ObjectId,
-            ref : "subjectTimeDetails"
+            ref : "subjectTimeDetail"
         },
         present : {
             type : String,
