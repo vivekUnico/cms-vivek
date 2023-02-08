@@ -151,7 +151,7 @@ exports.GetAllSubjectTimeTable = asyncHandler(async (req, res) => {
 		if (req.query?.stdcont == "true") {
 			for (let i = 0; i < data.length; i++) {
 				let a = Feedback.aggregate([
-					{ $match: { subjectTimeDetails : ObjectId(data[i]._id) } },
+					{ $match: { subjectTimeDetails: ObjectId(data[i]._id) } },
 					{
 						$group: {
 							_id: "$subjectTimeDetail",
@@ -168,19 +168,20 @@ exports.GetAllSubjectTimeTable = asyncHandler(async (req, res) => {
 					{
 						$group: {
 							_id: "$subjectTimeDetails",
-							value : { $push: "$present" },
+							value: { $push: "$present" },
 						}
 					},
 				]);
-				await Promise.all([a, b, c]);
-				data1.push(a[0]?.avg || 0);
-				data2.push({
-					total : b[0]?.count || 0,
-					present : c[0]?.value.filter((e) => e == "present").length || 0,
-				});
+				await Promise.all([a, b, c]).then((values) => {
+					data1.push(values[0][0]?.avg || 0);
+					data2.push({
+						total: values[1][0]?.count || 0,
+						present: values[2][0]?.value.filter((e) => e == "present").length || 0,
+					});
+				})
 			}
 		}
-		return res.status(200).json({ success: true, data, avgFeed : data1, data2 });
+		return res.status(200).json({ success: true, data, avgFeed: data1, data2 });
 	} catch (error) {
 		throw new ErrorResponse(`Server error :${error}`, 500);
 	}
