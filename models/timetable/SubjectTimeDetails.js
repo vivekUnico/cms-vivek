@@ -61,6 +61,7 @@ const subjectTimeDetailScheme = new mongoose.Schema({
         default : "ontime"
     },
     student_count : Number,
+    management_feedback : String,
 }, { timestamps: true });
 
 module.exports = mongoose.model("subjectTimeDetail", subjectTimeDetailScheme);
