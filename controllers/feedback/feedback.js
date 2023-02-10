@@ -85,7 +85,7 @@ exports.CreateFeedback = asyncHandler(async (req, res) => {
         let result = await Feedback.create(req.body);   
         return res.status(201).json({ success: true, data: result });
     } catch (error) {
-        throw new ErrorResponse(`Server error :${error}`, 400);
+        throw new ErrorResponse(`Server error :${error?.message}`, 400);
     }
 });
 
