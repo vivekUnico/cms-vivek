@@ -60,6 +60,11 @@ const subjectTimeDetailScheme = new mongoose.Schema({
         enum : ["cancelled", "postponed", "ontime", "preponed"],
         default : "ontime"
     },
+    Actualdeviated : {
+        type : String,
+        enum : ["As planned", "Deviated"],
+        default : "As planned"
+    },
     student_count : Number,
     management_feedback : String,
 }, { timestamps: true });

@@ -22,13 +22,17 @@
 const Config = require("../config/db");
 // const staff = require("../models/staff");
 // const course = require("../models/course");
-// const subjectTimeTable = require('../models/timetable/SubjectTimeDetails.js')
+const subjectTimeTable = require('../models/timetable/SubjectTimeDetails.js')
 // const LeadAndEnquiry = require("../models/leadAndEnquiry");
 // const { default: axios } = require("axios");
 const Feedback = require("../models/feedback");
 // const Attendance = require("../models/attendance");
 // const Assignment = require("../models/testsAssignment/assignment.js");
 Config().then( async (result) => {
-   await Feedback.deleteMany({});
+   await subjectTimeTable.updateMany({}, {
+         $set : {
+            Actualdeviated : "As planned",
+         }
+   })
 }).catch(err => console.log("got an error", err));
 
