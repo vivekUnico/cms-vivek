@@ -65,6 +65,7 @@ const subjectTimeDetailScheme = new mongoose.Schema({
         enum : ["As planned", "Deviated"],
         default : "As planned"
     },
+    AttandeceHardCopyLink : String,
     student_count : Number,
     management_feedback : String,
 }, { timestamps: true });

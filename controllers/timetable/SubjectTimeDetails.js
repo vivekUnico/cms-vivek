@@ -8,6 +8,7 @@ const { parseISO, sub, add } = require('date-fns');
 const Feedback = require('../../models/feedback.js');
 const Student = require('../../models/student/index.js');
 const Attendance = require("../../models/attendance");
+const getCloudinaryUrl = require('../../utils/cloudinary.js');
 
 exports.CreateSubjectTimeTable = asyncHandler(async (req, res) => {
 	try {
@@ -189,10 +190,8 @@ exports.GetAllSubjectTimeTable = asyncHandler(async (req, res) => {
 
 exports.UpdateSubjectTimeTable = asyncHandler(async (req, res) => {
 	try {
-		const { id } = req.params, { lecture_type } = req.body;
-		const obj = {
-			...req.body
-		};
+		const { id } = req.params, { lecture_type, AttandeceHardCopyLink } = req.body;
+		const obj = { ...req.body };
 		if (lecture_type == "online") {
 			let zoomconfig = {
 				start_time: obj?.start_time,
@@ -203,6 +202,9 @@ exports.UpdateSubjectTimeTable = asyncHandler(async (req, res) => {
 			}
 			const zoomData = await createZoomMeeting(zoomconfig);
 			obj.zoom_link = zoomData?.start_url;
+		}
+		if (AttandeceHardCopyLink) {
+			obj.AttandeceHardCopyLink = (await getCloudinaryUrl(AttandeceHardCopyLink))?.url;
 		}
 		let data = await SubjectTimeDetail.findByIdAndUpdate(id, { $set: obj }, { new: true });
 		return res.status(200).json({ success: true, data });
