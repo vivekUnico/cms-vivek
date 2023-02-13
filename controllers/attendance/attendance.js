@@ -125,8 +125,6 @@ exports.CreateAttendance = asyncHandler(async (req, res) => {
                 throw new ErrorResponse(`Please provide a ${validation.errorAt} in body at index ${i}`, 400);
             }    
         }
-
-
         const AttendanceData = await Attendance.insertMany(body);
         return res.status(201).json({ success: true, data: AttendanceData });
     } catch (error) {
@@ -136,12 +134,14 @@ exports.CreateAttendance = asyncHandler(async (req, res) => {
 
 exports.UpdateAttendance = asyncHandler(async (req, res) => {
     try {
-        const { id } = req.params;
-        console.log(req.body);
+        const { id } = req.params, { AttandeceHardCopyLink } = req.body;
         if (!id) throw new ErrorResponse(`Please provide a Attendance id `, 400);
         const AttendanceData = await Attendance.findOneAndUpdate({ _id: id }, 
             { $set: { ...req.body?.body } } , { new: true });
         if (!AttendanceData) throw new ErrorResponse(`Attendance not found`, 400);
+        if (AttandeceHardCopyLink) {
+
+        }
         return res.status(201).json({ success: true, data: AttendanceData });
 
     } catch (error) {

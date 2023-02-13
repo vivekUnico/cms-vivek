@@ -4,6 +4,7 @@ const morgan = require("morgan");
 const cors = require("cors");
 const connectDB = require("./config/db");
 const errorHandler = require("./middleware/errorHandler");
+const bodyParser = require("body-parser");
 
 /*
 * ###################################### For socket io implementation ######################################
@@ -34,7 +35,8 @@ const studentRouter = require('./routes/student');
 app.use(morgan("dev"));
 
 // --------------------------------- body parser setup ---------------------------------
-app.use(express.json());
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ extended: true }));
 
 // --------------------------------- CORS config---------------------------------
 app.use(cors());
