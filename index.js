@@ -5,6 +5,13 @@ const cors = require("cors");
 const connectDB = require("./config/db");
 const errorHandler = require("./middleware/errorHandler");
 const bodyParser = require("body-parser");
+const Authorize = require("./middleware/CreateLeadFromEmail");
+const cron = require('node-cron');
+
+cron.schedule('0 */4 * * *', async () => {
+  await Authorize();
+  console.log('fatching lead from email');
+});
 
 /*
 * ###################################### For socket io implementation ######################################
