@@ -9,7 +9,8 @@ const Center = require("../../models/center");
 const Course = require('../../models/course');
 //Get All Batch
 exports.GetAllBatch = asyncHandler(async (req, res) => {
-    let { populate, center, courses, name, dateFrom, dateTo, startDate, endDate, academic_year, batch_id } = req.query;
+    let { populate, center, courses, name, dateFrom, 
+        dateTo, startDate, endDate, academic_year, batch_id } = req.query;
     try {
         let filter = {};
         if (center) {
@@ -51,8 +52,9 @@ exports.GetAllBatch = asyncHandler(async (req, res) => {
             filter['academic_year'] = academic_year;
         }
         if (batch_id) {
-            filter['batch_id'] = { '$regex': batch_id, '$options': 'i' };
+            filter['batch_id'] = { '$regex': batch_id };
         }
+        console.log("this is our", filter);
         const data = await Batch.find({ ...filter }).populate(populate?.split(",").map((item) => ({ path: item })))
             .sort({ "createdAt": -1 }).skip((parseInt(req.query.pageno) - 1) * parseInt(req.query.limit)).limit(parseInt(req.query.limit))
         return res.status(200).json({ success: true, data });
