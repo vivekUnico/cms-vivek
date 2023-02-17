@@ -11,7 +11,8 @@ const { ObjectId } = require('mongoose').Types;
 
 //Get All Subject
 exports.GetAllSubject = asyncHandler(async (req, res) => {
-    let { populate, courses, name, dateFrom, dateTo, academic_year, select } = req.query;
+    let { populate, courses, name, 
+            dateFrom, dateTo, academic_year, select, subject_id, cnt_of_topics } = req.query;
     if (academic_year == undefined || academic_year.length <= 0 || academic_year == "undefined" || academic_year == "NaN")
         academic_year = "master"
     try {
@@ -34,6 +35,12 @@ exports.GetAllSubject = asyncHandler(async (req, res) => {
                 $gte: dateFrom,
                 $lte: dateTo
             };
+        }
+        if (subject_id) {
+            filter['subject_id'] = { '$regex': subject_id, '$options': 'i' };
+        }
+        if (cnt_of_topics) {
+            filter['topics'] = { $size: parseInt(cnt_of_topics) };
         }
         console.log("filter", filter);
         const data = await Subject.find({ ...filter, academic_year : academic_year })
