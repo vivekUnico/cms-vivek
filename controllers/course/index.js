@@ -12,8 +12,8 @@ const { findByIdAndUpdate } = require('../../models/course');
 
 //Get All Course
 exports.GetAllCourse = asyncHandler(async (req, res) => {
-    let { populate, centers, name, dateFrom, dateTo, academic_year, select } = req.query;
-    let acArr = [];
+    let { populate, centers, name, dateFrom, dateTo, academic_year, select, year_version, course_id, subject_cnt } = req.query;
+    let acArr = [], tempArr = [];
     if (!academic_year || academic_year.length == 0)
         academic_year = "master";
     academic_year?.split(',').map(itm => acArr.push({ academic_year: itm }));
@@ -38,11 +38,19 @@ exports.GetAllCourse = asyncHandler(async (req, res) => {
 
             filter['createdAt'] = { $gte: dateFrom, $lte: dateTo };
         }
-
-
-        const data = await Course.find({ ...filter }).select(select).populate(populate?.split(",").map((item) => ({ path: item })))
+        if (subject_cnt) {
+            filter['subjects'] = { $size: parseInt(subject_cnt) };
+        }
+        if (course_id) {
+            filter['course_id'] = { '$regex': course_id };
+        }
+        if (year_version) {
+            tempArr = year_version?.split(",")?.map(itm => ({ year_version: itm }));
+        }
+        if (tempArr.length == 0) tempArr = [{}];
+        const data = await Course.find({ ...filter, $or : tempArr })
+            .select(select).populate(populate?.split(",").map((item) => ({ path: item })))
             .sort({ "createdAt": -1 }).skip((parseInt(req.query.pageno) - 1) * parseInt(req.query.limit)).limit(parseInt(req.query.limit))
-
         for (let index = 0; index < data.length; index++) {
             let item = data[index]._doc;
             item["batch_details"] = await Batch.find({ "courses": item._id });
