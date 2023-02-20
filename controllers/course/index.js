@@ -14,9 +14,6 @@ const { findByIdAndUpdate } = require('../../models/course');
 exports.GetAllCourse = asyncHandler(async (req, res) => {
     let { populate, centers, name, dateFrom, dateTo, academic_year, select, year_version, course_id, subject_cnt } = req.query;
     let acArr = [], tempArr = [];
-    if (!academic_year || academic_year.length == 0)
-        academic_year = "master";
-    academic_year?.split(',').map(itm => acArr.push({ academic_year: itm }));
     try {
         let filter = {};
         if (centers) {
@@ -24,9 +21,6 @@ exports.GetAllCourse = asyncHandler(async (req, res) => {
             filter["centers"] = centersFilter.length > 1 ? centersFilter : centers;
         } if (name) {
             filter['name'] = { '$regex': name, '$options': 'i' };
-        }
-        if (academic_year) {
-            filter['$or'] = acArr;
         }
         if (dateFrom && dateTo) {
             dateFrom = new Date(dateFrom)
@@ -41,14 +35,15 @@ exports.GetAllCourse = asyncHandler(async (req, res) => {
         if (subject_cnt) {
             filter['subjects'] = { $size: parseInt(subject_cnt) };
         }
-        if (course_id) {
+        if (course_id && course_id != "undefined") {
             filter['course_id'] = { '$regex': course_id };
         }
         if (year_version) {
             tempArr = year_version?.split(",")?.map(itm => ({ year_version: itm }));
         }
         if (tempArr.length == 0) tempArr = [{}];
-        const data = await Course.find({ ...filter, $or : tempArr })
+        console.log("this is filter", filter, tempArr);
+        const data = await Course.find({ ...filter, $or : tempArr, academic_year })
             .select(select).populate(populate?.split(",").map((item) => ({ path: item })))
             .sort({ "createdAt": -1 }).skip((parseInt(req.query.pageno) - 1) * parseInt(req.query.limit)).limit(parseInt(req.query.limit))
         for (let index = 0; index < data.length; index++) {

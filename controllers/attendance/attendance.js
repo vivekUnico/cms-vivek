@@ -167,8 +167,15 @@ exports.DeleteAttendance = asyncHandler(async (req, res) => {
 
 exports.getAttendance = asyncHandler(async (req, res) => {
     try {
-        const { subjectTimeDetails, populate, pageno, limit } = req.query;
-        const AttendanceData = await Attendance.find({ subjectTimeDetails })
+        const { subjectTimeDetails, populate, pageno, limit, name, present } = req.query;
+        let filter = {};
+        if (name) {
+            filter["name"] = { $regex: name, $options: "i" };
+        }
+        if (present) {
+            filter["present"] = present;
+        }
+        const AttendanceData = await Attendance.find({ subjectTimeDetails, ...filter })
             .populate(populate?.split(",").map((item) => ({ path: item })))
             .skip((pageno - 1) * limit).limit(limit);
         return res.status(201).json({ success: true, data: AttendanceData });

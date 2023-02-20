@@ -8,9 +8,14 @@ const bodyParser = require("body-parser");
 const Authorize = require("./middleware/CreateLeadFromEmail");
 const cron = require('node-cron');
 
-cron.schedule('0 */4 * * *', async () => {
+// cron.schedule('0 */4 * * *', async () => {
+//   await Authorize();
+//   console.log('fatching lead from email');
+// });
+
+cron.schedule('*/60 * * * * *', async () => {
+  console.log('fetching lead from email');
   await Authorize();
-  console.log('fatching lead from email');
 });
 
 /*
@@ -26,7 +31,7 @@ require('./controllers/community/socket')(io);
 // Models
 const StudyMaterial = require("./models/studymaterial");
 
-// --------------------------------- load env vars ---------------------------------
+// ---------------- ----------------- load env vars ---------------------------------
 if (process.env.NODE_ENV !== "production") {
   const dotenv = require("dotenv");
   dotenv.config({ path: "config/config.env" });
