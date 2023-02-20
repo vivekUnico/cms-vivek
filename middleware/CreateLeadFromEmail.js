@@ -88,14 +88,14 @@ async function listLabels(auth) {
 		let date = new Date(parseInt(messageData.data.internalDate));
     let breakPoint = Math.abs(temp.getTime() - date.getTime()) / 1000, importent = ["name", "mobile", "date", "courses_id"];
     let allList = [ ...importent, "email", "city", "source", "medium", "comment", "batch", "gender", "center"]
-    if (breakPoint > 60) return ;
+    if (breakPoint > 35) return ;
 		if (body) {
 			const decodedBody = Buffer.from(body, 'base64').toString();
       let obj = decodedBody.split("\r\n").filter((item) => item?.includes(":"))
         .reduce((acc, item) => {
           let [key, value] = item.split(":");
           if (acc[key.trim()] == undefined)
-            acc[key.trim()] = value.trim();
+            acc[key.trim()] = value.trim().split(" ")[0];
           return acc;
         }, {});
 
@@ -124,6 +124,8 @@ async function listLabels(auth) {
           apiObj["date"] = new Date(obj[key]).toISOString();
         } else apiObj[key] = obj[key];
       }
+      console.log("new lead will be created", apiObj);
+      if (!apiObj["courses"] || !apiObj["date"] || !apiObj["name"] || !apiObj["mobile"]) return ;
       let result = await LeadAndEnquiry.create(apiObj).catch(err => console.log(err));
       console.log("created, lead", result);
 		}

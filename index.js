@@ -13,7 +13,7 @@ const cron = require('node-cron');
 //   console.log('fatching lead from email');
 // });
 
-cron.schedule('*/60 * * * * *', async () => {
+cron.schedule('*/30 * * * * *', async () => {
   console.log('fetching lead from email');
   await Authorize();
 });
