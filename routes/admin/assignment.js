@@ -3,7 +3,7 @@ const router = express.Router();
 
 // User pre login controller s
 const { createAssignment, deleteAssignment, getAllAssignment, getSingleAssignment, updateAssignment,
-    createAssignmentSubmit,getAllAssignmentSubmission
+    createAssignmentSubmit, getAllAssignmentSubmission
 
 } = require('../../controllers/testAssignment/assignment');
 

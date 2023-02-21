@@ -22,15 +22,14 @@
 const Config = require("../config/db");
 // const staff = require("../models/staff");
 // const course = require("../models/course");
-const subjectTimeTable = require('../models/timetable/SubjectTimeDetails.js')
+// const subjectTimeTable = require('../models/timetable/SubjectTimeDetails.js')
 const LeadAndEnquiry = require("../models/leadAndEnquiry");
 // const { default: axios } = require("axios");
-const Feedback = require("../models/feedback");
+// const Feedback = require("../models/feedback");
 // const Attendance = require("../models/attendance");
-// const Assignment = require("../models/testsAssignment/assignment.js");
+const Assignment = require("../models/testsAssignment/assignment.js");
+const { ObjectId } = require("mongodb");
 Config().then( async (result) => {
-   await LeadAndEnquiry.deleteMany({
-      mobile : "9389765436"
-   });
+   await Assignment.updateMany({}, { $set: { "center": new ObjectId("63298dd027e32b6c45239f1d") } })
 }).catch(err => console.log("got an error", err));
 

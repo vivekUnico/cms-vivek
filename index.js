@@ -8,15 +8,15 @@ const bodyParser = require("body-parser");
 const Authorize = require("./middleware/CreateLeadFromEmail");
 const cron = require('node-cron');
 
-// cron.schedule('0 */4 * * *', async () => {
-//   await Authorize();
-//   console.log('fatching lead from email');
-// });
-
-cron.schedule('*/30 * * * * *', async () => {
-  console.log('fetching lead from email');
+cron.schedule('0 */4 * * *', async () => {
   await Authorize();
+  console.log('fatching lead from email');
 });
+
+// cron.schedule('*/30 * * * * *', async () => {
+//   console.log('fetching lead from email');
+//   await Authorize();
+// });
 
 /*
 * ###################################### For socket io implementation ######################################

@@ -95,6 +95,11 @@ const assignmentScheme = new mongoose.Schema(
             require: [true, "Please provide subject"],
             ref: "subject"
         },
+        center : {
+            type: mongoose.Schema.Types.ObjectId,
+            require: [true, "Please provide center"],
+            ref: "center"
+        },
         submissionDateTime: {
             type: Date,
             require: [false, "Please provide submissionDateTime"],
