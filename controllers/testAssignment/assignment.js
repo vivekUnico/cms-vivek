@@ -153,12 +153,11 @@ const Assignment = require('../../models/testsAssignment/assignment');
 // })
 const ObjectId = require('mongoose').Types.ObjectId;
 exports.createAssignment = asyncHandler(async (req, res) => {
-	const { name, submissionDateTime, description, subjectTimeDetail, subject, batch, center } = req.body;
+	const { name, submissionDateTime, description, subjectTimeDetail, subject, batch, center, topics } = req.body;
 	//type : normal | mcq
 	const assignmentData = {
-		name, submissionDateTime, description, subjectTimeDetail, subject, batch, center
+		name, submissionDateTime, description, subjectTimeDetail, subject, batch, center, topics
 	}
-	console.log(req.body);
 	const validation = validationCheck({
 		name, submissionDateTime, description, subjectTimeDetail, subject, batch, center
 	});
