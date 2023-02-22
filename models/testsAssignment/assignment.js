@@ -100,6 +100,7 @@ const assignmentScheme = new mongoose.Schema(
             ref: "center"
         },
         topics: [],
+        assignmentFiles: [],
         submissionDateTime: {
             type: Date,
             require: [false, "Please provide submissionDateTime"],

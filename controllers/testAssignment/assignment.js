@@ -7,6 +7,7 @@ const { parseISO, sub, add } = require('date-fns');
 
 //models
 const Assignment = require('../../models/testsAssignment/assignment');
+const { request } = require('express');
 
 // exports.createAssignment = asyncHandler(async (req, res) => {
 //     const { name, timetable_datedetails, lecture_subject, center, course, batch, submissionDateTime, description, topic } = req.body;
@@ -152,20 +153,18 @@ const Assignment = require('../../models/testsAssignment/assignment');
 //     }
 // })
 const ObjectId = require('mongoose').Types.ObjectId;
+const getCloudinaryUrl = require('../../utils/cloudinary');
 exports.createAssignment = asyncHandler(async (req, res) => {
-	const { name, submissionDateTime, description, subjectTimeDetail, subject, batch, center, topics } = req.body;
-	//type : normal | mcq
-	const assignmentData = {
-		name, submissionDateTime, description, subjectTimeDetail, subject, batch, center, topics
-	}
-	const validation = validationCheck({
-		name, submissionDateTime, description, subjectTimeDetail, subject, batch, center
-	});
-
-	if (!validation.status) {
-		throw new ErrorResponse(`Please provide a ${validation?.errorAt}`, 400);
-	}
 	try {
+		let assignmentData = { ...req.body };
+		if (req.body?.assignmentFiles && req.body?.assignmentFiles?.length > 0) {
+			assignmentData.assignmentFiles = [];
+			for (let i = 0; i < req.body?.assignmentFiles.length; i++) {
+				let file = req.body?.assignmentFiles[i];
+				let cloudinaryUrl = await getCloudinaryUrl(file);
+				assignmentData.assignmentFiles.push(cloudinaryUrl?.url);
+			}
+		}
 		const AssignmentData = await Assignment.create(assignmentData);
 		return res.status(201).json({ success: true, data: AssignmentData });
 	} catch (error) {
