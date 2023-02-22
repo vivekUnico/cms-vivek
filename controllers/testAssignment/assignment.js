@@ -221,7 +221,7 @@ exports.getAllAssignment = asyncHandler(async (req, res) => {
 			{ $sort: { createdAt: -1 } },
 			{ $skip : (parseInt(req.query.pageno) - 1) * parseInt(req.query.limit) },
       { $limit : parseInt(req.query.limit) },
-		])
+		]);
 		return res.status(200).json({ success: true, data: result });
 	} catch (error) {
 		throw new ErrorResponse(`Server error :${error}`, 400);
@@ -230,13 +230,11 @@ exports.getAllAssignment = asyncHandler(async (req, res) => {
 
 exports.getSingleAssignment = asyncHandler(async (req, res) => {
 	const { id } = req.params;
-	const { populate, select } = req.query;
-
 	if (!id) {
 		throw new ErrorResponse(`Please provide id`, 400);
 	}
 	try {
-		const AssignmentData = await Assignment.findOne({ _id: id }).select(select?.split(",")).populate(populate?.split(","));
+		const AssignmentData = await Assignment.findOne({ _id: id }).populate("batch center subject subjectTimeDetail")
 		return res.status(200).json({ success: true, data: AssignmentData });
 	} catch (error) {
 		throw new ErrorResponse(`Server error :${error}`, 400);
@@ -245,14 +243,13 @@ exports.getSingleAssignment = asyncHandler(async (req, res) => {
 
 exports.updateAssignment = asyncHandler(async (req, res) => {
 	const { id } = req.params;
-	const { name, timetable_datedetails, lecture_subject, center, lecture, course, batch, submissionDateTime, description } = req.body;
-	const qp = {
-		name, timetable_datedetails, lecture_subject, center, lecture, course, batch, submissionDateTime, description
-	};
-
 	try {
-		const AssignmentData = await Assignment.findOneAndUpdate({ _id: id }, { ...qp }, { returnOriginal: false });
-		return res.status(201).json({ success: true, data: AssignmentData });
+		const result = await Assignment.findOneAndUpdate({ _id: id }, {
+			$set : {
+				...req?.body
+			}
+		}, { returnOriginal: true });
+		return res.status(201).json({ success: true, data: result });
 	} catch (error) {
 		throw new ErrorResponse(`Server error :${error}`, 400);
 	}

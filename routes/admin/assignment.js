@@ -9,7 +9,7 @@ const { createAssignment, deleteAssignment, getAllAssignment, getSingleAssignmen
 
 router.route('/').post(createAssignment);
 router.route('/').get(getAllAssignment);
-router.route('/single/:id').get(getSingleAssignment);
+router.route('/:id').get(getSingleAssignment);
 router.route('/:id').delete(deleteAssignment);
 router.route('/:id').put(updateAssignment);
 
