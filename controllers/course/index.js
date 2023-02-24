@@ -43,7 +43,7 @@ exports.GetAllCourse = asyncHandler(async (req, res) => {
         }
         if (tempArr.length == 0) tempArr = [{}];
         console.log("this is filter", filter, tempArr);
-        const data = await Course.find({ ...filter, $or : tempArr, academic_year })
+        const data = await Course.find({ ...filter, $or : tempArr, academic_year : academic_year || "master" })
             .select(select).populate(populate?.split(",").map((item) => ({ path: item })))
             .sort({ "createdAt": -1 }).skip((parseInt(req.query.pageno) - 1) * parseInt(req.query.limit)).limit(parseInt(req.query.limit))
         for (let index = 0; index < data.length; index++) {

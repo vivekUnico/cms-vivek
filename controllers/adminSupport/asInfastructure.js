@@ -15,7 +15,7 @@ exports.CreateInfastructure = asyncHandler(async (req, res) => {
     if (!validation.status) {
         throw new ErrorResponse(`Please provide a ${validation?.errorAt}`, 400);
     }
-
+    
     try {
         const data = await modelName.create(req.body);
         return res.status(201).json({ success: true, data });
