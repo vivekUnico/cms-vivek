@@ -18,8 +18,8 @@ const getCloudinaryUrl = async (base64File) => {
         reject(error);
       }
       resolve({
-        url: result.secure_url,
-        public_id: result.public_id,
+        url: result?.url,
+        public_id: result?.public_id,
       });
     }).end(buffer);
   });
@@ -49,7 +49,7 @@ const getCloudinaryUrlByBase64 = async (base64File, format) => {
 const getCloudinaryUrlBymulter = async (file) => {
   const result = await cloudinary.uploader.upload(file.path, {
     resource_type: "auto",
-    folder: "pdf",
+    // folder: "pdf",
   });
   return result;
 }

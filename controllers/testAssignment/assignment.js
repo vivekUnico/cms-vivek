@@ -153,19 +153,10 @@ const { request } = require('express');
 //     }
 // })
 const ObjectId = require('mongoose').Types.ObjectId;
-const getCloudinaryUrl = require('../../utils/cloudinary');
+const { getCloudinaryUrl } = require('../../utils/cloudinary');
 exports.createAssignment = asyncHandler(async (req, res) => {
 	try {
-		let assignmentData = { ...req.body };
-		if (req.body?.assignmentFiles && req.body?.assignmentFiles?.length > 0) {
-			assignmentData.assignmentFiles = [];
-			for (let i = 0; i < req.body?.assignmentFiles.length; i++) {
-				let file = req.body?.assignmentFiles[i];
-				let cloudinaryUrl = await getCloudinaryUrl(file);
-				assignmentData.assignmentFiles.push(cloudinaryUrl?.url);
-			}
-		}
-		const AssignmentData = await Assignment.create(assignmentData);
+		const AssignmentData = await Assignment.create(req.body);
 		return res.status(201).json({ success: true, data: AssignmentData });
 	} catch (error) {
 		throw new ErrorResponse(`Server error :${error}`, 400);
