@@ -204,9 +204,6 @@ exports.UpdateSubjectTimeTable = asyncHandler(async (req, res) => {
 			const zoomData = await createZoomMeeting(zoomconfig);
 			obj.zoom_link = zoomData?.start_url;
 		}
-		if (AttandeceHardCopyLink) {
-			obj.AttandeceHardCopyLink = (await getCloudinaryUrl(AttandeceHardCopyLink))?.url;
-		}
 		let data = await SubjectTimeDetail.findByIdAndUpdate(id, { $set: obj }, { new: true });
 		return res.status(200).json({ success: true, data });
 	} catch (error) {
