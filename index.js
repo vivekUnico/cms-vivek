@@ -85,6 +85,28 @@ app.post("/api/v1/getFileUrl", async (req, res) => {
   }
 });
 
+app.post("/api/v1/getFileUrl/Arr", async (req, res) => {
+  try {
+    let { fname } = req.query;
+    function answer() {
+      return new Promise((resolve, reject) => {
+        upload.array(fname)(req, null, async (err) => {
+          if (err) {
+            reject(err);
+          }
+          let Arr = req.files.map((file) => getCloudinaryUrlBymulter(file));
+          let result = await Promise.all(Arr);
+          resolve(result.map((item) => item?.secure_url || "#") || []);
+        });
+      });
+    }
+    let result = await answer();
+    return res.status(200).json({ success: true, data: result });
+  } catch (error) {
+    return res.status(500).json({ success: false, error: error.message });
+  }
+});
+
 
 // --------------------------------- Express App setup ---------------------------------
 const PORT = process.env.PORT || 5000;

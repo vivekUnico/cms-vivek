@@ -67,7 +67,7 @@ exports.ReadSingleVendorsOrder = asyncHandler(async (req, res) => {
 exports.UpdateVendorsOrder = asyncHandler(async (req, res) => {
     const { id } = req.params;
     try {
-        const data = await modelName.findOneAndUpdate({ _id: id }, { $set: req.body }, { returnOriginal: false });
+        const data = await modelName.findOneAndUpdate({ _id: id }, { $set: req.body }, { new: true });
         return res.status(201).json({ success: true, data });
     } catch (error) {
         throw new ErrorResponse(`Server error :${error}`, 400);
