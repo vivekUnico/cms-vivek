@@ -39,7 +39,9 @@ exports.GetFollowupByFilter = asyncHandler(async (req, res) => {
 		}
 		if (Arr.length == 0) Arr.push({});
 		if (Arr1.length == 0) Arr1.push({});
-		console.log(req.query);
+		let curr = new Date();
+    curr.setHours(0, 0, 0, 0);
+    curr = sub(curr, { days: "1" });
 		let data = await Followup.aggregate([
 			{ $addFields: { "followup_list_length": { $size: "$followup_list" } } },
 			{ $unwind: { path: "$followup_list", preserveNullAndEmptyArrays: true } },
@@ -66,16 +68,17 @@ exports.GetFollowupByFilter = asyncHandler(async (req, res) => {
 				$group: {
 					_id: null,
 					allData: { $push: "$$ROOT" },
-					Totalcount: { $sum: 1 }
+					total_count: { $sum: 1 },
+					match_count: { $sum: { $cond: [{ $gte: ["$followup_list.addedTime", curr] }, 1, 0] } }
 				}
 			},
 			{ $unwind: { path: "$allData", preserveNullAndEmptyArrays: true } },
 			{ $sort: { "allData.followup_list.addedTime": -1 } },
 			{ $skip: (parseInt(req.query.pageno) - 1) * parseInt(req.query.limit) },
 			{ $limit: parseInt(req.query.limit) },
-			{ $replaceRoot: { newRoot: { $mergeObjects: ["$allData", { total_count: "$Totalcount" }] } } },
+			{ $replaceRoot: { newRoot: { $mergeObjects: ["$allData", { total_count : "$total_count", match_count : "$match_count"  }] } } },
 		]);
-		console.log(data.length);
+		console.log(data);
 		return res.status(200).json({ success: true, data });
 	} catch (error) {
 		throw new ErrorResponse(`Server error :${error}`, 500);

@@ -49,6 +49,9 @@ exports.GetLeadAndEnquiryByFilter = asyncHandler(async (req, res) => {
         temp.push({ isEnquiry: true });
       }
     }
+    let curr = new Date();
+    curr.setHours(0, 0, 0, 0);
+    curr = sub(curr, { days: "1" });
     if (Arr.length == 0) Arr.push({});
     let data = await LeadAndEnquiry.aggregate([
       {
@@ -101,15 +104,17 @@ exports.GetLeadAndEnquiryByFilter = asyncHandler(async (req, res) => {
         $group: {
           _id: null,
           allData: { $push: "$$ROOT" },
-          Totalcount: { $sum: 1 }
+          total_count: { $sum: 1 },
+          match_count: { $sum: { $cond: [{ $gte: ["$updatedAt", curr] }, 1, 0] } }
         }
       },
       { $unwind: { path: "$allData", preserveNullAndEmptyArrays: true } },
       { $sort: { "allData.createdAt": -1 } },
       { $skip: (parseInt(req.query.pageno) - 1) * parseInt(req.query.limit) },
       { $limit: parseInt(req.query.limit) },
-      { $replaceRoot: { newRoot: { $mergeObjects : [ "$allData", { total_count : "$Totalcount" } ] }} },
+      { $replaceRoot: { newRoot: { $mergeObjects : [ "$allData", { total_count : "$total_count", match_count : "$match_count"  } ] }} },
     ]);
+    console.log(data);
     return res.status(200).json({ success: true, data });
   } catch (error) {
     throw new ErrorResponse(`Server error :${error}`, 400);
