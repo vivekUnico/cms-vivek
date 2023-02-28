@@ -108,8 +108,7 @@ exports.GetLeadAndEnquiryByFilter = asyncHandler(async (req, res) => {
       { $sort: { "allData.createdAt": -1 } },
       { $skip: (parseInt(req.query.pageno) - 1) * parseInt(req.query.limit) },
       { $limit: parseInt(req.query.limit) },
-      { $addFields: { "allData.Totalcount": "$Totalcount" } },
-      { $replaceRoot: { newRoot: "$allData" } },
+      { $replaceRoot: { newRoot: { $mergeObjects : [ "$allData", { total_count : "$Totalcount" } ] }} },
     ]);
     console.log(data);
     return res.status(200).json({ success: true, data });
