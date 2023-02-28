@@ -93,14 +93,25 @@ exports.GetLeadAndEnquiryByFilter = asyncHandler(async (req, res) => {
               $ifNull: ["$followup.followup_list", []]
             }
           },
-          "last_followup": { $last: "$followup.followup_list" }
+          "last_followup": { $last: "$followup.followup_list" },
         }
       },
       { $match: { $and: [...temp, { $or: Arr }] } },
-      { $sort: { "createdAt": -1 } },
+      {
+        $group: {
+          _id: null,
+          allData: { $push: "$$ROOT" },
+          Totalcount: { $sum: 1 }
+        }
+      },
+      { $unwind: { path: "$allData", preserveNullAndEmptyArrays: true } },
+      { $sort: { "allData.createdAt": -1 } },
       { $skip: (parseInt(req.query.pageno) - 1) * parseInt(req.query.limit) },
       { $limit: parseInt(req.query.limit) },
+      { $addFields: { "allData.Totalcount": "$Totalcount" } },
+      { $replaceRoot: { newRoot: "$allData" } },
     ]);
+    console.log(data);
     return res.status(200).json({ success: true, data });
   } catch (error) {
     throw new ErrorResponse(`Server error :${error}`, 400);
@@ -127,7 +138,7 @@ exports.getCountTotalLeadAndEnquiry = asyncHandler(async (req, res) => {
       }
     ]);
     console.log(data, curr);
-    return res.status(200).json({ success: true, data : data[0] });
+    return res.status(200).json({ success: true, data: data[0] });
   } catch (error) {
     throw new ErrorResponse(`Server error :${error}`, 400);
   }
