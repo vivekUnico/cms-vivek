@@ -110,7 +110,6 @@ exports.GetLeadAndEnquiryByFilter = asyncHandler(async (req, res) => {
       { $limit: parseInt(req.query.limit) },
       { $replaceRoot: { newRoot: { $mergeObjects : [ "$allData", { total_count : "$Totalcount" } ] }} },
     ]);
-    console.log(data);
     return res.status(200).json({ success: true, data });
   } catch (error) {
     throw new ErrorResponse(`Server error :${error}`, 400);
