@@ -42,7 +42,6 @@ exports.GetAllCourse = asyncHandler(async (req, res) => {
             tempArr = year_version?.split(",")?.map(itm => ({ year_version: itm }));
         }
         if (tempArr.length == 0) tempArr = [{}];
-        console.log("this is filter", filter, tempArr);
         const data = await Course.find({ ...filter, $or : tempArr, academic_year : academic_year || "master" })
             .select(select).populate(populate?.split(",").map((item) => ({ path: item })))
             .sort({ "createdAt": -1 }).skip((parseInt(req.query.pageno) - 1) * parseInt(req.query.limit)).limit(parseInt(req.query.limit))
@@ -88,7 +87,6 @@ exports.GetSingleCourse = asyncHandler(async (req, res) => {
                 master_id: master._id,
                 academic_year: academic_year,
             });
-            console.log("new course created", data._id);
         }
         return res.status(200).json({ success: true, data });
     } catch (error) {
@@ -330,11 +328,8 @@ exports.AddCoursesInAY = asyncHandler(async (req, res) => {
                     newCourseArrOfSubject.push(item?.ay_course_id)
                 }
             })
-            // console.log(itm?.master_course_id, item?.master_course_id)
             await Subject.findByIdAndUpdate(itm.ay_subject_id, { $addToSet: { courses: newCourseArrOfSubject } });
         })
-        // console.log('SubjectThisAy - ', SubjectThisAy)
-        // console.log('CourseThisAy - ', CourseThisAy)
         return res.status(200).json({ success: true, data: `All selected courses added in AY-${academic_year}` });
 
     } catch (error) {

@@ -18,7 +18,6 @@ exports.createMentorShip = asyncHandler(async (req, res) => {
     }
     try {
         let zoom_link = undefined;
-        console.log(mode)
         if (mode == 'Online') {
             let zoomconfig = { start_time: meet_date_time, hostemail: 'chandan7666h@gmail.com', topic: description, duration: 20, agenda: description }
             const zoomData = await createZoomMeeting(zoomconfig)

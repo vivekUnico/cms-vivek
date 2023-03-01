@@ -48,7 +48,6 @@ exports.CreateStaff = asyncHandler(async (req, res) => {
         if (!permission.success) {
             throw new ErrorResponse(`You are not authorized to access this route`, 401);
         }
-        console.log("staff data", req.body);
         const { initial, first_name, last_name, email, mobile, dob, center, staffCode, salary_type, loginId, role, department, password,
             position, grade, shift, qualification, manager, joining_date, job_type, gender, account_status, subjects, permission_id } = req.body;
 
@@ -158,7 +157,6 @@ exports.UpdateStaff = asyncHandler(async (req, res) => {
         }
 
         const data = await Staff.findOneAndUpdate({ _id: id }, { $set: { ...schemaData } }, { returnOriginal: false });
-        console.log(data);
         if (!data) throw new ErrorResponse(`Staff id not found`, 400);
 
         return res.status(200).json({ success: true, data });
@@ -184,9 +182,7 @@ exports.loginUser = asyncHandler(async (req, res) => {
             throw new ErrorResponse(`you are not authenticated`, 400);
         }
 
-        console.log('is Password ok -->', password, userData.password)
         const passwordOk = await comparePassword(password, userData.password);
-        console.log('is Password ok -->', passwordOk)
         if (passwordOk) {
             const token = jwt.sign(
                 {
@@ -314,7 +310,6 @@ exports.forgetPasswordWithToken = asyncHandler(async (req, res) => {
                 resetToken: { token: null, expiry: null },
             }
         );
-        // console.log(updatedPassword, dataUpdated)
         if (dataUpdated) {
             return res.status(200).json({ success: true, data: "Password updated successfully" });
         }

@@ -35,7 +35,6 @@ exports.getLeaves = asyncHandler(async (req, res) => {
         let filter = createFilter([
             { name: 'type', value: type, type: 'text' },
         ])
-        console.log(filter)
         const data = await Leaves.find({ ...filter, name });
         return res.status(200).json({ success: true, data });
     } catch (error) {

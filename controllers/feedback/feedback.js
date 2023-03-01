@@ -81,7 +81,6 @@ const Feedback = require("../../models/feedback");
 // });
 exports.CreateFeedback = asyncHandler(async (req, res) => {
     try {
-        console.log("new feedback", req.body);
         let result = await Feedback.create(req.body);   
         return res.status(201).json({ success: true, data: result });
     } catch (error) {
