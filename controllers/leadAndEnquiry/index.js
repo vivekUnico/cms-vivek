@@ -23,7 +23,7 @@ exports.GetLeadAndEnquiryByFilter = asyncHandler(async (req, res) => {
     const { populate, type } = req.query;
     let temp = [], Arr = [];
     for (let key in req.query) {
-      if (key == "populate" || key == "created_by" || key == "type" || key == "pageno" || key == "limit")
+      if (key == "populate" || key == "type" || key == "pageno" || key == "limit")
         continue;
       if (key === "courses") {
         (req.query[key].split(',')).map(val => {
