@@ -149,7 +149,6 @@ exports.getCountTotalLeadAndEnquiry = asyncHandler(async (req, res) => {
         }
       }
     ]);
-    console.log(data, curr);
     return res.status(200).json({ success: true, data: data[0] });
   } catch (error) {
     throw new ErrorResponse(`Server error :${error}`, 400);
@@ -193,7 +192,6 @@ exports.CreateLeadAndEnquiry = asyncHandler(async (req, res) => {
   try {
     const { name, gender, mobile, email, date, assign_to, comment, next_followup_date, type, batch, telegram, created_by,
       alternate_number, status, source, courses, center, medium, city, currentStatus, sendMail } = req.body;
-    console.log(`new ${currentStatus}`, assign_to);
     let temp1 = courses?.map((item) => item?.name).join(", "), temp2 = assign_to.email;
     let validation = validationImportent({ currentStatus, name, email, date, assign_to, status, source, center });
     if (!validation.status) {
