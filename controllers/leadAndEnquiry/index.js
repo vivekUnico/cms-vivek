@@ -54,14 +54,15 @@ exports.GetLeadAndEnquiryByFilter = asyncHandler(async (req, res) => {
     curr = sub(curr, { days: "1" });
     if (Arr.length == 0) Arr.push({});
     let data = await LeadAndEnquiry.aggregate([
-      {
-        $lookup: {
-          from: "staffs",
-          localField: "assign_to",
-          foreignField: "_id",
-          as: "assign_to"
-        }
-      },
+      { $lookup : {
+        from: "staffs",
+        let: { assign_to: "$assign_to" },
+        pipeline: [
+          { $match: { $expr: { $in: ["$_id", [ "$$assign_to" ]] } } },
+          { $project: { _id: 1, first_name: 1, first_name : 1 } }
+        ],
+        as: "assign_to"
+      }},
       { $unwind: { path: "$assign_to", preserveNullAndEmptyArrays: true } },
       {
         $lookup: {
@@ -75,8 +76,11 @@ exports.GetLeadAndEnquiryByFilter = asyncHandler(async (req, res) => {
       {
         $lookup: {
           from: "courses",
-          localField: "courses",
-          foreignField: "_id",
+          let: { courseIds: "$courses" },
+          pipeline: [
+            { $match: { $expr: { $in: ["$_id", "$$courseIds"] } } },
+            { $project: { _id: 1, name: 1 } }
+          ],
           as: "courses"
         }
       },
@@ -114,7 +118,6 @@ exports.GetLeadAndEnquiryByFilter = asyncHandler(async (req, res) => {
       { $limit: parseInt(req.query.limit) },
       { $replaceRoot: { newRoot: { $mergeObjects : [ "$allData", { total_count : "$total_count", match_count : "$match_count"  } ] }} },
     ]);
-    console.log(data);
     return res.status(200).json({ success: true, data });
   } catch (error) {
     throw new ErrorResponse(`Server error :${error}`, 400);
