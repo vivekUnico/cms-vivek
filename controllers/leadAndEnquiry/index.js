@@ -51,7 +51,7 @@ exports.GetLeadAndEnquiryByFilter = asyncHandler(async (req, res) => {
     }
     let curr = new Date();
     curr.setHours(0, 0, 0, 0);
-    curr = sub(curr, { days: "1" });
+    curr = sub(curr, { days: "30" });
     if (Arr.length == 0) Arr.push({});
     let data = await LeadAndEnquiry.aggregate([
       { $lookup : {
@@ -67,8 +67,11 @@ exports.GetLeadAndEnquiryByFilter = asyncHandler(async (req, res) => {
       {
         $lookup: {
           from: "centers",
-          localField: "center",
-          foreignField: "_id",
+          let: { centerId: "$center" },
+          pipeline: [
+            { $match: { $expr: { $in: ["$_id", ["$$centerId"]] } } },
+            { $project: { _id: 1, name: 1 } }
+          ],
           as: "center"
         }
       },
@@ -87,8 +90,11 @@ exports.GetLeadAndEnquiryByFilter = asyncHandler(async (req, res) => {
       {
         $lookup: {
           from: "followups",
-          localField: "_id",
-          foreignField: "connection_id",
+          let: { connection_id: "$_id" },
+          pipeline: [
+            { $match: { $expr: { $eq: ["$connection_id", "$$connection_id"] } } },
+            { $project: { _id: 1, followup_list : 1 } },
+          ],
           as: "followup"
         }
       },
