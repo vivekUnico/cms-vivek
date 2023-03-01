@@ -59,7 +59,6 @@ exports.GetAllStudent = asyncHandler(async (req, res) => {
                 feedata.push(Object.values(obj));
             }
         }
-        console.log("data", feedata);
         return res.status(200).json({ success: true, data, feedata });
     } catch (error) {
         throw new ErrorResponse(`Server error :${error}`, 400);
@@ -67,7 +66,6 @@ exports.GetAllStudent = asyncHandler(async (req, res) => {
 });
 
 exports.UpdateStudent = asyncHandler(async (req, res) => {
-    console.log("bodyStudent", req.body)
 
     try {
         const { id } = req.params;
@@ -135,7 +133,6 @@ exports.CreateStudent = asyncHandler(async (req, res) => {
                 gross_amount, committed_amount, bifurcation, fees
             }
         };
-        console.log(schemaData);
         const hashedPassword = await hashPassword(mobile);
         schemaData.password = hashedPassword;
 
@@ -175,7 +172,6 @@ exports.GetSingleStudent = asyncHandler(async (req, res) => {
             else temp1[item.paymentId] = [item];
         });
         temp1 = Object.keys(temp1).map((key) => temp1[key]);
-        console.log("this is temp1", temp1);
         return res.status(200).json({
             success: true, data: {
                 ...data,
@@ -210,13 +206,11 @@ exports.DeleteStudent = asyncHandler(async (req, res) => {
 
 //enquiry to student
 exports.MoveEnquiryToStudent = asyncHandler(async (req, res) => {
-    console.log("good......");
     try {
         const { id } = req.params;
         if (!id) throw new ErrorResponse(`Please provide a Enquiry id `, 400);
 
         const { fees } = req.body;
-        // console.log("this is complete body", req.body);
 
         let oldEnquiry = await findUniqueData(LeadAndEnquiry, { _id: id });
         if (!oldEnquiry) throw new ErrorResponse(`Enquiry not found`, 400);
@@ -444,7 +438,6 @@ exports.forgetPasswordWithToken = asyncHandler(async (req, res) => {
                 resetToken: { token: null, expiry: null },
             }
         );
-        // console.log(updatedPassword, dataUpdated)
         if (dataUpdated) {
             return res.status(200).json({ success: true, data: "Password updated successfully" });
         }

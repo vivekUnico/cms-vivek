@@ -107,7 +107,6 @@ exports.CreateDateDetails = asyncHandler(async (req, res, next) => {
                     const { start_time, end_time, subject, topics, teacher } = time_item;
                     if (lecture_type == 'online') {
                         const subjectData = await Subject.findOne({ _id: subject });
-                        // console.log(subjectData)
                         let zoomconfig = { start_time: start_time, 
                             hostemail: 'chandan7666h@gmail.com', 
                             topic: subjectData?.name, 

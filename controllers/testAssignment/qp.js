@@ -48,7 +48,6 @@ exports.getAllQP = asyncHandler(async (req, res) => {
             { name: 'name', value: name, type: 'text' },
         ])
     }
-    console.log(filter)
     try {
         const QuestionPaperData = await QuestionPaper.find({ ...filter }).select(select?.split(",")).limit(Number(limit)).skip(Number(page) * Number(limit)).sort({ createdAt: -1 }).populate(populate?.split(","));;
         return res.status(200).json({ success: true, data: QuestionPaperData });

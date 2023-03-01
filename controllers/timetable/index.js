@@ -66,7 +66,6 @@ exports.GetAllTimetable = asyncHandler(async (req, res) => {
             }
         }
 
-        console.log(filter);
 
         const data = await Timetable.find(filter).populate(populate?.split(",").map((item) => ({ path: item })));
 

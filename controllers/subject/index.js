@@ -42,7 +42,6 @@ exports.GetAllSubject = asyncHandler(async (req, res) => {
         if (cnt_of_topics) {
             filter['topics'] = { $size: parseInt(cnt_of_topics) };
         }
-        console.log("filter", filter);
         const data = await Subject.find({ ...filter, academic_year : academic_year })
             .select(select).populate(populate?.split(",").map((item) => ({ path: item })))
             .sort({ "createdAt" : -1 }).skip((parseInt(req.query.pageno) - 1) * parseInt(req.query.limit)).limit(parseInt(req.query.limit))
@@ -83,7 +82,6 @@ exports.GetSingleSubject = asyncHandler(async (req, res) => {
             });
             data = await Subject.findOne({ [mastersearch == 'true' ? 'master_id' : '_id']: id, ...filter })
                 .populate(populate?.split(",").map((item) => ({ path: item })));
-            console.log(data);
         }
         return res.status(200).json({ success: true, data });
     } catch (error) {
@@ -123,7 +121,6 @@ exports.CreateSubject = asyncHandler(async (req, res) => {
 //Update Single Subject
 exports.UpdateSubject = asyncHandler(async (req, res) => {
     try {
-        console.log(req.body);
         const { id } = req.params;
         if (!id) throw new ErrorResponse(`Please provide a subject id `, 400);
         const { name, topics, description, subject_id, master_id, academic_year } = req.body;

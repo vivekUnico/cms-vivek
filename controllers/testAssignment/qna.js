@@ -42,7 +42,6 @@ exports.createQuestionAnswer = asyncHandler(async (req, res) => {
 exports.getAllQA = asyncHandler(async (req, res) => {
     const { qp_id } = req.params;
     const { page, limit, populate, select, course, } = req.query;
-    // console.log('api ok')
     if (!qp_id) {
         throw new ErrorResponse(`Please provide qp_id`, 400);
     }

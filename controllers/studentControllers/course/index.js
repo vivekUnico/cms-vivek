@@ -197,11 +197,8 @@ exports.AddCoursesInAY = asyncHandler(async (req, res) => {
                     newCourseArrOfSubject.push(item?.ay_course_id)
                 }
             })
-            // console.log(itm?.master_course_id, item?.master_course_id)
             await Subject.findByIdAndUpdate(itm.ay_subject_id, { $push: { courses: newCourseArrOfSubject } });
         })
-        // console.log('SubjectThisAy - ', SubjectThisAy)
-        // console.log('CourseThisAy - ', CourseThisAy)
         return res.status(200).json({ success: true, data: `All selected courses added in AY-${academic_year}` });
 
     } catch (error) {
