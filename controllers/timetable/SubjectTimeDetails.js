@@ -226,14 +226,6 @@ exports.GetTimeTableBySubjectId = asyncHandler(async (req, res) => {
 		const { subjectId } = req.params;
 		let data2 = await SubjectTimeDetail.aggregate([
 			{ $match: { actual_subject: ObjectId(subjectId) } },
-			// { $group : { _id : "$batch", samosa : { $push : "$$ROOT" } } },
-			// { $group : { 
-			//     _id : "$batch",
-			//     "$group" : { 
-			//         actual_subject : "$actual_subject",
-			//         completed_topics : { $addToSet : "$completed_topics" },
-			//     }
-			// }, },
 			{ $unwind: { path: "$completed_topics", preserveNullAndEmptyArrays: false } },
 			{
 				$group: {
