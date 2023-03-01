@@ -78,7 +78,6 @@ exports.GetFollowupByFilter = asyncHandler(async (req, res) => {
 			{ $limit: parseInt(req.query.limit) },
 			{ $replaceRoot: { newRoot: { $mergeObjects: ["$allData", { total_count : "$total_count", match_count : "$match_count"  }] } } },
 		]);
-		console.log(data);
 		return res.status(200).json({ success: true, data });
 	} catch (error) {
 		throw new ErrorResponse(`Server error :${error}`, 500);
@@ -129,7 +128,6 @@ exports.newDeleteSingleFollowup = asyncHandler(async (req, res) => {
 		await data.save();
 		return res.status(200).json({ success: true, data });
 	} catch (error) {
-		console.log("correct");
 		throw new ErrorResponse(`Server error :${error}`, 500);
 	}
 });
@@ -138,7 +136,6 @@ exports.newDeleteSingleFollowup = asyncHandler(async (req, res) => {
 exports.GetAllFollowup = asyncHandler(async (req, res) => {
 	try {
 		let { populate, created_by, followup_type, followup_by } = req.query;
-		console.log(req.query);
 		let filter = {};
 		if (followup_type) {
 			filter["followup_type"] = String(followup_type);
@@ -190,7 +187,6 @@ exports.GetSingleFollowup = asyncHandler(async (req, res) => {
 //Create Single Followup, Update Single Followup
 exports.CreateFollowup = asyncHandler(async (req, res) => {
 	try {
-		console.log("followup", req.body);
 		const { followup_type, connection_id, created_by, followup_list, followupName } = req.body;
 		let validation = await validationCheck({ followup_type, connection_id, created_by, followup_list });
 		let str1 = (followup_type == "lead") ? "create_followup_lead" : "create_followup_enquiry";

@@ -77,7 +77,6 @@ exports.GetAllSubjectTimeTable = asyncHandler(async (req, res) => {
 			} else Filter.push({ [key]: { $regex: req.query[key] } });
 		}
 		if (temp?.length == 0) temp.push({});
-		console.log(Filter);
 		let data = await SubjectTimeDetail.aggregate([
 			{
 				$lookup: {
@@ -265,7 +264,6 @@ exports.bulkUpdate = asyncHandler(async (req, res) => {
 	try {
 		const { IdArr } = req.query;
 		let temp = IdArr.split(",")?.map(id => ObjectId(id)) || [];
-		console.log(temp);
 		await SubjectTimeDetail.updateMany({ _id: { $in: temp } },
 			{ $set: { ...req.body } }
 		);
