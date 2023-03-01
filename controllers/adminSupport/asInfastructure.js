@@ -25,7 +25,6 @@ exports.CreateInfastructure = asyncHandler(async (req, res) => {
 })
 
 exports.ReadInfastructure = asyncHandler(async (req, res) => {
-    console.log("i am called........");
     const { select, populate, page, limit } = req.query;
     const filter = createFilter([
         // add content for filter

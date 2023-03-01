@@ -10,7 +10,6 @@ let modelName = VendorOrder;
 
 
 exports.CreateVendorsOrder = asyncHandler(async (req, res) => {
-    console.log('vo')
 
     const { orderName,vendorId, totalCost, totalPaid, totalPending, deliveryDate, orderStatus, quotetion, invoice } = req.body;
     const schemaData = { orderName,vendorId, totalCost, totalPaid, totalPending, deliveryDate, orderStatus, quotetion, invoice };
@@ -42,7 +41,6 @@ exports.ReadVendorsOrder = asyncHandler(async (req, res) => {
    
     try {
         if(!id){
-            console.log('vendor id ==>',id)
             throw new ErrorResponse("please Provide Valide Vendor Id", 400);
         }
         const data = await modelName.find({ ...filter, ...filterDate, vendorId: id }).select(select?.split(",")).populate(populate?.split(",").map((item) => ({ path: item })));

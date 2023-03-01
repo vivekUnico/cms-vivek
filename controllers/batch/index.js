@@ -54,7 +54,6 @@ exports.GetAllBatch = asyncHandler(async (req, res) => {
         if (batch_id) {
             filter['batch_id'] = { '$regex': batch_id };
         }
-        console.log("this is our", filter);
         const data = await Batch.find({ ...filter }).populate(populate?.split(",").map((item) => ({ path: item })))
             .sort({ "createdAt": -1 }).skip((parseInt(req.query.pageno) - 1) * parseInt(req.query.limit)).limit(parseInt(req.query.limit))
         return res.status(200).json({ success: true, data });
@@ -82,7 +81,6 @@ exports.GetSingleBatch = asyncHandler(async (req, res) => {
 //Create Single Batch
 exports.CreateBatch = asyncHandler(async (req, res) => {
     try {
-        console.log(req.body);
         const { name, center, courses, description, batch_id, batch_date, academic_year } = req.body;
         let validation = await validationCheck({ name, center, courses, description, batch_id, batch_date, academic_year });
         if (!validation.status) {

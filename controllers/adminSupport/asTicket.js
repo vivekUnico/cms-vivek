@@ -27,7 +27,6 @@ exports.CreateTicket = asyncHandler(async (req, res) => {
 })
 
 exports.ReadTicket = asyncHandler(async (req, res) => {
-    console.log(req.query);
     const { priority, status, createdon, populate } = req.query;
     const filter = {};
     for (let key in req.query) {

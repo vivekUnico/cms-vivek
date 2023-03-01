@@ -26,7 +26,6 @@ exports.CreatePhysicalMaterials = asyncHandler(async (req, res) => {
 
 exports.ReadPhysicalMaterials = asyncHandler(async (req, res) => {
     const { select, populate, page, limit } = req.query;
-    console.log("i am called........");
     const filter = {}
     for (let key in req.query) {
         if (key == "populate" || key == "limit" || key == "pageno")

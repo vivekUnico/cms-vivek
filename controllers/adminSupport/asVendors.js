@@ -9,7 +9,6 @@ const Vendor = require("../../models/adminSupport/asVendors");
 let modelName = Vendor;
 
 exports.CreateVendors = asyncHandler(async (req, res) => {
-    console.log('v')
     const { vendorName, kpc, email, phone, websiteURL, typeOfVendor, RegisteredOn } = req.body;
     const schemaData = { vendorName, kpc, email, phone, websiteURL, typeOfVendor, RegisteredOn };
     let validation = validationCheck(schemaData);
@@ -26,7 +25,6 @@ exports.CreateVendors = asyncHandler(async (req, res) => {
 })
 
 exports.ReadVendors = asyncHandler(async (req, res) => {
-    console.log("i am in read vendors");
     const filter = {}
     for (const key in req.query) {
         if (key !== 'limit' && key !== 'pageno') {

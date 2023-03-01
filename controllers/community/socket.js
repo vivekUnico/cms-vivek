@@ -5,13 +5,11 @@ const Messages = require('../../models/community/messages');
 
 module.exports = (io) => {
     io.on('connection', (socket) => {
-        console.log('Connection Established');
         /*
          * Join a community chat room
          */
         socket.on('join-room', (data) => {
             const { roomId, token } = data;
-            console.log('join room')
             const user = validateUser(token);
             //validation
             if (!user.data.userid && !roomId) return;

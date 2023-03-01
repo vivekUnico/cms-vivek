@@ -26,7 +26,6 @@ exports.CreateContact = asyncHandler(async (req, res) => {
 
 
 exports.GetAllContacts = asyncHandler(async (req, res) => {
-    console.log('contact get')
     let { select, populate, name, createdAt } = req.query;
     const filter = {};
     for (let key in req.query) {
