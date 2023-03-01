@@ -4,7 +4,7 @@ const router = express.Router();
 const multer = require("multer");
 const storage = multer.diskStorage({});
 const upload = multer({ storage });
-const { getCloudinaryUrlBymulter } = require("./utils/cloudinary");
+const { getCloudinaryUrlBymulter } = require("../../utils/cloudinary");
 
 
 router.post("/", async (req, res) => {

@@ -12,7 +12,6 @@ const { EmailNoteficationForLeadAndEnquiry, AssignToEmailNotefication } = requir
 const { parseISO, sub, add } = require('date-fns');
 
 const { PermissionAuthenctication } = require('../../middleware/apiAuth');
-// Get LeadAndEnquiry by filter
 exports.GetLeadAndEnquiryByFilter = asyncHandler(async (req, res) => {
   try {
     let str1 = (req.query.type == "lead") ? "leads_filter" : "enquiry_filter";
@@ -29,6 +28,8 @@ exports.GetLeadAndEnquiryByFilter = asyncHandler(async (req, res) => {
         (req.query[key].split(',')).map(val => {
           Arr.push({ courses: { $in: val } })
         });
+      } else if (key == "created_by") {
+        temp.push({ [key]: ObjectId(req.query[key]) });
       } else {
         if (key == "name" || key == "mobile" || key == "last_followup.comment") {
           temp.push({ [key]: { $regex: req.query[key] } });
