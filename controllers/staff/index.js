@@ -144,15 +144,14 @@ exports.UpdateStaff = asyncHandler(async (req, res) => {
         };
 
         let oldStaff = await findUniqueData(Staff, { _id: id });
-
+        let checkLoginId = await findUniqueData(Staff, { loginId });
         if (oldStaff.email != email) {
             let checkEmail = await findUniqueData(Staff, { email });
             if (checkEmail) throw new ErrorResponse(`email already exist`, 400);
         } else if (oldStaff.staffCode != staffCode) {
             let checkStaffCode = await findUniqueData(Staff, { staffCode });
             if (checkStaffCode) throw new ErrorResponse(`staffCode already exist`, 400);
-        } else if (oldStaff.oldStaff != checkLoginId) {
-            let checkLoginId = await findUniqueData(Staff, { loginId });
+        } else if (oldStaff.loginId != loginId) {
             if (checkLoginId) throw new ErrorResponse(`loginId already exist`, 400);
         }
 
