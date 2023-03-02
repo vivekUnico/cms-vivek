@@ -8,7 +8,6 @@ const { parseISO, sub, add } = require('date-fns');
 const Feedback = require('../../models/feedback.js');
 const Student = require('../../models/student/index.js');
 const Attendance = require("../../models/attendance");
-const { getCloudinaryUrl } = require('../../utils/cloudinary.js');
 
 exports.CreateSubjectTimeTable = asyncHandler(async (req, res) => {
 	try {
