@@ -48,8 +48,11 @@ exports.GetFollowupByFilter = asyncHandler(async (req, res) => {
 			{
 				$lookup: {
 					from: "staffs",
-					localField: "followup_list.followup_by",
-					foreignField: "_id",
+					let : { "staffId" : "$followup_list.followup_by" },
+					pipeline: [
+						{ $match: { $expr: { $eq: ["$_id", "$$staffId"] } } },
+						{ $project: { _id: 1, first_name: 1, last_name : 1 } }
+					],
 					as: "followup_list.followup_by"
 				}
 			},
@@ -57,8 +60,11 @@ exports.GetFollowupByFilter = asyncHandler(async (req, res) => {
 			{
 				$lookup: {
 					from: "lead-and-enquiries",
-					localField: "connection_id",
-					foreignField: "_id",
+					let : { "connectionId" : "$connection_id" },
+					pipeline: [
+						{ $match: { $expr: { $eq: ["$_id", "$$connectionId"] } } },
+						{ $project: { _id: 1, name: 1, courses : 1 } }
+					],
 					as: "connection_id"
 				}
 			},

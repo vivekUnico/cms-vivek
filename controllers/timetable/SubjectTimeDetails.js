@@ -81,48 +81,66 @@ exports.GetAllSubjectTimeTable = asyncHandler(async (req, res) => {
 			{
 				$lookup: {
 					from: "centers",
-					localField: "center",
-					foreignField: "_id",
+					let : { center: "$center" },
+					pipeline: [
+						{ $match: { $expr: { $eq: ["$_id", "$$center"] } } },
+						{ $project: { name: 1, _id : 1 } }
+					],
 					as: "center"
 				}
 			},
 			{
 				$lookup: {
 					from: "batches",
-					localField: "batch",
-					foreignField: "_id",
+					let : { batch: "$batch" },
+					pipeline: [
+						{ $match: { $expr: { $eq: ["$_id", "$$batch"] } } },
+						{ $project: { name: 1, _id : 1, courses : 1, academic_year : 1 } }
+					],
 					as: "batch"
 				}
 			},
 			{
 				$lookup: {
 					from: "subjects",
-					localField: "subject",
-					foreignField: "_id",
+					let : { subject: "$subject" },
+					pipeline: [
+						{ $match: { $expr: { $eq: ["$_id", "$$subject"] } } },
+						{ $project: { name: 1, _id : 1, master_id : 1, topics : 1 } }
+					],
 					as: "subject"
 				}
 			},
 			{
 				$lookup: {
 					from: "staffs",
-					localField: "teacher",
-					foreignField: "_id",
+					let : { teacher: "$teacher" },
+					pipeline: [
+						{ $match: { $expr: { $eq: ["$_id", "$$teacher"] } } },
+						{ $project: { _id: 1, first_name: 1, last_name : 1 } }
+					],
 					as: "teacher"
 				}
 			},
 			{
 				$lookup: {
 					from: "subjects",
-					localField: "actual_subject",
-					foreignField: "_id",
+					let : { actual_subject: "$actual_subject" },
+					pipeline: [
+						{ $match: { $expr: { $eq: ["$_id", "$$actual_subject"] } } },
+						{ $project: {_id : 1, name : 1 } }
+					],
 					as: "actual_subject"
 				}
 			},
 			{
 				$lookup: {
 					from: "staffs",
-					localField: "actual_teacher",
-					foreignField: "_id",
+					let : { actual_teacher: "$actual_teacher" },
+					pipeline: [
+						{ $match: { $expr: { $eq: ["$_id", "$$actual_teacher"] } } },
+						{ $project: {_id : 1 } }
+					],
 					as: "actual_teacher"
 				}
 			},
