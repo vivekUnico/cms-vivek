@@ -1,10 +1,12 @@
 const express = require("express");
 const router = express.Router();
 
-const { GetAllStaff, CreateStaff, GetSingleStaff, DeleteStaff, UpdateStaff,loginUser,forgetPassword,forgetPasswordWithToken ,verifyToken} = require("../../../controllers/staff");
+const { GetAllStaff, CreateStaff, GetSingleStaff, DeleteStaff, UpdateStaff,loginUser,forgetPassword, getTeachersBySubject,
+  forgetPasswordWithToken ,verifyToken} = require("../../../controllers/staff");
 const { ApiAuthentication } = require("../../../middleware/apiAuth");
 
 router.route('/').get(GetAllStaff)
+router.route('/bysubject').get(getTeachersBySubject)
 router.route('/').post(CreateStaff)
 
 router.route('/:id').get(GetSingleStaff);

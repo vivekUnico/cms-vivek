@@ -21,7 +21,7 @@
 
 const Config = require("../config/db");
 // const staff = require("../models/staff");
-// const course = require("../models/course");
+const course = require("../models/course");
 // const subjectTimeTable = require('../models/timetable/SubjectTimeDetails.js')
 const LeadAndEnquiry = require("../models/leadAndEnquiry");
 // const { default: axios } = require("axios");
@@ -30,6 +30,7 @@ const LeadAndEnquiry = require("../models/leadAndEnquiry");
 const Assignment = require("../models/testsAssignment/assignment.js");
 const { ObjectId } = require("mongodb");
 Config().then( async (result) => {
-   await Assignment.updateMany({}, { $set: { "center": new ObjectId("63298dd027e32b6c45239f1d") } })
+   await course.updateMany({ course_id : "asd6a5d" }, 
+   { $set : { year_version : [ "master", "AY22-23" ] } });
 }).catch(err => console.log("got an error", err));
 

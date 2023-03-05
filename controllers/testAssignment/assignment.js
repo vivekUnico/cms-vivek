@@ -21,7 +21,7 @@ exports.createAssignment = asyncHandler(async (req, res) => {
 
 exports.getAllAssignment = asyncHandler(async (req, res) => {
 	try {
-		let filter = [{}];
+		let filter = [];
 		for (let key in req.query) {
 			if (key == "pageno" || key == "limit") 
 				continue;
@@ -29,6 +29,7 @@ exports.getAllAssignment = asyncHandler(async (req, res) => {
 				filter.push({ [key]: new ObjectId(req.query[key]) })
 			} else filter.push({ [key]: { $regex : req.query[key]} })
 		}
+		if (filter.length == 0) filter.push({});
 		const result = await Assignment.aggregate([
 			{ $match: { $and: filter } },
 			{
