@@ -31,7 +31,10 @@ const ticketScheme = new mongoose.Schema(
         },
         description: {
             type: String,
-        }
+        },
+        attachment: {
+            type: String,
+        },
     },
     { timestamps: true }
 );

@@ -36,6 +36,10 @@ const infastructureScheme = new mongoose.Schema(
         },
         invoice: {
             type: String,
+            // required: [true, "Please provide terms & condition"]
+        },
+        description : {
+            type: String,
         }
     },
     { timestamps: true }

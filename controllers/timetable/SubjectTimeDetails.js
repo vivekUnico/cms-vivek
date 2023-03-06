@@ -127,7 +127,7 @@ exports.GetAllSubjectTimeTable = asyncHandler(async (req, res) => {
 					let : { actual_subject: "$actual_subject" },
 					pipeline: [
 						{ $match: { $expr: { $eq: ["$_id", "$$actual_subject"] } } },
-						{ $project: {_id : 1, name : 1 } }
+						{ $project: {_id : 1, name : 1, topics : 1 } }
 					],
 					as: "actual_subject"
 				}
@@ -138,7 +138,7 @@ exports.GetAllSubjectTimeTable = asyncHandler(async (req, res) => {
 					let : { actual_teacher: "$actual_teacher" },
 					pipeline: [
 						{ $match: { $expr: { $eq: ["$_id", "$$actual_teacher"] } } },
-						{ $project: {_id : 1 } }
+						{ $project: {_id : 1, first_name : 1 } }
 					],
 					as: "actual_teacher"
 				}

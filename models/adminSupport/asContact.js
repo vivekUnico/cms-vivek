@@ -31,6 +31,7 @@ const contactScheme = new mongoose.Schema(
             required: [true, "Please provide comment"],
             trim: true,
         },
+        category : String,
     },
     { timestamps: true }
 );

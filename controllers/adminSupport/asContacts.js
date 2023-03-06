@@ -17,7 +17,7 @@ exports.CreateContact = asyncHandler(async (req, res) => {
         throw new ErrorResponse(`Please provide a ${validation?.errorAt}`, 400);
     }
     try {
-        const data = await modelName.create(schemaData);
+        const data = await modelName.create(req.body);
         return res.status(201).json({ success: true, data });
     } catch (error) {
         throw new ErrorResponse(`Server error :${error}`, 400);
