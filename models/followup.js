@@ -12,6 +12,10 @@ const followupScheme = new mongoose.Schema(
             type: mongoose.Schema.Types.ObjectId,
             ref: "lead-and-enquiry"
         },
+        created_by:  {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'staff'
+        },
         followup_list: [
             {
                 date: {
