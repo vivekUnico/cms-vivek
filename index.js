@@ -10,7 +10,6 @@ const cron = require('node-cron');
 
 cron.schedule('0 */4 * * *', async () => {
   await Authorize();
-  console.log('fatching lead from email');
 });
 
 // cron.schedule('*/30 * * * * *', async () => {

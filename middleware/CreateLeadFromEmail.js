@@ -103,7 +103,6 @@ async function listLabels(auth) {
         isLead : true,
         currentStatus: "lead",
         isEnquiry : false,
-
       }
       for (let key in obj) {
         if (!allList.includes(key)) return;
@@ -126,7 +125,9 @@ async function listLabels(auth) {
       }
       console.log("new lead will be created", apiObj);
       if (!apiObj["courses"] || !apiObj["date"] || !apiObj["name"] || !apiObj["mobile"]) return ;
-      let result = await LeadAndEnquiry.create(apiObj).catch(err => console.log(err));
+      let result = await LeadAndEnquiry.create(apiObj).then(result => {
+        console.log("lead created", result);
+      }).catch(err => console.log(err));
       console.log("created, lead", result);
 		}
   }

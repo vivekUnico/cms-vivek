@@ -43,12 +43,10 @@ const feedbackScheme = new mongoose.Schema(
 		},
 		created_staff: {
 			type: mongoose.Schema.Types.ObjectId,
-			unique: true,
 			ref: "staff"
 		},
 		created_student: {
 			type: mongoose.Schema.Types.ObjectId,
-			unique: true,
 			ref: "student"
 		},
 		subjectTimeDetails: {

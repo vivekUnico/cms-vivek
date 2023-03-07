@@ -8,11 +8,6 @@ const followupScheme = new mongoose.Schema(
             enum: ["lead","enquiry"],
             required: [true, "Please provide followup_type"],
         },
-        created_by:  {
-            required: [true, "Please provide created_by"],
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'staff'
-        },
         connection_id: {
             type: mongoose.Schema.Types.ObjectId,
             ref: "lead-and-enquiry"
@@ -25,6 +20,10 @@ const followupScheme = new mongoose.Schema(
                 },
                 followup_by:  {
                     required: [true, "Please provide followup_by"],
+                    type: mongoose.Schema.Types.ObjectId,
+                    ref: 'staff'
+                },
+                created_by:  {
                     type: mongoose.Schema.Types.ObjectId,
                     ref: 'staff'
                 },

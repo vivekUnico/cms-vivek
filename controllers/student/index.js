@@ -22,6 +22,7 @@ const ObjectId = require('mongoose').Types.ObjectId;
 const { v4: uuidv4 } = require('uuid');
 const { log } = require('console');
 const Courses = require('../../models/course');
+const SubjectTimeDetail = require('../../models/timetable/SubjectTimeDetails.js');
 //Get All Student
 exports.GetAllStudent = asyncHandler(async (req, res) => {
     let { populate, select, good } = req.query;

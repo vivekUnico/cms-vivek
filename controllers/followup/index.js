@@ -17,14 +17,14 @@ exports.GetFollowupByFilter = asyncHandler(async (req, res) => {
 		let str1 = req.query["followup_type"] == "lead" ?
 			"all_followups_lead" : "all_followups_enquiry";
 		let permission = await PermissionAuthenctication(req.headers, str1);
-		if ((!permission.success) && req.query["created_by"] == undefined) {
+		if ((!permission.success)) {
 			throw new ErrorResponse(`You are not authorized to access this route`, 401);
 		}
 		let temp = [], Arr = [], Arr1 = [];
 		for (let key in req.query) {
 			if (key.includes("pageno") || key == "limit")
 				continue;
-			if ((key == "created_by" || key == "followup_list.followup_by._id"))
+			if ((key == "followup_list.created_by" || key == "followup_list.followup_by._id"))
 				Arr1.push({ [key]: ObjectId(req.query[key]) });
 			else if (key.includes("courses")) {
 				(req.query[key].split(',')).map(val => {
@@ -39,9 +39,10 @@ exports.GetFollowupByFilter = asyncHandler(async (req, res) => {
 		}
 		if (Arr.length == 0) Arr.push({});
 		if (Arr1.length == 0) Arr1.push({});
+		console.log(Arr1, req.query);
 		let curr = new Date();
     curr.setHours(0, 0, 0, 0);
-    curr = sub(curr, { days: "1" });
+    curr = sub(curr, { days: "30" });
 		let data = await Followup.aggregate([
 			{ $addFields: { "followup_list_length": { $size: "$followup_list" } } },
 			{ $unwind: { path: "$followup_list", preserveNullAndEmptyArrays: true } },
@@ -192,14 +193,17 @@ exports.GetSingleFollowup = asyncHandler(async (req, res) => {
 
 //Create Single Followup, Update Single Followup
 exports.CreateFollowup = asyncHandler(async (req, res) => {
+	console.log("i am createorupdate");
 	try {
-		const { followup_type, connection_id, created_by, followup_list, followupName } = req.body;
-		let validation = await validationCheck({ followup_type, connection_id, created_by, followup_list });
+		const { followup_type, connection_id, followup_list, followupName } = req.body;
+		let validation = await validationCheck({ followup_type, connection_id, followup_list });
+
 		let str1 = (followup_type == "lead") ? "create_followup_lead" : "create_followup_enquiry";
 		let permission = await PermissionAuthenctication(req.headers, str1);
 		if (!permission.success) {
 			throw new ErrorResponse(`You are not authorized to access this route`, 401);
 		}
+
 		if (!validation.status) {
 			throw new ErrorResponse(`Please provide a ${validation?.errorAt}`, 400);
 		} else if (!followup_list) {

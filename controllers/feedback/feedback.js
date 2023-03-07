@@ -79,37 +79,79 @@ const Feedback = require("../../models/feedback");
 //         throw new ErrorResponse(`Server error :${error}`, 400);
 //     }
 // });
+let ObjectId = require('mongoose').Types.ObjectId;
 exports.CreateFeedback = asyncHandler(async (req, res) => {
-    try {
-        let result = await Feedback.create(req.body);   
-        return res.status(201).json({ success: true, data: result });
-    } catch (error) {
-        throw new ErrorResponse(`Server error :${error?.message}`, 400);
-    }
+	try {
+		console.log(req.body);
+		let result = await Feedback.create(req.body);
+		return res.status(201).json({ success: true, data: result });
+	} catch (error) {
+		throw new ErrorResponse(`Server error :${error?.message}`, 400);
+	}
 });
 
 exports.UpdateFeedback = asyncHandler(async (req, res) => {
-    try {
-        const { id } = req.params;
-        if (!id) throw new ErrorResponse(`Please provide a Feedback id `, 400);
+	try {
+		const { id } = req.params;
+		if (!id) throw new ErrorResponse(`Please provide a Feedback id `, 400);
 
-        const feedbackData = await Feedback.findOneAndUpdate({ _id: id }, {
-            $set: { ...req.body } }, { new: true });
-        if (!feedbackData) throw new ErrorResponse(`Feedback not found`, 400);
-        return res.status(201).json({ success: true, data: feedbackData });
-    } catch (error) {
-        throw new ErrorResponse(`Server error :${error}`, 400);
-    }
+		const feedbackData = await Feedback.findOneAndUpdate({ _id: id }, {
+			$set: { ...req.body }
+		}, { new: true });
+		if (!feedbackData) throw new ErrorResponse(`Feedback not found`, 400);
+		return res.status(201).json({ success: true, data: feedbackData });
+	} catch (error) {
+		throw new ErrorResponse(`Server error :${error}`, 400);
+	}
+});
+
+exports.getFeedbackForStudent = asyncHandler(async (req, res) => {
+	try {
+		let { studentId, pageno, limit } = req.query;
+		let result = await Feedback.aggregate([
+			{ $match: { created_student: ObjectId(studentId) } },
+			{
+				$lookup: {
+					from: "subjecttimedetails",
+					let: { subjectTimeDetails: "$subjectTimeDetails" },
+					pipeline: [
+						{ $match: { $expr: { $eq: ["$_id", "$$subjectTimeDetails"] } } },
+						{ $project: { start_time: 1, end_time: 1, subject: 1, _id: 1 } },
+					],
+					as: "subjectTimeDetails"
+				}
+			},
+			{ $unwind: { path: "$subjectTimeDetails", preserveNullAndEmptyArrays: false } },
+			{
+				$lookup: {
+					from: "subjects",
+					let: { subject: "$subjectTimeDetails.subject" },
+					pipeline: [
+						{ $match: { $expr: { $eq: ["$_id", "$$subject"] } } },
+						{ $project: { name: 1, _id: 1, master_id: 1 } },
+					],
+					as: "subjectTimeDetails.subject"
+				}
+			},
+			{ $unwind: { path: "$subjectTimeDetails.subject", preserveNullAndEmptyArrays: true } },
+			{ $sort: { createdAt: -1 } },
+			{ $skip: (parseInt(pageno) - 1) * parseInt(limit) },
+			{ $limit: parseInt(limit) },
+		]);
+		return res.status(201).json({ success: true, data: result });
+	} catch (error) {
+		throw new ErrorResponse(`Server error :${error}`, 400);
+	}
 });
 
 exports.getFeedback = asyncHandler(async (req, res) => {
-    try {
-        let { subjectTimeDetails, pageno, limit, populate } = req.query;
-        let result = await Feedback.find({ subjectTimeDetails })
-            .populate(populate?.split(",").map((item) => ({ path: item })))
-            .sort({ createdAt: -1 }).skip((parseInt(pageno) - 1) * parseInt(limit)).limit(parseInt(limit));
-        return res.status(201).json({ success: true, data: result });
-    } catch (error) {
-        throw new ErrorResponse(`Server error :${error}`, 400);
-    }
+	try {
+		let { subjectTimeDetails, pageno, limit, populate } = req.query;
+		let result = await Feedback.find({ subjectTimeDetails })
+			.populate(populate?.split(",").map((item) => ({ path: item })))
+			.sort({ createdAt: -1 }).skip((parseInt(pageno) - 1) * parseInt(limit)).limit(parseInt(limit));
+		return res.status(201).json({ success: true, data: result });
+	} catch (error) {
+		throw new ErrorResponse(`Server error :${error}`, 400);
+	}
 });
