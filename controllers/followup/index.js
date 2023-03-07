@@ -228,7 +228,7 @@ exports.CreateFollowup = asyncHandler(async (req, res) => {
 		}
 		if (followup_list?.length && followup_list[followup_list?.length - 1]["addedTime"] == undefined)
 			followup_list[followup_list?.length - 1]["addedTime"] = new Date().toISOString();
-		let schemaData = { followup_type, connection_id, created_by, followup_list };
+		let schemaData = { followup_type, connection_id, followup_list };
 		let checkFollowupID = await Followup.findOne({ connection_id });
 		if (checkFollowupID) {
 			checkFollowupID["followup_list"] = followup_list;
