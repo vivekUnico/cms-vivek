@@ -39,7 +39,6 @@ exports.GetFollowupByFilter = asyncHandler(async (req, res) => {
 		}
 		if (Arr.length == 0) Arr.push({});
 		if (Arr1.length == 0) Arr1.push({});
-		console.log(Arr1, req.query);
 		let curr = new Date();
     curr.setHours(0, 0, 0, 0);
     curr = sub(curr, { days: "30" });
@@ -193,7 +192,6 @@ exports.GetSingleFollowup = asyncHandler(async (req, res) => {
 
 //Create Single Followup, Update Single Followup
 exports.CreateFollowup = asyncHandler(async (req, res) => {
-	console.log("i am createorupdate");
 	try {
 		const { followup_type, connection_id, followup_list, followupName } = req.body;
 		let validation = await validationCheck({ followup_type, connection_id, followup_list });

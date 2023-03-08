@@ -55,6 +55,7 @@ async function saveCredentials(client) {
  */
 async function Authorize() {
   let client = await loadSavedCredentialsIfExist();
+  console.log("client", client);
   if (client) {
     return listLabels(client);
   }
@@ -79,8 +80,11 @@ async function Authorize() {
 async function listLabels(auth) {
   const gmail = google.gmail({version: 'v1', auth}), temp = new Date();
 	const result = await gmail.users.messages.list({
-		userId: 'me',
-	});
+    userId: 'me',
+	}).catch((err) => {
+    console.log("err", err);
+  });
+  console.log("auth", result.data.messages);
 	for (let message of result.data.messages) {
     const messageData = await gmail.users.messages.get({userId: 'me', id: message.id, format : 'full'});
     const parts = messageData.data.payload.parts;

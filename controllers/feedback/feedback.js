@@ -82,7 +82,6 @@ const Feedback = require("../../models/feedback");
 let ObjectId = require('mongoose').Types.ObjectId;
 exports.CreateFeedback = asyncHandler(async (req, res) => {
 	try {
-		console.log(req.body);
 		let result = await Feedback.create(req.body);
 		return res.status(201).json({ success: true, data: result });
 	} catch (error) {

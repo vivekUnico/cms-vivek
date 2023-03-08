@@ -199,7 +199,6 @@ exports.GetAllSubjectTimeTable = asyncHandler(async (req, res) => {
 				})
 			}
 		}
-		console.log(req.query, data);
 		return res.status(200).json({ success: true, data, avgFeed: data1, data2 });
 	} catch (error) {
 		throw new ErrorResponse(`Server error :${error}`, 500);
