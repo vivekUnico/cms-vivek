@@ -12,10 +12,10 @@ const cron = require('node-cron');
 //   await Authorize();
 // });
 
-cron.schedule('*/30 * * * * *', async () => {
-  console.log('fetching lead from email');
-  await Authorize();
-});
+// cron.schedule('*/30 * * * * *', async () => {
+//   console.log('fetching lead from email');
+//   await Authorize();
+// });
 
 /*
 * ###################################### For socket io implementation ######################################

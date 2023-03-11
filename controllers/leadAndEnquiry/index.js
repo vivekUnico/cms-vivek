@@ -60,10 +60,20 @@ exports.GetLeadAndEnquiryByFilter = asyncHandler(async (req, res) => {
         let: { assign_to: "$assign_to" },
         pipeline: [
           { $match: { $expr: { $in: ["$_id", [ "$$assign_to" ]] } } },
-          { $project: { _id: 1, first_name: 1, first_name : 1 } }
+          { $project: { _id: 1, first_name: 1 } }
         ],
         as: "assign_to"
       }},
+      // { $lookup : {
+      //   from: "staffs",
+      //   let: { created_by: "$created_by" },
+      //   pipeline: [
+      //     { $match: { $expr: { $in: ["$_id", [ "$$created_by" ]] } } },
+      //     { $project: { _id: 1, first_name: 1 } }
+      //   ],
+      //   as: "created_by"
+      // }},
+      // { $unwind: { path: "$created_by", preserveNullAndEmptyArrays: true } },
       { $unwind: { path: "$assign_to", preserveNullAndEmptyArrays: true } },
       {
         $lookup: {
@@ -257,8 +267,10 @@ exports.GetSingleLeadAndEnquiry = asyncHandler(async (req, res) => {
     const { id } = req.params;
     if (!id) throw new ErrorResponse(`Please provide a LeadAndEnquiry id `, 400);
 
+    // partially populate created_by
     let data = await LeadAndEnquiry.findOne({ _id: id })
-      .populate(populate?.split(",").map((item) => ({ path: item })));
+      .populate(populate?.split(",").map((item) => ({ path: item })))
+      .populate({ path: "created_by", select: "first_name" });
     let str1 = (data.isLead) ? "view_lead" : "view_enquiry";
     let permission = await PermissionAuthenctication(req.headers, str1);
     if (!permission.success) {
