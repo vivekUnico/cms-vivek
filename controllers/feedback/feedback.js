@@ -105,17 +105,25 @@ exports.UpdateFeedback = asyncHandler(async (req, res) => {
 });
 
 exports.getFeedbackForStudent = asyncHandler(async (req, res) => {
+	console.log(req.query);
 	try {
-		let { studentId, pageno, limit } = req.query;
+		let { studentId, pageno, limit, created_for_staff } = req.query;
+		let Filter = {};
+		if (created_for_staff) {
+			Filter['created_for_staff'] = ObjectId(created_for_staff);
+		}
+		if (studentId) {
+			Filter['created_student'] = ObjectId(studentId);
+		}
 		let result = await Feedback.aggregate([
-			{ $match: { created_student: ObjectId(studentId) } },
+			{ $match: { ...Filter } },
 			{
 				$lookup: {
 					from: "subjecttimedetails",
 					let: { subjectTimeDetails: "$subjectTimeDetails" },
 					pipeline: [
 						{ $match: { $expr: { $eq: ["$_id", "$$subjectTimeDetails"] } } },
-						{ $project: { start_time: 1, end_time: 1, subject: 1, _id: 1 } },
+						{ $project: { start_time: 1, end_time: 1, actual_subject: 1, _id: 1 } },
 					],
 					as: "subjectTimeDetails"
 				}
@@ -124,7 +132,7 @@ exports.getFeedbackForStudent = asyncHandler(async (req, res) => {
 			{
 				$lookup: {
 					from: "subjects",
-					let: { subject: "$subjectTimeDetails.subject" },
+					let: { subject: "$subjectTimeDetails.actual_subject" },
 					pipeline: [
 						{ $match: { $expr: { $eq: ["$_id", "$$subject"] } } },
 						{ $project: { name: 1, _id: 1, master_id: 1 } },

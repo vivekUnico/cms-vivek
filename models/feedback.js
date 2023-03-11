@@ -49,6 +49,10 @@ const feedbackScheme = new mongoose.Schema(
 			type: mongoose.Schema.Types.ObjectId,
 			ref: "student"
 		},
+		created_for_staff: {
+			type: mongoose.Schema.Types.ObjectId,
+			ref: "staff"
+		},
 		subjectTimeDetails: {
 			type: mongoose.Schema.Types.ObjectId,
 			ref: "subjectTimeDetail"
