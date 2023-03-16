@@ -9,17 +9,17 @@ const Course = require('../../models/course.js')
 const Center = require('../../models/center.js')
 
 
-const CLIENT_ID = precess.env.CLIENT_ID_GOOGLE;
-const CLIENT_SECRET = precess.env.CLIENT_SECRET_GOOGLE;
-const REDIRECT_URI = precess.env.REDIRECT_URI_GOOGLE;
-const REFRESH_TOKEN = precess.env.REFRESH_TOKEN_GOOGLE;
+const CLIENT_ID = process.env.CLIENT_ID_GOOGLE;
+const CLIENT_SECRET = process.env.CLIENT_SECRET_GOOGLE;
+const REDIRECT_URI = process.env.REDIRECT_URI_GOOGLE;
+const REFRESH_TOKEN = process.env.REFRESH_TOKEN_GOOGLE;
 
 const oAuth2Client = new OAuth2Client(CLIENT_ID, CLIENT_SECRET, REDIRECT_URI);
 
 router.route("/").post(async (req, res) => {
   try {
     oAuth2Client.setCredentials({ refresh_token: REFRESH_TOKEN });
-    oAuth2Client.refreshAccessToken();
+    await oAuth2Client.refreshAccessToken();
     const gmail = google.gmail({ version: 'v1', auth: oAuth2Client });
     const res = await gmail.users.messages.list({ userId: 'me', maxResults: 1 });
     let { id } = res.data.messages[0];
@@ -67,7 +67,7 @@ router.route("/").post(async (req, res) => {
         date : new Date(),
         addedTime : new Date(),
         comment : decodedBody['comment'] || "",
-        status : decodedBody['comment'] || "HOT",
+        status : decodedBody['status'] || "HOT",
       }]
     })
   } catch (error) {
