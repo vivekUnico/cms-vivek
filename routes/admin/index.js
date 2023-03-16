@@ -1,7 +1,6 @@
 const express = require("express");
 const router = express.Router();
 
-//routes
 const center = require("./center");
 const batch = require("./batch");
 
@@ -18,6 +17,7 @@ const emi = require("./emi");
 
 
 const leadAndEnquiry = require("./leadAndEnquiry/leadAndEnquiry");
+const LeadAutoMation = require("./LeadAutoMation");
 const followup = require("./followup");
 
 const studymaterial = require("./studymaterial");
@@ -74,6 +74,7 @@ router.use('/staff/leaves', leavesRouter);
 router.use('/admin-support', adminSupportRouter);
 router.use('/community', communityRouter);
 router.use('/permission', permissionRouter);
+router.use('/lead-automation', LeadAutoMation);
 
 
 module.exports = router;
