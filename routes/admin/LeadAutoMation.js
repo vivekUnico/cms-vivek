@@ -59,6 +59,8 @@ router.route("/").post(async (req, res) => {
         decodedBody['center'] = temp._id;
       }
     }
+    if (!decodedBody['mobile'] || !decodedBody['name'] || !decodedBody['data'] )
+      return res.status(200).json({ success: true });
     const result = await LeadAndEnquiry.create(decodedBody);
     await Followup.create({
       followup_type : "lead",
@@ -70,6 +72,7 @@ router.route("/").post(async (req, res) => {
         status : decodedBody['status'] || "HOT",
       }]
     })
+    return res.status(200).json({ success: true });
   } catch (error) {
     return res.status(500).json({ success: false, error });
   }
