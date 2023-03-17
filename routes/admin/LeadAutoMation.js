@@ -32,7 +32,7 @@ router.route("/").post(async (req, res) => {
     }, []);
     const body = parts?.filter(part => part.mimeType === 'text/plain')[0]?.body?.data;
     if (!body) {
-      return res.status(500).json({ success: false, error: 'No body found' });
+      return res.status(200).json({ success: false, error: 'No body found' });
     }
     const decodedBody = Buffer.from(body, 'base64').toString().split('\n').reduce((acc, line) => {
       line = line.trim().split(':');
@@ -74,7 +74,7 @@ router.route("/").post(async (req, res) => {
     })
     return res.status(200).json({ success: true });
   } catch (error) {
-    return res.status(500).json({ success: false, error });
+    return res.status(200).json({ success: false, error });
   }
 });
 
