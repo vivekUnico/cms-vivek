@@ -21,7 +21,7 @@ exports.createAssignment = asyncHandler(async (req, res) => {
 
 exports.getAllAssignment = asyncHandler(async (req, res) => {
 	try {
-		let filter = [];
+		let filter = [], temp;
 		for (let key in req.query) {
 			if (key == "pageno" || key == "limit") 
 				continue;
@@ -74,6 +74,77 @@ exports.getAllAssignment = asyncHandler(async (req, res) => {
 		throw new ErrorResponse(`Server error :${error}`, 400);
 	}
 })
+
+exports.getAssignmentsByteacher = asyncHandler(async (req, res) => {
+	try {
+		let filter = [];
+		for (let key in req.query) {
+			if (key == "pageno" || key == "limit") 
+				continue;
+			if (key == 'subjectTimeDetail._id' || key == 'subject' || key == 'batch' || key == 'subjectTimeDetail.teacher') {
+				filter.push({ [key]: new ObjectId(req.query[key]) })
+			} else filter.push({ [key]: { $regex : req.query[key]} })
+		}
+		if (filter.length == 0) filter.push({});
+		const result = await Assignment.aggregate([
+			{
+				$lookup: {
+					from: "subjecttimedetails",
+					let : { subjectTimeDetail : "$subjectTimeDetail" },
+					pipeline: [
+						{ $match: { $expr: { $eq: ["$_id", "$$subjectTimeDetail"] } } },
+						{ $project: { start_time: 1, end_time: 1, subject: 1, _id: 1, teacher : 1 } },
+					],
+					as: "subjectTimeDetail",
+				},
+			},
+			{
+				$lookup: {
+					from: "subjects",
+					let : { subject : "$subject" },
+					pipeline: [
+						{ $match: { $expr: { $eq: ["$_id", "$$subject"] } } },
+						{ $project: { name: 1, _id: 1, topics : 1 } },
+					],
+					as: "subject",
+				},
+			},
+			{
+				$lookup: {
+					from: "batches",
+					let : { batch : "$batch" },
+					pipeline: [
+						{ $match: { $expr: { $eq: ["$_id", "$$batch"] } } },
+						{ $project: { name: 1, _id: 1 } },
+					],
+					as: "batch",
+				},
+			},
+			{
+				$lookup: {
+					from: "centers",
+					let : { center : "$center" },
+					pipeline: [
+						{ $match: { $expr: { $eq: ["$_id", "$$center"] } } },
+						{ $project: { name: 1, _id: 1 } },
+					],
+					as: "center",
+				},
+			},
+			{ $unwind: { path: "$subjectTimeDetail", preserveNullAndEmptyArrays: true } },
+			{ $unwind: { path: "$subject", preserveNullAndEmptyArrays: true } },
+			{ $unwind: { path: "$batch", preserveNullAndEmptyArrays: true } },
+			{ $unwind: { path: "$center", preserveNullAndEmptyArrays: true } },
+			{ $match: { $and: filter } },
+			{ $sort: { createdAt: -1 } },
+			{ $skip : (parseInt(req.query.pageno) - 1) * parseInt(req.query.limit) },
+      { $limit : parseInt(req.query.limit) },
+		]);
+		return res.status(200).json({ success: true, data: result });
+	} catch (error) {
+		throw new ErrorResponse(`Server error :${error}`, 400);
+	}
+});
 
 exports.getSingleAssignment = asyncHandler(async (req, res) => {
 	const { id } = req.params;

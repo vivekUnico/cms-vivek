@@ -23,7 +23,7 @@ const followupScheme = new mongoose.Schema(
                     required: [true,"Please provide followup date"]
                 },
                 followup_by:  {
-                    required: [true, "Please provide followup_by"],
+                    // required: [true, "Please provide followup_by"],
                     type: mongoose.Schema.Types.ObjectId,
                     ref: 'staff'
                 },

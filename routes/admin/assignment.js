@@ -3,10 +3,11 @@ const router = express.Router();
 
 // User pre login controller s
 const { createAssignment, deleteAssignment, getAllAssignment, getSingleAssignment, updateAssignment,
-    createAssignmentSubmit, getAllAssignmentSubmission
+    createAssignmentSubmit, getAllAssignmentSubmission, getAssignmentsByteacher
 
 } = require('../../controllers/testAssignment/assignment');
 
+router.route('/teacher').get(getAssignmentsByteacher);
 router.route('/').post(createAssignment);
 router.route('/').get(getAllAssignment);
 router.route('/:id').get(getSingleAssignment);
