@@ -23,6 +23,7 @@ const followup = require("./followup");
 const studymaterial = require("./studymaterial");
 
 const librarybook = require("./librarybook");
+const PayrollRouter = require("./payroll/payroll.js");
 
 const QuestionRouter = require("./testAssignement");
 const AssignmentRouter = require("./assignment");
@@ -57,6 +58,7 @@ router.use('/student-screening', studentScreening);
 router.use('/emi', emi);
 
 router.use('/studymaterial', studymaterial);
+router.use('/payroll', PayrollRouter);
 
 router.use('/library', librarybook);
 
