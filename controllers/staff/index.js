@@ -52,6 +52,19 @@ exports.getTeachersBySubject = asyncHandler(async (req, res) => {
 	}
 });
 
+exports.getSubjectByTeacher = asyncHandler(async (req, res) => {
+	try {
+		const { TeacherId } = req.query;
+		if (!TeacherId) {
+			throw new ErrorResponse(`Please provide a TeacherId `, 400);
+		}
+		const data = await Subject.find({ Teachers: { $in: [ObjectId(TeacherId)] } });
+		return res.status(200).json({ success: true, data });
+	} catch (error) {
+		throw new ErrorResponse(`Server error :${error}`, 400);
+	}
+});
+
 //Create Single Staff
 exports.CreateStaff = asyncHandler(async (req, res) => {
 	try {
