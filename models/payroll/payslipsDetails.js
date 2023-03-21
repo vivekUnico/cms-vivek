@@ -69,7 +69,7 @@ const paySlipScheme = new mongoose.Schema(
     },
     anyDeductions : { 
       type: Number,
-      default: 0,
+      default: 0,            
     }
   },
   { timestamps: true }
