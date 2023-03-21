@@ -33,7 +33,8 @@ const ticketScheme = new mongoose.Schema(
             type: String,
         },
         attachment: {
-            type: String,
+            type: Array,
+            default: []
         },
     },
     { timestamps: true }
