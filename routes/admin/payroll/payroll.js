@@ -5,7 +5,7 @@ const {
   createPayroll, getAllPayroll, createPaySlip, getAllPaySlips
 } = require('../../../controllers/payroll/index.js');
 
-router.route('/create').post(createPayroll);
+router.route('/create').put(createPayroll);
 router.route('/get').get(getAllPayroll);
 router.route('/createPaySlip').post(createPaySlip);
 router.route('/getPaySlip').get(getAllPaySlips);

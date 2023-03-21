@@ -7,9 +7,10 @@ const PaySlip = require('../../models/payroll/payslipsDetails.js');
 exports.createPayroll = asyncHandler(async (req, res, next) => {
   try {
     const { staffId } = req.body;
-    let result = Payroll.findOne({ staffId }), payrollData;
+    let result = await Payroll.findOne({ staffId }), payrollData;
     if (result) {
-      payrollData = await Payroll.updateOne({ staffId }, {
+      console.log("result", result);
+      payrollData = await Payroll.findOneAndUpdate({ staffId }, {
         $set: {
           ...req?.body,
         },
