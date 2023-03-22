@@ -68,7 +68,11 @@ exports.UpdateTicket = asyncHandler(async (req, res) => {
     // }
 
     try {
-        const data = await modelName.findOneAndUpdate({ _id: id }, { summary, reason, assignedTo, priority, status, description }, { returnOriginal: false });
+        const data = await modelName.findOneAndUpdate({ _id: id }, {
+            $set: {
+                ...req.body
+            }
+        }, { returnOriginal: false });
         return res.status(201).json({ success: true, data });
     } catch (error) {
         throw new ErrorResponse(`Server error :${error}`, 400);
