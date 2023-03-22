@@ -2,7 +2,17 @@ const mongoose = require("mongoose");
 const PermissionSchemma = new mongoose.Schema({
     roll_name : {
         type: String,
-        enum: ["admin", "manager", "teacher", "operations", "sales", "accountant", "student" , "markting"],
+        enum: ["admin", "manager", "teacher", "operations", "sales", "accountant", "student" , "marketing"],
+    },
+    derived : {
+        type: Boolean,
+        default: false
+    },
+    parents : {
+        type : [{
+            type : mongoose.Schema.Types.ObjectId,
+            ref : "Permission"
+        }],
     },
     create_followup_lead: {
         type: Boolean,

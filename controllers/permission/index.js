@@ -6,7 +6,8 @@ const { PermissionAuthenctication } = require('../../middleware/apiAuth.js');
 
 exports.GetAllRolls = asyncHandler(async (req, res, next) => {
     try {
-        const data = await Permission.find({});
+        const data = await Permission.find();
+        console.log(data.length, data);
         res.status(200).json({ success: true, data: data });
     } catch (error) {
         throw new ErrorResponse(`Server error :${error}`, 500);
