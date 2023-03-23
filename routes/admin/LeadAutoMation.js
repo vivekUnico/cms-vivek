@@ -17,10 +17,12 @@ const REFRESH_TOKEN = process.env.REFRESH_TOKEN_GOOGLE;
 const oAuth2Client = new OAuth2Client(CLIENT_ID, CLIENT_SECRET, REDIRECT_URI);
 
 router.route("/").post(async (req, res) => {
+  console.log("stage 1");
   try {
     oAuth2Client.setCredentials({ refresh_token: REFRESH_TOKEN });
     await oAuth2Client.refreshAccessToken();
     const gmail = google.gmail({ version: 'v1', auth: oAuth2Client });
+    console.log("stage 2");
     const res = await gmail.users.messages.list({ userId: 'me', maxResults: 1 });
     let { id } = res.data.messages[0];
     const response = await gmail.users.messages.get({ userId: 'me', id, });
@@ -30,6 +32,7 @@ router.route("/").post(async (req, res) => {
       }
       return [...acc, part];
     }, []);
+    console.log("stage 3", parts);
     const body = parts?.filter(part => part.mimeType === 'text/plain')[0]?.body?.data;
     if (!body) {
       return res.status(200).json({ success: false, error: 'No body found' });
@@ -42,6 +45,7 @@ router.route("/").post(async (req, res) => {
       }
       return acc;
     }, { isLead : true, currentStatus: "lead", isEnquiry : false});
+    console.log("stage 4", decodedBody);
     if (decodedBody['batch'] != undefined) {
       let { _id } =  await Batch.findOne({ batch_name : { $regex : decodedBody['batch'] }})
         .select({ _id : true });
