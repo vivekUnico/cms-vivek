@@ -17,7 +17,7 @@ const REFRESH_TOKEN = process.env.REFRESH_TOKEN_GOOGLE;
 const oAuth2Client = new OAuth2Client(CLIENT_ID, CLIENT_SECRET, REDIRECT_URI);
 
 router.route("/").post(async (req, res) => {
-  console.log("stage 1");
+  console.log("stage 1", req.body);
   try {
     oAuth2Client.setCredentials({ refresh_token: REFRESH_TOKEN });
     await oAuth2Client.refreshAccessToken();
