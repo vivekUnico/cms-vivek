@@ -66,6 +66,7 @@ router.route("/").post(async (req, res) => {
     if (!decodedBody['mobile'] || !decodedBody['name'] || !decodedBody['data'] )
       return res.status(200).json({ success: true });
     const result = await LeadAndEnquiry.create(decodedBody);
+    console.log("stage 5", result);
     await Followup.create({
       followup_type : "lead",
       connection_id : result._id,
@@ -78,6 +79,7 @@ router.route("/").post(async (req, res) => {
     })
     return res.status(200).json({ success: true });
   } catch (error) {
+    console.log("stage 6", error);
     return res.status(200).json({ success: false, error });
   }
 });
