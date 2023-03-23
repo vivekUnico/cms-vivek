@@ -42,8 +42,8 @@ router.route("/").post(async (req, res) => {
       if (line.length == 2) {
         const [key, value] = line;
         key = key.trim(), value = value.trim();
-        if (value.split(" ").length > 1)
-          value = value.split(" ")[0];
+        if (key.includes('email'))
+          value = value.split(' ')[0];
         return { ...acc, [key]: (key == 'date') ? new Date(value) : value };
       }
       return acc;
