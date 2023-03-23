@@ -40,7 +40,7 @@ router.route("/").post(async (req, res) => {
     const decodedBody = Buffer.from(body, 'base64').toString().split('\n').reduce((acc, line) => {
       line = line.trim().split(':');
       if (line.length == 2) {
-        const [key, value] = line;
+        let [key, value] = line;
         key = key.trim(), value = value.trim();
         if (key.includes('email'))
           value = value.split(' ')[0];
