@@ -52,8 +52,8 @@ router.route("/").post(async (req, res) => {
       if (_id != undefined)
         decodedBody['batch'] = _id;
     }
-    if (decodedBody['courses'] != undefined) {
-      let cid = decodedBody['courses'].split(",");
+    if (decodedBody['courses_id'] != undefined) {
+      let cid = decodedBody['courses_id'].split(",");
       cid = await Course.find({ $or : cid.map(course_id => ({ course_id })), academic_year : "master"}).select({ _id : true });
       decodedBody['courses'] = cid.map(({ _id }) => _id);
     }
