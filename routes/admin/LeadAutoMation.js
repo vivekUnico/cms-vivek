@@ -23,8 +23,8 @@ router.route("/").post(async (req, res) => {
     await oAuth2Client.refreshAccessToken();
     const gmail = google.gmail({ version: 'v1', auth: oAuth2Client });
     console.log("stage 2");
-    const res = await gmail.users.messages.list({ userId: 'me', maxResults: 1 });
-    let { id } = res.data.messages[0];
+    const res1 = await gmail.users.messages.list({ userId: 'me', maxResults: 1 });
+    let { id } = res1.data.messages[0];
     const response = await gmail.users.messages.get({ userId: 'me', id, });
     const parts = response.data.payload.parts.reduce((acc, part) => {
       if (part.parts) {
@@ -63,7 +63,7 @@ router.route("/").post(async (req, res) => {
         decodedBody['center'] = temp._id;
       }
     }
-    if (!decodedBody['mobile'] || !decodedBody['name'] || !decodedBody['data'] )
+    if (!decodedBody['mobile'] || !decodedBody['name'] || !decodedBody['date'] )
       return res.status(200).json({ success: true });
     const result = await LeadAndEnquiry.create(decodedBody);
     console.log("stage 5", result);
