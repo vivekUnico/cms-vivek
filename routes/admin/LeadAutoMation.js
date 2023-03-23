@@ -41,7 +41,7 @@ router.route("/").post(async (req, res) => {
       line = line.trim().split(':');
       if (line.length == 2) {
         const [key, value] = line;
-        return { ...acc, [split(" ")[0].trim()]: (split(" ")[0].trim() == 'date') ? new Date(value.split(" ")[0].trim()) : value.split(" ")[0].trim() };
+        return { ...acc, [key.split(" ")[0].trim()]: (key.split(" ")[0].trim() == 'date') ? new Date(value.split(" ")[0].trim()) : value.split(" ")[0].trim() };
       }
       return acc;
     }, { isLead : true, currentStatus: "lead", isEnquiry : false});
