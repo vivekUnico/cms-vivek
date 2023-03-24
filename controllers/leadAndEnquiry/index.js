@@ -201,7 +201,7 @@ exports.GetAllLeadAndEnquiry = asyncHandler(async (req, res) => {
 //Create Single LeadAndEnquiry
 exports.CreateLeadAndEnquiry = asyncHandler(async (req, res) => {
   try {
-    const { name, gender, mobile, email, date, assign_to, comment, next_followup_date, type, batch, telegram, created_by,
+    const { name, gender, mobile, email, date, assign_to, comment, next_followup_date, type, batch, telegram, created_by, academic_year,
       alternate_number, status, source, courses, center, medium, city, currentStatus, sendMail } = req.body;
     let temp1 = courses?.map((item) => item?.name).join(", "), temp2 = assign_to.email;
     let validation = validationImportent({ currentStatus, name, email, date, assign_to, status, source, center });
@@ -219,7 +219,7 @@ exports.CreateLeadAndEnquiry = asyncHandler(async (req, res) => {
     }
     //main and final body
     let schemaData = {
-      currentStatus, name, gender, mobile, email, date, assign_to, comment, created_by,
+      currentStatus, name, gender, mobile, email, date, assign_to, comment, created_by, academic_year,
       alternate_number, status, source, courses, center, medium, city, type, batch, telegram
     }, Arr = ["", null, undefined, [], {}];
     if (currentStatus == "lead") {

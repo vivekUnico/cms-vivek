@@ -113,7 +113,7 @@ exports.UpdateStudent = asyncHandler(async (req, res) => {
 //Create Single Student
 exports.CreateStudent = asyncHandler(async (req, res) => {
     try {
-        const { name, gender, mobile, email, date, assign_to, comment, alternate_number, sendMail,
+        const { name, gender, mobile, email, date, assign_to, comment, alternate_number, sendMail, academic_year,
             batch, type, telegram, status, source, courses, center, medium, city, define_emi } = req.body;
         let temp1 = courses?.map((item) => item?.name).join(", ");
         let { gross_amount, committed_amount, bifurcation, fees, Emi_Id } = req.body;
@@ -129,7 +129,7 @@ exports.CreateStudent = asyncHandler(async (req, res) => {
         }
         //main and final body
         let schemaData = {
-            name, gender, mobile, email, date, assign_to, comment, alternate_number, Emi_Id, batch, type, telegram, define_emi,
+            name, gender, mobile, email, date, assign_to, comment, alternate_number, Emi_Id, batch, type, telegram, define_emi, academic_year,
             status, source, courses, center, medium, city, payment_related: {
                 gross_amount, committed_amount, bifurcation, fees
             }
