@@ -64,6 +64,7 @@ const student = new mongoose.Schema({
         type: Object,
         default: {}
     },
+    academic_year : String,
     status: {
         type: String,
         enum: ["HOT", "WARM", "COLD", "REJECTED"]
