@@ -350,7 +350,7 @@ exports.UpdateLead = asyncHandler(async (req, res) => {
     if (oldLeadAndEnquiry.currentStatus != "lead") throw new ErrorResponse(`You cannot update this lead.`, 400);
 
     const { name, gender, mobile, email, date, assign_to, comment, alternate_number,
-      status, source, courses, center, medium, city, batch, type, telegram } = req.body;
+      status, source, courses, center, medium, city, batch, type, telegram, academic_year } = req.body;
     if (oldLeadAndEnquiry.email != email) {
       let checkEmail = await findUniqueData(LeadAndEnquiry, { email });
       if (checkEmail) throw new ErrorResponse(`email already exist`, 400);
@@ -359,7 +359,7 @@ exports.UpdateLead = asyncHandler(async (req, res) => {
     //main and final body
     let schemaData = {
       name, gender, mobile, email, date, assign_to, comment, alternate_number,
-      status, source, courses, center, medium, city, batch, type, telegram
+      status, source, courses, center, medium, city, batch, type, telegram, academic_year
     };
 
     const data = await LeadAndEnquiry.findOneAndUpdate({ _id: id }, schemaData, { returnOriginal: false });
@@ -387,7 +387,7 @@ exports.UpdateEnquiry = asyncHandler(async (req, res) => {
       throw new ErrorResponse(`You cannot update this Enquiry.`, 400);
 
     const { name, gender, mobile, email, date, assign_to, comment, telegram,
-      alternate_number, status, source, courses, center, medium, city, isEnquiry, type, batch } = req.body;
+      alternate_number, status, source, courses, center, medium, city, isEnquiry, type, batch, academic_year } = req.body;
     let { gross_amount, committed_amount, bifurcation, fees } = req.body;
     //validate email
     if (email && oldLeadAndEnquiry.email != email) {
@@ -400,7 +400,7 @@ exports.UpdateEnquiry = asyncHandler(async (req, res) => {
     //main and final body
     let schemaData = {
       gross_amount, committed_amount, bifurcation, name, gender, mobile, email, isEnquiry, type, batch, telegram,
-      date, assign_to, comment, alternate_number, status, source, courses, center, medium, city, fees
+      date, assign_to, comment, alternate_number, status, source, courses, center, medium, city, fees, academic_year
     };
     let updateData = {};
     Object.entries(schemaData).map((item) => {
