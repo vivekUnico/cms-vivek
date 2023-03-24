@@ -33,6 +33,7 @@ let mainSchema = {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'staff'
     },
+    academic_year : string,
     comment: {
         type: String,
         trim: true,
