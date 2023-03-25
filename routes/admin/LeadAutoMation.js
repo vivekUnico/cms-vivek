@@ -17,10 +17,12 @@ const REFRESH_TOKEN = process.env.REFRESH_TOKEN_GOOGLE;
 const oAuth2Client = new OAuth2Client(CLIENT_ID, CLIENT_SECRET, REDIRECT_URI);
 
 router.route("/").post(async (req, res) => {
+  console.log("Lead Automation stag 1");
   try {
     oAuth2Client.setCredentials({ refresh_token: REFRESH_TOKEN });
     await oAuth2Client.refreshAccessToken();
     const gmail = google.gmail({ version: 'v1', auth: oAuth2Client });
+    console.log("Lead Automation stag 2", gmail);
     const res = await gmail.users.messages.list({ userId: 'me', maxResults: 1 });
     let { id } = res.data.messages[0];
     const response = await gmail.users.messages.get({ userId: 'me', id, });
@@ -30,6 +32,7 @@ router.route("/").post(async (req, res) => {
       }
       return [...acc, part];
     }, []);
+    console.log("Lead Automation stag 3", parts);
     const body = parts?.filter(part => part.mimeType === 'text/plain')[0]?.body?.data;
     if (!body) {
       return res.status(200).json({ success: false, error: 'No body found' });
@@ -59,9 +62,11 @@ router.route("/").post(async (req, res) => {
         decodedBody['center'] = temp._id;
       }
     }
+    console.log("Lead Automation stag 4", decodedBody);
     if (!decodedBody['mobile'] || !decodedBody['name'] || !decodedBody['data'] )
       return res.status(200).json({ success: true });
     const result = await LeadAndEnquiry.create(decodedBody);
+    console.log("Lead Automation stag 6", result);
     await Followup.create({
       followup_type : "lead",
       connection_id : result._id,
@@ -74,6 +79,7 @@ router.route("/").post(async (req, res) => {
     })
     return res.status(200).json({ success: true });
   } catch (error) {
+    console.log("Lead Automation stag 6", error);
     return res.status(200).json({ success: false, error });
   }
 });
